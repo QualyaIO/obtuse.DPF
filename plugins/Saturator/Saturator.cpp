@@ -17,7 +17,7 @@ protected:
   const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
-    return d_cconst('B','O','S','A','T'); 
+    return d_cconst('B','S','A','T'); 
   }
 
   // params
@@ -25,7 +25,7 @@ protected:
     switch (index) {
     case kThreshold:
       parameter.name = "Threshold";
-      parameter.symbol = "theshold";
+      parameter.symbol = "threshold";
       parameter.ranges.def = 1.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -46,9 +46,9 @@ protected:
   float getParameterValue(uint32_t index) const override {
     switch (index) {
     case kThreshold:
-      return theshold;
+      return threshold;
     case kCoeff:
-      return gain;
+      return coeff;
     default:
       return 0.0;
     }
@@ -69,7 +69,7 @@ protected:
   
   void run(const float **inputs, float **outputs, uint32_t frames) override {
     // TODO
-    const float *const in = inputs[0];
+   const float *const in = inputs[0];
     float *const out = outputs[0];
     
     for (uint32_t i = 0; i < frames; i++) {
@@ -83,8 +83,8 @@ private:
   float coeff;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Saturator);
-}
+};
 
-  Plugin *createPlugin() { return new Saturator(); }
+Plugin *createPlugin() { return new Saturator(); }
 
 END_NAMESPACE_DISTRHO

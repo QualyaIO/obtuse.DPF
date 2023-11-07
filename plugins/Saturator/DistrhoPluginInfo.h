@@ -4,6 +4,8 @@
 
 #define DISTRHO_PLUGIN_NAME  "Saturator"
 #define DISTRHO_PLUGIN_URI   "https://gitlab.com/ullo/funky/botania"
+#define DISTRHO_PLUGIN_CLAP_ID "botania.saturator"
+
 
 #define DISTRHO_PLUGIN_NUM_INPUTS   1
 #define DISTRHO_PLUGIN_NUM_OUTPUTS  1
