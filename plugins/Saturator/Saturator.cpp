@@ -32,6 +32,7 @@ protected:
     // tODO: should we retrieve default from actual value (after init)?
     switch (index) {
     case kThreshold:
+      parameter.hints = kParameterIsAutomatable;
       parameter.name = "Threshold";
       parameter.symbol = "threshold";
       parameter.ranges.def = 0.8f;
@@ -40,6 +41,7 @@ protected:
       effects_Saturator_setThreshold(context_processor, float_to_fix(parameter.ranges.def));
       break;
     case kCoeff:
+      parameter.hints = kParameterIsAutomatable;
       parameter.name = "Coeff";
       parameter.symbol = "coeff";
       parameter.ranges.def = 1.0f;
@@ -64,6 +66,7 @@ protected:
   }
   
   void setParameterValue(uint32_t index, float value) override {
+    // FIXME: check up to which point function is repeatedly called from host even when value does not change
     switch (index) {
     case kThreshold:
       effects_Saturator_setThreshold(context_processor, float_to_fix(value));
@@ -79,7 +82,6 @@ protected:
   }
   
   void run(const float **inputs, float **outputs, uint32_t frames) override {
-    // TODO
     const float *const in = inputs[0];
     float *const out = outputs[0];
 
@@ -88,7 +90,7 @@ protected:
     while (k < frames) {
       // enough frames left for whole buffer or only leftovers?
       int chunkSize = ((frames - k) > BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
-      // copy input buffer
+      // copy to input buffer
       for (int i = 0; i < chunkSize; i++) {
         buffIn[i] = float_to_fix(in[k+i]);
       }
