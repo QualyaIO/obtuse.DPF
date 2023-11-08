@@ -2,8 +2,8 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "SynthFMr"
-#define DISTRHO_PLUGIN_URI   "https://gitlab.com/ullo/funky/botania"
+#define DISTRHO_PLUGIN_NAME  "SynthFM"
+#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/synthfm"
 #define DISTRHO_PLUGIN_CLAP_ID "botania.synthfm"
 
 #define DISTRHO_PLUGIN_NUM_INPUTS   1
