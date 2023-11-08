@@ -1,4 +1,4 @@
-#!/usr/bin/make -f
+#!umsr/bin/make -f
 # Makefile for DPF #
 # ---------------- #
 # Created by falkTX
@@ -25,6 +25,7 @@ endif
 
 plugins: dgl
 	$(MAKE) all -C plugins/Saturator
+	$(MAKE) all -C plugins/SynthFM
 
 ifeq ($(CAN_GENERATE_TTL),true)
 gen: plugins utils/lv2_ttl_generator
@@ -43,19 +44,9 @@ tests: dgl
 
 clean:
 	$(MAKE) clean -C dgl
-	$(MAKE) clean -C examples/CVPort
-	$(MAKE) clean -C examples/CairoUI
-	$(MAKE) clean -C examples/EmbedExternalUI
-	$(MAKE) clean -C examples/FileHandling
-	$(MAKE) clean -C examples/Info
-	$(MAKE) clean -C examples/Latency
-	$(MAKE) clean -C examples/Meters
-	$(MAKE) clean -C examples/Metronome
-	$(MAKE) clean -C examples/MidiThrough
-	$(MAKE) clean -C examples/Parameters
-	$(MAKE) clean -C examples/SendNote
-	$(MAKE) clean -C examples/States
-	$(MAKE) clean -C utils/lv2-ttl-generator
+	$(MAKE) clean -C plugins/Saturator
+	$(MAKE) clean -C plugins/SynthFM
+	$(MAKE) clean -C dpf/utils/lv2-ttl-generator
 	rm -rf bin build
 
 # --------------------------------------------------------------
