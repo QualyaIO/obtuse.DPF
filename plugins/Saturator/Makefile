@@ -13,6 +13,7 @@ NAME = saturator
 # Files to build
 
 FILES_DSP = \
+	../../botania/src/effects.cpp \
 	Saturator.cpp
 
 
@@ -20,6 +21,10 @@ FILES_DSP = \
 # Do some magic
 
 include ../../dpf/Makefile.plugins.mk
+
+# --------------------------------------------------------------
+# Adding botania lib
+BUILD_CXX_FLAGS += -I../../botania/src
 
 # --------------------------------------------------------------
 # Enable all possible plugin types

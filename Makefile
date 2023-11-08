@@ -6,6 +6,8 @@
 
 include dpf/Makefile.base.mk
 
+BUILD_CXX_FLAGS = -Ibotania/src
+
 all: dgl examples gen
 
 # --------------------------------------------------------------
