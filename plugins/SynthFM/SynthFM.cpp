@@ -15,6 +15,7 @@ public:
   // Note: do not care with default values since we will sent all parameters upon init
   SynthFM() : Plugin(kParameterCount, 0, 0) {
     synthFM_Voice_process_init(context_processor);
+    synthFM_Voice_setSamplerate(context_processor, float_to_fix((float)getSampleRate() / 1000.0f));
   }
 
 protected:
@@ -436,7 +437,12 @@ protected:
     }
   }
 
-  
+  // Optional callback to inform synth about a sample rate change on the plugin side.
+  void sampleRateChanged(double newSampleRate) override
+  {
+    synthFM_Voice_setSamplerate(context_processor, float_to_fix((float)newSampleRate / 1000.0f));
+  }
+
 private:
   synthFM_Voice_process_type context_processor;
   fix16_t buffOut[BUFFER_SIZE];
