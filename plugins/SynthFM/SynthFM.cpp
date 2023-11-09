@@ -423,12 +423,12 @@ protected:
     uint32_t k = 0;
     while (k < frames) {
       // enough frames left for whole buffer or only leftovers?
-      int chunkSize = ((frames - k) > BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
+      int chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
       // process
-      synthFM_Voice_process_bufferTo(context_processor, BUFFER_SIZE, buffOut);
+      synthFM_Voice_process_bufferTo(context_processor, chunkSize, buffOut);
       // copy to output buffer
       for (int i = 0; i < chunkSize; i++) {
-        out[i] = fix_to_float(buffOut[k+i]);
+        out[k+i] = fix_to_float(buffOut[i]);
       }
       // advance
       k += chunkSize;
