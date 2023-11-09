@@ -113,7 +113,7 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator level";
       parameter.symbol = "level";
-      parameter.ranges.def = 0.0f;
+      parameter.ranges.def = 0.1f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
       break;
