@@ -6,8 +6,9 @@
 #define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/synthfm"
 #define DISTRHO_PLUGIN_CLAP_ID "botania.synthfm"
 
-#define DISTRHO_PLUGIN_NUM_INPUTS   1
+#define DISTRHO_PLUGIN_NUM_INPUTS   0
 #define DISTRHO_PLUGIN_NUM_OUTPUTS  1
+#define DISTRHO_PLUGIN_WANT_MIDI_INPUT 1
 #define DISTRHO_PLUGIN_IS_RT_SAFE   1
 
 enum Parameters {

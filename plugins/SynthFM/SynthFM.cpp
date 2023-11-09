@@ -8,6 +8,8 @@ START_NAMESPACE_DISTRHO
 // to sync with vult code
 #define BUFFER_SIZE 128
 
+// Wrapper for FM synth
+// TODO: available options such as voice re-use for same note
 class SynthFM : public Plugin {
 public:
   SynthFM() : Plugin(kParameterCount, 0, 0) {
@@ -345,9 +347,76 @@ protected:
       break;
     }
   }
-  
-  void run(const float **inputs, float **outputs, uint32_t frames) override {
-    const float *const in = inputs[0];
+
+  void run(const float**, float** outputs, uint32_t frames,
+             const MidiEvent* midiEvents, uint32_t midiEventCount) override {
+
+    // deal with MIDI input
+    // FIXME: take into consideration the timestamp and place before correct chunk
+    for (uint32_t i=0; i<midiEventCount; ++i) {
+      // only process regular midi even
+      if (midiEvents[i].size > 1 and midiEvents[i].size <= 4) {
+        // channel and type of event on first value
+	int chan = midiEvents[i].data[0] & 0x0F;
+        int type = midiEvents[i].data[0] & 0xF0;
+        switch(type) {
+          
+          // note on
+        case 144:
+          if (midiEvents[i].size > 2) {
+            synthFM_Voice_noteOn(context_processor, midiEvents[i].data[1], midiEvents[i].data[2], chan);
+          }
+
+          break;
+          // note off
+        case 128:
+          if (midiEvents[i].size > 1) {
+            synthFM_Voice_noteOff(context_processor, midiEvents[i].data[1], chan);
+          }
+          break;
+
+          // cc
+        case 176:
+          if (midiEvents[i].size > 3) {
+            // cc number and then value
+            int cc = midiEvents[i].data[1];
+            int value = midiEvents[i].data[2];
+            switch(cc) {
+              // sustain
+            case 64:
+              if (value >= 64) {
+                synthFM_Voice_synthSetSustain(context_processor, true);
+              } else {
+                synthFM_Voice_synthSetSustain(context_processor, false);
+              }
+              break;
+            }
+          }
+          break;
+
+          // pitch bend
+          // data: pitchbend value = ev.buffer[1] | (ev.buffer[2] << 7);
+        case 224:
+          if (midiEvents[i].size > 2) {
+            // retrieve full value
+            int pitchBend = midiEvents[i].data[1] | (midiEvents[i].data[2] << 7);
+            float semitones = 0.0;
+            // compute semitones, for now will bend +/- one tone
+            // from 0 (-2 semitones) to 16383 (+2 semitones), 8192: no bend
+            if (pitchBend > 8192) {
+              semitones =  2.0 * (pitchBend - 8192) / (8191);
+            }
+            else if (pitchBend < 8192) {
+              semitones =  - 2.0 * (8192 - pitchBend) / (8192);
+            }
+            synthFM_Voice_synthPitchBend(context_processor, float_to_fix(semitones));
+          }
+          break;
+        }
+      }
+    }
+
+    // deal with audio
     float *const out = outputs[0];
 
     // we will process in chunks
@@ -355,12 +424,8 @@ protected:
     while (k < frames) {
       // enough frames left for whole buffer or only leftovers?
       int chunkSize = ((frames - k) > BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
-      // copy to input buffer
-      for (int i = 0; i < chunkSize; i++) {
-        buffIn[i] = float_to_fix(in[k+i]);
-      }
       // process
-      //effects_Saturator_process_bufferTo(context_processor, chunkSize, buffIn, buffOut);
+      synthFM_Voice_process_bufferTo(context_processor, BUFFER_SIZE, buffOut);
       // copy to output buffer
       for (int i = 0; i < chunkSize; i++) {
         out[i] = fix_to_float(buffOut[k+i]);
@@ -373,7 +438,6 @@ protected:
   
 private:
   synthFM_Voice_process_type context_processor;
-  fix16_t buffIn[BUFFER_SIZE];
   fix16_t buffOut[BUFFER_SIZE];
 
   float modulatorAttack;
