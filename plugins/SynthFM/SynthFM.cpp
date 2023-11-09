@@ -12,6 +12,7 @@ START_NAMESPACE_DISTRHO
 // TODO: available options such as voice re-use for same note
 class SynthFM : public Plugin {
 public:
+  // Note: do not care with default values since we will sent all parameters upon init
   SynthFM() : Plugin(kParameterCount, 0, 0) {
     synthFM_Voice_process_init(context_processor);
   }
@@ -129,6 +130,8 @@ protected:
         values[1].label = "Level";
         values[1].value = 1;
       }
+      // select default idx
+      parameter.ranges.def = 0.0f;
       break;
     case kModulatorShift:
       parameter.hints = kParameterIsAutomatable;
@@ -206,11 +209,9 @@ protected:
     default:
       break;
     }
-
+    
     // effectively set parameter
-    // TODO: check if needed
-    //setParameterValue(index, parameter.ranges.def);
-
+    setParameterValue(index, parameter.ranges.def);
   }
 
   float getParameterValue(uint32_t index) const override {

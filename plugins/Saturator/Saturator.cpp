@@ -38,7 +38,8 @@ protected:
       parameter.ranges.def = 0.8f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
-      effects_Saturator_setThreshold(context_processor, float_to_fix(parameter.ranges.def));
+      // effectively set parameter
+      setParameterValue(index, parameter.ranges.def);
       break;
     case kCoeff:
       parameter.hints = kParameterIsAutomatable;
