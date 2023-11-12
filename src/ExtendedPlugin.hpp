@@ -103,13 +103,17 @@ protected:
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
-  // only one output 
-  void run(const float**, float** outputs, uint32_t frames,
+  // only at most one input and/or one output
+  void run(const float** inputs, float** outputs, uint32_t frames,
              const MidiEvent* midiEvents, uint32_t midiEventCount) override {
 
-    // deal with audio
-    // FIXME: check if we got an output
+    // deal with audio I/O
+#if DISTRHO_PLUGIN_NUM_INPUTS > 0
+    const float *const in = inputs[0];
+#endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
+#if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
     float *const out = outputs[0];
+#endif // DISTRHO_PLUGIN_NUM_OUTPUTS > 0
 
     // we will process in chunks, position of current frame
     uint32_t k = 0;
@@ -131,12 +135,20 @@ protected:
         }
       }
 
+      // copy to input buffer
+#if DISTRHO_PLUGIN_NUM_INPUTS > 0
+      for (int i = 0; i < chunkSize; i++) {
+        buffIn[i] = float_to_fix(in[k+i]);
+      }
+#endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
       // let subclass output buffer
       process(chunkSize);
       // copy to output buffer
+#if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
       for (int i = 0; i < chunkSize; i++) {
         out[k+i] = fix_to_float(buffOut[i]);
       }
+#endif // DISTRHO_PLUGIN_NUM_OUTPUTS > 0
       // advance
       k += chunkSize;
     }
@@ -148,20 +160,20 @@ protected:
       midiEventNum++;
     }
 
-
-
-
   }
 
 #else // DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
-  // only one input, one output 
+  // only at most one input and/or one output 
   void run(const float** inputs, float** outputs, uint32_t frames) override {
 
-    // deal with audio
-    // FIXME: check if we got an output and/or input
+    // deal with audio I/O
+#if DISTRHO_PLUGIN_NUM_INPUTS > 0
     const float *const in = inputs[0];
+#endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
+#if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
     float *const out = outputs[0];
+#endif // DISTRHO_PLUGIN_NUM_OUTPUTS > 0
 
     // we will process in chunks, position of current frame
     uint32_t k = 0;
@@ -169,15 +181,19 @@ protected:
       // enough frames left for whole buffer or only leftovers?
       int chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
       // copy to input buffer
+#if DISTRHO_PLUGIN_NUM_INPUTS > 0
       for (int i = 0; i < chunkSize; i++) {
         buffIn[i] = float_to_fix(in[k+i]);
       }
+#endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
       // let subclass output buffer
       process(chunkSize);
       // copy to output buffer
+#if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
       for (int i = 0; i < chunkSize; i++) {
         out[k+i] = fix_to_float(buffOut[i]);
       }
+#endif // DISTRHO_PLUGIN_NUM_OUTPUTS > 0
       // advance
       k += chunkSize;
     }

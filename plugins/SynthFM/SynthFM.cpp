@@ -16,7 +16,7 @@ public:
 
 protected:
   // metadata
-  const char *getLabel() const override { return "BotaniaSaturator"; }
+  const char *getLabel() const override { return "BotaniaSynthFM"; }
   const char *getDescription() const override {
     return "I do FM things.";
   }

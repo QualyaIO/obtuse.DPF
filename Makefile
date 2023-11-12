@@ -24,6 +24,7 @@ endif
 plugins: dgl
 	$(MAKE) all -C plugins/Saturator
 	$(MAKE) all -C plugins/SynthFM
+	$(MAKE) all -C plugins/Arp
 
 ifeq ($(CAN_GENERATE_TTL),true)
 gen: plugins utils/lv2_ttl_generator
@@ -44,6 +45,7 @@ clean:
 	$(MAKE) clean -C dgl
 	$(MAKE) clean -C plugins/Saturator
 	$(MAKE) clean -C plugins/SynthFM
+	$(MAKE) clean -C plugins/Arp
 	$(MAKE) clean -C dpf/utils/lv2-ttl-generator
 	rm -rf bin build
 
