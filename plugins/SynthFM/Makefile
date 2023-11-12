@@ -24,7 +24,7 @@ include ../../dpf/Makefile.plugins.mk
 
 # --------------------------------------------------------------
 # Adding botania lib
-BUILD_CXX_FLAGS += -I../../botania/src
+BUILD_CXX_FLAGS += -I../../botania/src -I../../src
 
 # --------------------------------------------------------------
 # Enable all possible plugin types

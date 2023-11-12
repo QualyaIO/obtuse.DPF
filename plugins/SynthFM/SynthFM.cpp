@@ -1,5 +1,5 @@
 
-#include "DistrhoPlugin.hpp"
+#include "ExtendedPlugin.hpp"
 #include "synthFM.h"
 
 START_NAMESPACE_DISTRHO
@@ -10,10 +10,10 @@ START_NAMESPACE_DISTRHO
 
 // Wrapper for FM synth
 // TODO: available options such as voice re-use for same note
-class SynthFM : public Plugin {
+class SynthFM : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
-  SynthFM() : Plugin(kParameterCount, 0, 0) {
+  SynthFM() : ExtendedPlugin(kParameterCount, 0, 0) {
     synthFM_Voice_process_init(context_processor);
     synthFM_Voice_setSamplerate(context_processor, float_to_fix((float)getSampleRate() / 1000.0f));
   }
@@ -350,73 +350,27 @@ protected:
     }
   }
 
+  // callbacks for processing MIDI
+  void noteOn(uint8_t note, uint8_t velocity, uint8_t channel) {
+    synthFM_Voice_noteOn(context_processor, note, velocity, channel);
+  }
+
+  void noteOff(uint8_t note, uint8_t channel) {
+    synthFM_Voice_noteOff(context_processor, note, channel);
+  }
+
+  void pitchbend(uint8_t, float semitones) {
+    synthFM_Voice_synthPitchBend(context_processor, float_to_fix(semitones));
+  }
+
+  void sustain(uint8_t, bool flag) {
+    synthFM_Voice_synthSetSustain(context_processor, flag);
+  }
+
   void run(const float**, float** outputs, uint32_t frames,
              const MidiEvent* midiEvents, uint32_t midiEventCount) override {
 
-    // deal with MIDI input
-    // FIXME: take into consideration the timestamp and place before correct chunk
-    for (uint32_t i=0; i<midiEventCount; ++i) {
-      // only process regular midi even
-      if (midiEvents[i].size > 1 and midiEvents[i].size <= 4) {
-        // channel and type of event on first value
-	int chan = midiEvents[i].data[0] & 0x0F;
-        int type = midiEvents[i].data[0] & 0xF0;
-        switch(type) {
-          
-          // note on
-        case 144:
-          if (midiEvents[i].size > 2) {
-            synthFM_Voice_noteOn(context_processor, midiEvents[i].data[1], midiEvents[i].data[2], chan);
-          }
-
-          break;
-          // note off
-        case 128:
-          if (midiEvents[i].size > 1) {
-            synthFM_Voice_noteOff(context_processor, midiEvents[i].data[1], chan);
-          }
-          break;
-
-          // cc
-        case 176:
-          if (midiEvents[i].size > 3) {
-            // cc number and then value
-            int cc = midiEvents[i].data[1];
-            int value = midiEvents[i].data[2];
-            switch(cc) {
-              // sustain
-            case 64:
-              if (value >= 64) {
-                synthFM_Voice_synthSetSustain(context_processor, true);
-              } else {
-                synthFM_Voice_synthSetSustain(context_processor, false);
-              }
-              break;
-            }
-          }
-          break;
-
-          // pitch bend
-          // data: pitchbend value = ev.buffer[1] | (ev.buffer[2] << 7);
-        case 224:
-          if (midiEvents[i].size > 2) {
-            // retrieve full value
-            int pitchBend = midiEvents[i].data[1] | (midiEvents[i].data[2] << 7);
-            float semitones = 0.0;
-            // compute semitones, for now will bend +/- one tone
-            // from 0 (-2 semitones) to 16383 (+2 semitones), 8192: no bend
-            if (pitchBend > 8192) {
-              semitones =  2.0 * (pitchBend - 8192) / (8191);
-            }
-            else if (pitchBend < 8192) {
-              semitones =  - 2.0 * (8192 - pitchBend) / (8192);
-            }
-            synthFM_Voice_synthPitchBend(context_processor, float_to_fix(semitones));
-          }
-          break;
-        }
-      }
-    }
+    processMidi(midiEvents, midiEventCount);
 
     // deal with audio
     float *const out = outputs[0];
