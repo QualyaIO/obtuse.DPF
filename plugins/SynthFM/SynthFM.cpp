@@ -52,6 +52,7 @@ protected:
     case kModulatorAttack:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator attack";
+      parameter.shortName = "Mod A";
       parameter.symbol = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minA;
@@ -60,6 +61,7 @@ protected:
     case kModulatorDecay:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator decay";
+      parameter.shortName = "Mod D";
       parameter.symbol = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minD;
@@ -68,6 +70,7 @@ protected:
     case kModulatorSustain:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator sustain";
+      parameter.shortName = "Mod S";
       parameter.symbol = "seconds";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = minS;
@@ -76,6 +79,7 @@ protected:
     case kModulatorRelease:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator release";
+      parameter.shortName = "Mod R";
       parameter.symbol = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minR;
@@ -84,6 +88,7 @@ protected:
     case kModulatorRatio:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator ratio";
+      parameter.shortName = "Mod ratio";
       parameter.symbol = "ratio";
       parameter.ranges.def = 2.0f;
       parameter.ranges.min = -maxRatio;
@@ -92,14 +97,15 @@ protected:
     case kModulatorWavetable:
       // FIXME: not automatable due to heavy computation at the moment upon change
       parameter.name = "Modulator wavetable";
+      parameter.shortName = "Mod wavetbl";
       parameter.symbol = "index";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = maxMorph;
       break;
     case kModulatorWavetablePhase:
-      parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator wavetable phase";
+      parameter.shortName = "Mod wavetbl phase";
       parameter.symbol = "phase";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
@@ -108,6 +114,7 @@ protected:
     case kModulatorLevel:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator level";
+      parameter.shortName = "Mod lvl";
       parameter.symbol = "level";
       parameter.ranges.def = 0.1f;
       parameter.ranges.min = 0.0f;
@@ -116,6 +123,7 @@ protected:
     case kModulatorMode:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Modulator target";
+      parameter.shortName = "Mod target";
       parameter.symbol = "target";
       parameter.enumValues.count = 2;
       parameter.enumValues.restrictedMode = true;
@@ -133,6 +141,7 @@ protected:
     case kModulatorShift:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator phase shift";
+      parameter.shortName = "Mod phase shift";
       parameter.symbol = "shift";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
@@ -141,6 +150,7 @@ protected:
     case kModulatorFeedback:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator feedback";
+      parameter.shortName = "Mod fbk";
       parameter.symbol = "feedback";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
@@ -150,6 +160,7 @@ protected:
     case kCarrierAttack:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier attack";
+      parameter.shortName = "Car A";
       parameter.symbol = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minA;
@@ -158,6 +169,7 @@ protected:
     case kCarrierDecay:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier decay";
+      parameter.shortName = "Car D";
       parameter.symbol = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minD;
@@ -166,6 +178,7 @@ protected:
     case kCarrierSustain:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier sustain";
+      parameter.shortName = "Car S";
       parameter.symbol = "seconds";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = minS;
@@ -174,6 +187,7 @@ protected:
     case kCarrierRelease:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier release";
+      parameter.shortName = "Car R";
       parameter.symbol = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minR;
@@ -182,6 +196,7 @@ protected:
     case kCarrierRatio:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier ratio";
+      parameter.shortName = "Car ratio";
       parameter.symbol = "ratio";
       parameter.ranges.def = 1.0f;
       parameter.ranges.min = -maxRatio;
@@ -190,6 +205,7 @@ protected:
     case kCarrierWavetable:
       // FIXME: not automatable due to heavy computation at the moment upon change
       parameter.name = "Carrier wavetable";
+      parameter.shortName = "Car wavetbl";
       parameter.symbol = "index";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
@@ -197,6 +213,7 @@ protected:
       break;
     case kCarrierWavetablePhase:
       parameter.name = "Modulator wavetable phase";
+      parameter.shortName = "Car wavetbl phase";
       parameter.symbol = "phase";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;

@@ -30,6 +30,7 @@ protected:
     case kThreshold:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Threshold";
+      parameter.shortName = "Thresh";
       parameter.symbol = "threshold";
       parameter.ranges.def = 0.8f;
       parameter.ranges.min = 0.0f;
@@ -40,6 +41,7 @@ protected:
     case kCoeff:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Coeff";
+      parameter.shortName = "Coeff";
       parameter.symbol = "coeff";
       parameter.ranges.def = 1.0f;
       parameter.ranges.min = fix_to_float(effects_Saturator_getMinCoeff());
