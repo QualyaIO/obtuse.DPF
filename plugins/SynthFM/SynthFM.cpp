@@ -4,10 +4,6 @@
 
 START_NAMESPACE_DISTRHO
 
-// chunk size to process audio
-// to sync with vult code
-#define BUFFER_SIZE 128
-
 // Wrapper for FM synth
 // TODO: available options such as voice re-use for same note
 class SynthFM : public ExtendedPlugin {
@@ -367,48 +363,8 @@ protected:
     synthFM_Voice_synthSetSustain(context_processor, flag);
   }
 
-  void run(const float**, float** outputs, uint32_t frames,
-             const MidiEvent* midiEvents, uint32_t midiEventCount) override {
-
-    // deal with audio
-    float *const out = outputs[0];
-
-    // we will process in chunks, position of current frame
-    uint32_t k = 0;
-    // current midi 
-    uint32_t midiEventNum = 0;
-    while (k < frames) {
-      // enough frames left for whole buffer or only leftovers?
-      int chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
-
-      // do we have any MIDI event to process before this chunk?
-      while (midiEventNum < midiEventCount) {
-        MidiEvent ev = midiEvents[midiEventNum];
-        if (ev.frame <= k) {
-          processMidiEvent(ev);
-          midiEventNum++;
-        }
-        else {
-          break;
-        }
-      }
-
-      // process
-      synthFM_Voice_process_bufferTo(context_processor, chunkSize, buffOut);
-      // copy to output buffer
-      for (int i = 0; i < chunkSize; i++) {
-        out[k+i] = fix_to_float(buffOut[i]);
-      }
-      // advance
-      k += chunkSize;
-    }
-
-    // MIDI event remaining
-    while (midiEventNum < midiEventCount) {
-      MidiEvent ev = midiEvents[midiEventNum];
-      processMidiEvent(ev);
-      midiEventNum++;
-    }
+  void process(unsigned int chunkSize) {
+    synthFM_Voice_process_bufferTo(context_processor, chunkSize, buffOut);
   }
 
   // Optional callback to inform synth about a sample rate change on the plugin side.
@@ -419,7 +375,6 @@ protected:
 
 private:
   synthFM_Voice_process_type context_processor;
-  fix16_t buffOut[BUFFER_SIZE];
 
   float modulatorAttack;
   float modulatorDecay;

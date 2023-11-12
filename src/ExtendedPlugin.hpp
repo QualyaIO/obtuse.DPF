@@ -1,12 +1,26 @@
 
-#include "DistrhoPlugin.hpp"
+#ifndef EXTENDED_PLUGIN_HPP
+#define EXTENDED_PLUGIN_HPP
 
+#include "DistrhoPlugin.hpp"
+#include "vultin.h"
+
+// chunk size to process audio
+// to sync with vult code
+#define BUFFER_SIZE 128
+
+
+// wrapper to factorize code between plugins. Consider at the moment at most one input and one output
 class ExtendedPlugin : public Plugin {
 
 public:
 
   // will forward to Plugin
   ExtendedPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount) : Plugin(parameterCount, programCount, stateCount) {}
+
+protected:
+  // to be filled by sub-class
+  fix16_t buffOut[BUFFER_SIZE];
 
   // The following functions will be called upon encountering MIDI events, to be implemented by subclasses. channel: 0..15
   virtual void noteOn(uint8_t note, uint8_t velocity, uint8_t channel) {};
@@ -81,4 +95,67 @@ public:
     }
   };
 
+
+  // should read from buffIn and write to buffOut, and process a specific amount of samples
+  virtual void process(unsigned int nbSamples) {};
+
+
+#if DISTRHO_PLUGIN_WANT_MIDI_INPUT
+  // only one output 
+  void run(const float**, float** outputs, uint32_t frames,
+             const MidiEvent* midiEvents, uint32_t midiEventCount) override {
+
+    // deal with audio
+    // FIXME: check if we got an output
+    float *const out = outputs[0];
+
+    // we will process in chunks, position of current frame
+    uint32_t k = 0;
+    // current midi 
+    uint32_t midiEventNum = 0;
+    while (k < frames) {
+      // enough frames left for whole buffer or only leftovers?
+      int chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
+
+      // do we have any MIDI event to process before this chunk?
+      while (midiEventNum < midiEventCount) {
+        MidiEvent ev = midiEvents[midiEventNum];
+        if (ev.frame <= k) {
+          processMidiEvent(ev);
+          midiEventNum++;
+        }
+        else {
+          break;
+        }
+      }
+
+      // let subclass output buffer
+      process(chunkSize);
+      // copy to output buffer
+      for (int i = 0; i < chunkSize; i++) {
+        out[k+i] = fix_to_float(buffOut[i]);
+      }
+      // advance
+      k += chunkSize;
+    }
+
+    // MIDI event remaining
+    while (midiEventNum < midiEventCount) {
+      MidiEvent ev = midiEvents[midiEventNum];
+      processMidiEvent(ev);
+      midiEventNum++;
+    }
+
+
+
+
+  }
+
+#else // DISTRHO_PLUGIN_WANT_MIDI_INPUT
+
+#endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
+
+  
 };
+
+#endif // EXTENDED_PLUGIN_HPP
