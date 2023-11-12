@@ -23,8 +23,8 @@ FILES_DSP = \
 include ../../dpf/Makefile.plugins.mk
 
 # --------------------------------------------------------------
-# Adding botania lib
-BUILD_CXX_FLAGS += -I../../botania/src
+# Adding botania and custom libs
+BUILD_CXX_FLAGS += -I../../botania/src -I../../src
 
 # --------------------------------------------------------------
 # Enable all possible plugin types

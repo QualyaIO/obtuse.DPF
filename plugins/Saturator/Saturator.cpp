@@ -1,16 +1,12 @@
 
-#include "DistrhoPlugin.hpp"
+#include "ExtendedPlugin.hpp"
 #include "effects.h"
 
 START_NAMESPACE_DISTRHO
 
-// chunk size to process audio
-// to sync with vult code
-#define BUFFER_SIZE 128
-
-class Saturator : public Plugin {
+class Saturator : public ExtendedPlugin {
 public:
-  Saturator() : Plugin(kParameterCount, 0, 0), threshold(0.8), coeff(1.0) {
+  Saturator() : ExtendedPlugin(kParameterCount, 0, 0), threshold(0.8), coeff(1.0) {
     effects_Saturator_process_init(context_processor);
   }
 
@@ -29,7 +25,7 @@ protected:
 
   // params
   void initParameter (uint32_t index, Parameter& parameter) override {
-    // tODO: should we retrieve default from actual value (after init)?
+    // TODO: should we retrieve default from actual value (after init)?
     switch (index) {
     case kThreshold:
       parameter.hints = kParameterIsAutomatable;
@@ -81,36 +77,13 @@ protected:
       break;
     }
   }
-  
-  void run(const float **inputs, float **outputs, uint32_t frames) override {
-    const float *const in = inputs[0];
-    float *const out = outputs[0];
 
-    // we will process in chunks
-    uint32_t k = 0;
-    while (k < frames) {
-      // enough frames left for whole buffer or only leftovers?
-      int chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
-      // copy to input buffer
-      for (int i = 0; i < chunkSize; i++) {
-        buffIn[i] = float_to_fix(in[k+i]);
-      }
-      // process
-      effects_Saturator_process_bufferTo(context_processor, chunkSize, buffIn, buffOut);
-      // copy to output buffer
-      for (int i = 0; i < chunkSize; i++) {
-        out[k+i] = fix_to_float(buffOut[i]);
-      }
-      // advance
-      k += chunkSize;
-    }
+  void process(unsigned int chunkSize) {
+    effects_Saturator_process_bufferTo(context_processor, chunkSize, buffIn, buffOut);
   }
-
   
 private:
   effects_Saturator_process_type context_processor;
-  fix16_t buffIn[BUFFER_SIZE];
-  fix16_t buffOut[BUFFER_SIZE];
   float threshold;
   float coeff;
 
