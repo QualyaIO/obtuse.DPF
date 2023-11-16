@@ -9,6 +9,7 @@ START_NAMESPACE_DISTRHO
 #define ARP_MAX_NOTES 16
 
 // Wrapper for Arp. Up, down, etc. will refer to note order. Duplicated note brings it to newest.
+// Note: In this version, the duration of the trigger input will be the duration of noteOn / noteOff MIDI events.
 // TODO: support MIDI sustain at this level, and/or add an "hold" option?
 class Arp : public ExtendedPlugin {
 public:
@@ -180,22 +181,26 @@ protected:
   }
 
   void process(unsigned int chunkSize) {
+    static int lastNote = -1;
     for (unsigned int i = 0; i < chunkSize; i++) {
       // threshold 0.1 for trigger, advance note upon trigger
       if (fix_to_float(buffIn[i]) >= 0.1 and !trigerring) {
         trigerring = true;
         // advance arp
-        int arpNote = utils_Arp_process(context_processor);
-        d_stdout("trig note: %d", arpNote);
+        lastNote  = utils_Arp_process(context_processor);
+        d_stdout("trig note: %d", lastNote);
         // send MIDI
-        if (arpNote >= 0) {
+        if (lastNote >= 0) {
           // FIXME: retrieve frame
-          sendNoteOn(arpNote);
-          sendNoteOff(arpNote);
+          sendNoteOn(lastNote);
         }
       }
-      else if (fix_to_float(buffIn[i]) < 0.1) {
+      // turn off note
+      else if (fix_to_float(buffIn[i]) < 0.1 and trigerring) {
         trigerring = false;
+        if (lastNote >= 0) {
+          sendNoteOff(lastNote);
+        }
       }
     }
   }
