@@ -5,12 +5,23 @@
 
 START_NAMESPACE_DISTRHO
 
-// Wrapper for Arp
+// to sync with vult code
+#define ARP_MAX_NOTES 16
+
+// Wrapper for Arp. Up, down, etc. will refer to note order. Duplicated note brings it to newest.
 class Arp : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
   Arp() : ExtendedPlugin(kParameterCount, 0, 0) {
     utils_Arp_process_init(context_processor);
+    utils_Gate_list_init(context_list);
+    // will init notes to -1
+    updateNotes();
+    // make sure we don't do anything rash - but compiler will catch discrepancy also while setNotes
+    assert(
+           (utils_Arp_getMaxNbNotes(context_processor) == ARP_MAX_NOTES) &&
+           "Number of notes held in arp differs from expected (16)"
+           );
   }
 
 protected:
@@ -26,6 +37,24 @@ protected:
     return d_cconst('B','A','R','P'); 
   }
 
+  // ports
+  void initAudioPort(bool input, uint32_t index, AudioPort& port) override
+  {
+    if (input)
+      {
+        switch (index)
+          {
+          case 0:
+            port.hints   = kAudioPortIsCV;
+            port.name    = "Clock Input";
+            port.symbol  = "clock_in";
+            return;
+          }
+      }
+    // It shouldn't reach here, but just in case if index is greater than 0.
+    ExtendedPlugin::initAudioPort(input, index, port);
+  }
+  
   // params
   void initParameter (uint32_t index, Parameter& parameter) override {
 
@@ -51,7 +80,7 @@ protected:
         values[1].value = 1;
         values[2].label = "up-down no repeat";
         values[2].value = 2;
-        values[3].label = "up-down repea";
+        values[3].label = "up-down repeat";
         values[3].value = 3;
         values[4].label = "down-up no repeat";
         values[4].value = 4;
@@ -60,6 +89,9 @@ protected:
       }
       // select default idx
       parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      // we must define max range to be able to select all values, 1 by default
+      parameter.ranges.max = (float) (parameter.enumValues.count - 1);
       break;
     case kRandNotes:
       parameter.hints = kParameterIsAutomatable;
@@ -125,24 +157,87 @@ protected:
   }
 
   // callbacks for processing MIDI
-  void noteOn(uint8_t note, uint8_t velocity, uint8_t channel) {
+  // keep track of xx last active notes, duplicate no matter the channel will reset position. Using gate's list
+  void noteOn(uint8_t note, uint8_t, uint8_t channel) {
+    // turn off previous note, if any
+    noteOff(note, channel);
+    // add note to list
+    utils_Gate_push(context_list, note);
+    // update arp
+    updateNotes();
   }
 
-  void noteOff(uint8_t note, uint8_t channel) {
+  // remove note from active list
+  void noteOff(uint8_t note, uint8_t) {
+    // Do we have the note already?
+    int idx = utils_Gate_search(context_list, note);
+    // If so, remove it, and will update arp
+    if (idx >= 0) {
+      utils_Gate_delete(context_list, idx);
+      updateNotes();
+    }
   }
 
+  // TODO
   void sustain(uint8_t, bool flag) {
   }
 
   void process(unsigned int chunkSize) {
+    for (unsigned int i = 0; i < chunkSize; i++) {
+      // threshold 0.1 for trigger, advance note upon trigger
+      if (fix_to_float(buffIn[i]) >= 0.1 and !trigerring) {
+        trigerring = true;
+        // advance arp
+        int arpNote = utils_Arp_process(context_processor);
+        d_stdout("trig note: %d", arpNote);
+      }
+      else if (fix_to_float(buffIn[i]) < 0.1) {
+        trigerring = false;
+      }
+    }
   }
 
 private:
   utils_Arp_process_type context_processor;
+  utils_Gate_list_type context_list;
+  // currently receive a trigger
+  bool trigerring = false;
 
   float mode;
   float randNotes;
   float randomize;
+
+  // re-compute active notes and send to arp
+  void updateNotes() {
+    d_stdout("update notes");
+    // retrieve number of notes currently held and how much can fit in arp
+    int nbNotes = utils_Gate_getListSize(context_list);
+    // we want most recent notes for arp
+    int listStartIdx = nbNotes - ARP_MAX_NOTES;
+    // at most number of elements, of course
+    if (listStartIdx < 0) {
+      listStartIdx = 0;
+    }
+    // now build array to be sent to arp from there
+    int arpNotes[ARP_MAX_NOTES];
+    int n = 0;
+    while (n < nbNotes && n < ARP_MAX_NOTES) {
+      arpNotes[n] = utils_Gate_peek(context_list, listStartIdx + n);
+      n++;
+    }
+    // finish with -1
+    while (n < ARP_MAX_NOTES) {
+      arpNotes[n] = -1;
+      n++;
+    }
+
+    // debug
+    for (int i = 0; i < ARP_MAX_NOTES; i++) {
+      d_stdout("%d: %d", i, arpNotes[i]);
+    }
+    
+    utils_Arp_setNotes(context_processor, arpNotes);
+  }
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Arp);
 };

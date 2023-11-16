@@ -6,6 +6,7 @@
 #define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/arp"
 #define DISTRHO_PLUGIN_CLAP_ID "botania.arp"
 
+// Note: CV input
 #define DISTRHO_PLUGIN_NUM_INPUTS   1
 #define DISTRHO_PLUGIN_NUM_OUTPUTS  0
 #define DISTRHO_PLUGIN_WANT_MIDI_INPUT 1
