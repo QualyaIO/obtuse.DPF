@@ -9,6 +9,7 @@ START_NAMESPACE_DISTRHO
 #define ARP_MAX_NOTES 16
 
 // Wrapper for Arp. Up, down, etc. will refer to note order. Duplicated note brings it to newest.
+// TODO: support MIDI sustain at this level, and/or add an "hold" option?
 class Arp : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
@@ -178,10 +179,6 @@ protected:
     }
   }
 
-  // TODO
-  void sustain(uint8_t, bool flag) {
-  }
-
   void process(unsigned int chunkSize) {
     for (unsigned int i = 0; i < chunkSize; i++) {
       // threshold 0.1 for trigger, advance note upon trigger
@@ -190,11 +187,48 @@ protected:
         // advance arp
         int arpNote = utils_Arp_process(context_processor);
         d_stdout("trig note: %d", arpNote);
+        // send MIDI
+        if (arpNote >= 0) {
+          // FIXME: retrieve frame
+          sendNoteOn(arpNote);
+          sendNoteOff(arpNote);
+        }
       }
       else if (fix_to_float(buffIn[i]) < 0.1) {
         trigerring = false;
       }
     }
+  }
+
+  void sendNoteOn(uint8_t note, uint8_t velocity=127, uint8_t channel=0) {
+    // sanitize
+    channel = channel & 0x0F;
+    // code for note on
+    uint8_t type = 144;
+    // build event
+    MidiEvent midiEvent;
+    midiEvent.frame = 0;
+    midiEvent.size = 3;
+    midiEvent.data[0] = type + channel;
+    midiEvent.data[1] = note;
+    midiEvent.data[2] = velocity;
+    writeMidiEvent(midiEvent);
+  }
+
+  // Note: velocity set to 0
+  void sendNoteOff(uint8_t note, uint8_t channel=0) {
+    // sanitize
+    channel = channel & 0x0F;
+    // code for note on
+    uint8_t type = 128;
+    // build event
+    MidiEvent midiEvent;
+    midiEvent.frame = 0;
+    midiEvent.size = 3;
+    midiEvent.data[0] = type + channel;
+    midiEvent.data[1] = note;
+    midiEvent.data[2] = 0;
+    writeMidiEvent(midiEvent);
   }
 
 private:
