@@ -12,8 +12,9 @@ START_NAMESPACE_DISTRHO
 class Chord : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
-  Chord() : ExtendedPlugin(kParameterCount, 0, 0) {
+  Chord() : ExtendedPlugin(kParameterCount, 0, 0), root(60.0f) {
     utils_Tonnetz_process_init(context_processor);
+    utils_Tonnetz_setRoot(context_processor, root);
 
     DISTRHO_SAFE_ASSERT_RETURN(
                                (CHORD_NB_SCALES  == utils_Tonnetz_getNbScales(context_processor)) &&
@@ -180,7 +181,7 @@ protected:
       parameter.name = "Root note";
       parameter.shortName = "note";
       parameter.symbol = "note";
-      parameter.ranges.def = 60.0f;
+      parameter.ranges.def = root;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 127.0f;
 
@@ -236,9 +237,8 @@ protected:
       jump = value;
       utils_Tonnetz_setJump(context_processor, float_to_fix(value));
       break;
+      // kRoot is output only, set through MIDI here, but just in case
     case kRoot:
-      // no kRoot since output only, but check that
-      d_stdout("got value for root: %f", value);
       break;
 
     default:
@@ -278,6 +278,7 @@ private:
   float chordSpread;
   float invSpread;
   float jump;
+  // same as in DSP
   float root;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Chord);
