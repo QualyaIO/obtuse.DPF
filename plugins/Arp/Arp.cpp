@@ -7,6 +7,7 @@ START_NAMESPACE_DISTRHO
 
 // to sync with vult code
 #define ARP_MAX_NOTES 16
+#define ARP_NB_MODES 6
 
 // Wrapper for Arp. Up, down, etc. will refer to note order. Duplicated note brings it to newest.
 // Note: In this version, the duration of the trigger input will be the duration of noteOn / noteOff MIDI events.
@@ -15,15 +16,21 @@ class Arp : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
   Arp() : ExtendedPlugin(kParameterCount, 0, 0) {
+    // check if number of modes for arp different than expected
+    DISTRHO_SAFE_ASSERT_RETURN(
+                               ARP_NB_MODES == utils_Arp_getNbModes(context_processor) &&
+                               "Number of modes for arp different than expected (6)"
+                               ,;);
+    // make sure we don't do anything rash - but compiler will catch discrepancy also while setNotes
+    DISTRHO_SAFE_ASSERT_RETURN(
+                               ARP_MAX_NOTES == utils_Arp_getMaxNbNotes(context_processor) &&
+                               "Number of notes held in arp differs from expected (16)"
+                               ,;);
     utils_Arp_process_init(context_processor);
     utils_Gate_list_init(context_list);
+
     // will init notes to -1
     updateNotes();
-    // make sure we don't do anything rash - but compiler will catch discrepancy also while setNotes
-    assert(
-           (utils_Arp_getMaxNbNotes(context_processor) == ARP_MAX_NOTES) &&
-           "Number of notes held in arp differs from expected (16)"
-           );
   }
 
 protected:
@@ -67,11 +74,7 @@ protected:
       parameter.shortName = "Mode";
       parameter.symbol = "mode";
       // we want to make sure we are on par with API
-      parameter.enumValues.count = 6;
-      assert(
-             (parameter.enumValues.count  == Processor_arp_getNbModes(context_processor) - 1) &&
-             "Number of modes for arp different than expected (6)"
-             );
+      parameter.enumValues.count = ARP_NB_MODES;
       parameter.enumValues.restrictedMode = true;
       {
         ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
