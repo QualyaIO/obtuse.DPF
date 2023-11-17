@@ -48,8 +48,8 @@ protected:
           {
           case 0:
             port.hints   = kAudioPortIsCV;
-            port.name    = "Clock Input";
-            port.symbol  = "clock_in";
+            port.name    = "Trigger Input";
+            port.symbol  = "trigg_in";
             return;
           }
       }
