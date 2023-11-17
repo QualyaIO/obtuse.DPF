@@ -9,6 +9,9 @@ START_NAMESPACE_DISTRHO
 #define CHORD_NB_CHORDS 6
 
 // Wrapper for Chord.
+// TODO: implement reset input
+// TODO: ouput parameter for current chord?
+// Note: send chord via MIDI, hence will change behavior of things like arp if used after, compared to plain DSP or VCV (e.g. use of note off will temporarily change number of active notes in arp). Will also note off / note off all 3 notes for each new chord, even if unchanged.
 class Chord : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
@@ -253,13 +256,33 @@ protected:
     utils_Tonnetz_setRoot(context_processor, note);
   }
 
-  void process(uint32_t chunkSize, uint32_t) {
+  void process(uint32_t chunkSize, uint32_t frame) {
+    // chord notes
+    static int notes[3] = {-1, -1, -1};
+
     for (unsigned int i = 0; i < chunkSize; i++) {
       // threshold 0.1 for trigger, new chord upon trigger
       if (fix_to_float(buffIn[i]) >= 0.1 and !trigerring) {
         trigerring = true;
-        // TODO
-        d_stdout("trig chord");
+        // turn off previous chord
+        for (int i = 0; i < 3; i++) {
+          if (notes[i] >= 0) {
+            sendNoteOff(notes[i], channelChord, frame);
+          }
+        }
+        // draw and retrieve chord
+        utils_Tonnetz_process(context_processor);
+        notes[0] = utils_Tonnetz_process_ret_0(context_processor);
+        notes[1] = utils_Tonnetz_process_ret_1(context_processor);
+        notes[2] = utils_Tonnetz_process_ret_2(context_processor);
+        d_stdout("trig chord [%d, %d, %d]", notes[0], notes[1], notes[2]);
+        // send chord
+        for (int i = 0; i < 3; i++) {
+          if (notes[i] >= 0) {
+            sendNoteOn(notes[i], 127, channelChord, frame);
+          }
+        }
+
       }
       // nothing to be done when trigger in finished
       else if (fix_to_float(buffIn[i]) < 0.1 and trigerring) {
@@ -280,6 +303,9 @@ private:
   float jump;
   // same as in DSP
   float root;
+  // where to send notes
+  float channelChord = 0;
+  float channelScale = 1;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Chord);
 };
