@@ -96,6 +96,44 @@ protected:
     }
   };
 
+#if DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
+  // output noteOn event
+  // note, velocity, channel: as per usual MIDI
+  // frame: frame of the event in the buffer
+  // TODO: sanitize frame
+  void sendNoteOn(uint8_t note, uint8_t velocity=127, uint8_t channel=0, uint32_t frame=0) {
+    // sanitize
+    channel = channel & 0x0F;
+    // code for note on
+    uint8_t type = 144;
+    // build event
+    MidiEvent midiEvent;
+    midiEvent.frame = frame;
+    midiEvent.size = 3;
+    midiEvent.data[0] = type + channel;
+    midiEvent.data[1] = note;
+    midiEvent.data[2] = velocity;
+    writeMidiEvent(midiEvent);
+  }
+
+  // output noteOff event
+  // note, and channel: as per usual MIDI (velocity set to 0)
+  // frame: frame of the event in the buffer
+  void sendNoteOff(uint8_t note, uint8_t channel=0, uint32_t frame=0) {
+    // sanitize
+    channel = channel & 0x0F;
+    // code for note on
+    uint8_t type = 128;
+    // build event
+    MidiEvent midiEvent;
+    midiEvent.frame = frame;
+    midiEvent.size = 3;
+    midiEvent.data[0] = type + channel;
+    midiEvent.data[1] = note;
+    midiEvent.data[2] = 0;
+    writeMidiEvent(midiEvent);
+  }
+#endif // DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
 
   // should read from buffIn and write to buffOut, and process a specific amount of samples, with reference of the starting frame
   virtual void process(uint32_t nbSamples, uint32_t frame) {};

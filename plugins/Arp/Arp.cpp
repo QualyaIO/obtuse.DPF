@@ -204,39 +204,6 @@ protected:
     }
   }
 
-  // output noteOn event
-  void sendNoteOn(uint8_t note, uint8_t velocity=127, uint8_t channel=0, uint32_t frame=0) {
-    // sanitize
-    channel = channel & 0x0F;
-    // code for note on
-    uint8_t type = 144;
-    // build event
-    MidiEvent midiEvent;
-    midiEvent.frame = frame;
-    midiEvent.size = 3;
-    midiEvent.data[0] = type + channel;
-    midiEvent.data[1] = note;
-    midiEvent.data[2] = velocity;
-    writeMidiEvent(midiEvent);
-  }
-
-  // output noteOff event
-  // Note: velocity set to 0
-  void sendNoteOff(uint8_t note, uint8_t channel=0, uint32_t frame=0) {
-    // sanitize
-    channel = channel & 0x0F;
-    // code for note on
-    uint8_t type = 128;
-    // build event
-    MidiEvent midiEvent;
-    midiEvent.frame = frame;
-    midiEvent.size = 3;
-    midiEvent.data[0] = type + channel;
-    midiEvent.data[1] = note;
-    midiEvent.data[2] = 0;
-    writeMidiEvent(midiEvent);
-  }
-
 private:
   utils_Arp_process_type context_processor;
   utils_Gate_list_type context_list;
