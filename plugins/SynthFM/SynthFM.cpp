@@ -380,7 +380,7 @@ protected:
     synthFM_Voice_synthSetSustain(context_processor, flag);
   }
 
-  void process(unsigned int chunkSize) {
+  void process(uint32_t chunkSize, uint32_t) {
     synthFM_Voice_process_bufferTo(context_processor, chunkSize, buffOut);
   }
 

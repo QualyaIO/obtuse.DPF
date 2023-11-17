@@ -80,7 +80,7 @@ protected:
     }
   }
 
-  void process(unsigned int chunkSize) {
+  void process(uint32_t chunkSize, uint32_t) {
     effects_Saturator_process_bufferTo(context_processor, chunkSize, buffIn, buffOut);
   }
   

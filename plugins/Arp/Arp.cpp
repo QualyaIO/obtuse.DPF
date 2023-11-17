@@ -180,7 +180,7 @@ protected:
     }
   }
 
-  void process(unsigned int chunkSize) {
+  void process(uint32_t chunkSize, uint32_t frame) {
     static int lastNote = -1;
     for (unsigned int i = 0; i < chunkSize; i++) {
       // threshold 0.1 for trigger, advance note upon trigger
@@ -191,28 +191,28 @@ protected:
         d_stdout("trig note: %d", lastNote);
         // send MIDI
         if (lastNote >= 0) {
-          // FIXME: retrieve frame
-          sendNoteOn(lastNote);
+          sendNoteOn(lastNote, 127, 0, frame+i);
         }
       }
       // turn off note
       else if (fix_to_float(buffIn[i]) < 0.1 and trigerring) {
         trigerring = false;
         if (lastNote >= 0) {
-          sendNoteOff(lastNote);
+          sendNoteOff(lastNote, 0, frame+i);
         }
       }
     }
   }
 
-  void sendNoteOn(uint8_t note, uint8_t velocity=127, uint8_t channel=0) {
+  // output noteOn event
+  void sendNoteOn(uint8_t note, uint8_t velocity=127, uint8_t channel=0, uint32_t frame=0) {
     // sanitize
     channel = channel & 0x0F;
     // code for note on
     uint8_t type = 144;
     // build event
     MidiEvent midiEvent;
-    midiEvent.frame = 0;
+    midiEvent.frame = frame;
     midiEvent.size = 3;
     midiEvent.data[0] = type + channel;
     midiEvent.data[1] = note;
@@ -220,15 +220,16 @@ protected:
     writeMidiEvent(midiEvent);
   }
 
+  // output noteOff event
   // Note: velocity set to 0
-  void sendNoteOff(uint8_t note, uint8_t channel=0) {
+  void sendNoteOff(uint8_t note, uint8_t channel=0, uint32_t frame=0) {
     // sanitize
     channel = channel & 0x0F;
     // code for note on
     uint8_t type = 128;
     // build event
     MidiEvent midiEvent;
-    midiEvent.frame = 0;
+    midiEvent.frame = frame;
     midiEvent.size = 3;
     midiEvent.data[0] = type + channel;
     midiEvent.data[1] = note;

@@ -97,8 +97,8 @@ protected:
   };
 
 
-  // should read from buffIn and write to buffOut, and process a specific amount of samples
-  virtual void process(unsigned int nbSamples) {};
+  // should read from buffIn and write to buffOut, and process a specific amount of samples, with reference of the starting frame
+  virtual void process(uint32_t nbSamples, uint32_t frame) {};
 
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
@@ -121,7 +121,7 @@ protected:
     uint32_t midiEventNum = 0;
     while (k < frames) {
       // enough frames left for whole buffer or only leftovers?
-      int chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
+      uint32_t chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
 
       // do we have any MIDI event to process before this chunk?
       while (midiEventNum < midiEventCount) {
@@ -142,7 +142,7 @@ protected:
       }
 #endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
       // let subclass output buffer
-      process(chunkSize);
+      process(chunkSize, k);
       // copy to output buffer
 #if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
       for (int i = 0; i < chunkSize; i++) {
@@ -179,7 +179,7 @@ protected:
     uint32_t k = 0;
     while (k < frames) {
       // enough frames left for whole buffer or only leftovers?
-      int chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
+      uint32_t chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
       // copy to input buffer
 #if DISTRHO_PLUGIN_NUM_INPUTS > 0
       for (int i = 0; i < chunkSize; i++) {
@@ -187,7 +187,7 @@ protected:
       }
 #endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
       // let subclass output buffer
-      process(chunkSize);
+      process(chunkSize, k);
       // copy to output buffer
 #if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
       for (int i = 0; i < chunkSize; i++) {
