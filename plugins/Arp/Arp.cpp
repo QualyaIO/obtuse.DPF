@@ -163,9 +163,9 @@ protected:
 
   // callbacks for processing MIDI
   // keep track of xx last active notes, duplicate no matter the channel will reset position. Using gate's list
-  void noteOn(uint8_t note, uint8_t, uint8_t channel) {
+  void noteOn(uint8_t note, uint8_t, uint8_t channel, uint32_t frame) {
     // turn off previous note, if any
-    noteOff(note, channel);
+    noteOff(note, channel, frame);
     // add note to list
     utils_Gate_push(context_list, note);
     // update arp
@@ -173,7 +173,7 @@ protected:
   }
 
   // remove note from active list
-  void noteOff(uint8_t note, uint8_t) {
+  void noteOff(uint8_t note, uint8_t, uint32_t) {
     // Do we have the note already?
     int idx = utils_Gate_search(context_list, note);
     // If so, remove it, and will update arp

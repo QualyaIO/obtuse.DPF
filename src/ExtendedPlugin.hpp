@@ -23,14 +23,14 @@ protected:
   fix16_t buffIn[BUFFER_SIZE];
   fix16_t buffOut[BUFFER_SIZE];
 
-  // The following functions will be called upon encountering MIDI events, to be implemented by subclasses. channel: 0..15
-  virtual void noteOn(uint8_t note, uint8_t velocity, uint8_t channel) {};
-  virtual void noteOff(uint8_t note, uint8_t channel) {};
+  // The following functions will be called upon encountering MIDI events, to be implemented by subclasses. channel: 0..15. frame: frame number within the buffer of the MIDI event
+  virtual void noteOn(uint8_t note, uint8_t velocity, uint8_t channel, uint32_t frame) {};
+  virtual void noteOff(uint8_t note, uint8_t channel, uint32_t frame) {};
   // pitch bend from -2 to +2 semitones
-  virtual void pitchbend(uint8_t chanel, float value) {};
-  virtual void cc(uint8_t number, uint8_t value, uint8_t channel) {};
+  virtual void pitchbend(uint8_t chanel, float value, uint32_t frame) {};
+  virtual void cc(uint8_t number, uint8_t value, uint8_t channel, uint32_t frame) {};
   // special CC
-  virtual void sustain(uint8_t channel, bool flag) {};
+  virtual void sustain(uint8_t channel, bool flag, uint32_t frame) {};
 
   // deal with MIDI input
   void processMidiEvent(const MidiEvent midiEvent) {
@@ -44,14 +44,14 @@ protected:
 	// note on
       case 144:
 	if (midiEvent.size > 2) {
-	  noteOn(midiEvent.data[1], midiEvent.data[2], chan);
+	  noteOn(midiEvent.data[1], midiEvent.data[2], chan, midiEvent.frame);
 	}
 	
 	break;
 	// note off
       case 128:
 	if (midiEvent.size > 1) {
-	  noteOff(midiEvent.data[1], chan);
+	  noteOff(midiEvent.data[1], chan, midiEvent.frame);
 	}
 	break;
 	
@@ -65,9 +65,9 @@ protected:
 	    // sustain
 	  case 64:
 	    if (value >= 64) {
-	      sustain(chan, true);
+	      sustain(chan, true, midiEvent.frame);
 	    } else {
-	      sustain(chan, false);
+	      sustain(chan, false, midiEvent.frame);
 	    }
 	    break;
 	  }
@@ -89,7 +89,7 @@ protected:
 	  else if (pitchBend < 8192) {
 	    semitones =  - 2.0 * (8192 - pitchBend) / (8192);
 	  }
-	  pitchbend(chan, semitones);
+	  pitchbend(chan, semitones, midiEvent.frame);
 	}
 	break;
       }

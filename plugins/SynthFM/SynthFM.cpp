@@ -364,19 +364,19 @@ protected:
   }
 
   // callbacks for processing MIDI
-  void noteOn(uint8_t note, uint8_t velocity, uint8_t channel) {
+  void noteOn(uint8_t note, uint8_t velocity, uint8_t channel, uint32_t) {
     synthFM_Voice_noteOn(context_processor, note, velocity, channel);
   }
 
-  void noteOff(uint8_t note, uint8_t channel) {
+  void noteOff(uint8_t note, uint8_t channel, uint32_t) {
     synthFM_Voice_noteOff(context_processor, note, channel);
   }
 
-  void pitchbend(uint8_t, float semitones) {
+  void pitchbend(uint8_t, float semitones, uint32_t) {
     synthFM_Voice_synthPitchBend(context_processor, float_to_fix(semitones));
   }
 
-  void sustain(uint8_t, bool flag) {
+  void sustain(uint8_t, bool flag, uint32_t) {
     synthFM_Voice_synthSetSustain(context_processor, flag);
   }
 
