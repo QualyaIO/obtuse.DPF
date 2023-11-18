@@ -7,11 +7,17 @@ START_NAMESPACE_DISTRHO
 // to sync with DSP
 #define CHORD_NB_SCALES 20
 #define CHORD_NB_CHORDS 6
+// how many notes in chord and scale, to sync with DSP
+#define CHORD_CHORD_SIZE 3
+#define CHORD_MAX_SCALE_SIZE 12
 
 // Wrapper for Chord.
+// FIXME: scale sent only upon change in root or scale at the moment... change that?
 // TODO: implement reset input
 // TODO: ouput parameter for current chord?
 // Note: send chord via MIDI, hence will change behavior of things like arp if used after, compared to plain DSP or VCV (e.g. use of note off will temporarily change number of active notes in arp). Will also note off / note off all 3 notes for each new chord, even if unchanged.
+// Note: changing chord or scale midi channel will note off on pevious chan / note on on current chan pending chord or scale. 
+// Note: changing root note or scale will output scale in MIDI, hence beware of spamming midi if automated
 class Chord : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
@@ -29,6 +35,8 @@ public:
                                "Number of scales for chord different than expected (20)"
                                ,;
            );
+
+    // init scale, scale will be init and sent upon first parameter sent
   }
 
 protected:
@@ -179,6 +187,26 @@ protected:
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
       break;
+    case kChannelChord:
+      parameter.hints = kParameterIsInteger;
+      parameter.name = "Chord MIDI channel";
+      parameter.shortName = "chord chan";
+      parameter.symbol = "channel";
+      // 1-index here
+      parameter.ranges.def = 1.0;
+      parameter.ranges.min = 1.0f;
+      parameter.ranges.max = 16.0f;
+      break;
+    case kChannelScale:
+      parameter.hints = kParameterIsInteger;
+      parameter.name = "Scale MIDI channel";
+      parameter.shortName = "scale chan";
+      parameter.symbol = "channel";
+      // 1-index here
+      parameter.ranges.def = 2.0;
+      parameter.ranges.min = 1.0f;
+      parameter.ranges.max = 16.0f;
+      break;
     case kRoot:
       parameter.hints = kParameterIsInteger|kParameterIsOutput;
       parameter.name = "Root note";
@@ -187,6 +215,7 @@ protected:
       parameter.ranges.def = root;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 127.0f;
+      break;
 
     default:
       break;
@@ -221,8 +250,12 @@ protected:
     // FIXME: check up to which point function is repeatedly called from host even when value does not change
     switch (index) {
     case kScale:
+      // retrig scale upon change
+      sendScaleOff();
       scale = value;
       utils_Tonnetz_setScale(context_processor, value);
+      updateScale();
+      sendScaleOn();
       break;
     case kChord:
       chord = value;
@@ -240,6 +273,22 @@ protected:
       jump = value;
       utils_Tonnetz_setJump(context_processor, float_to_fix(value));
       break;
+    case kChannelChord:
+      // retrig chord upon channel change
+      if (channelChord != value) {
+        sendChordOff();
+        channelChord = value;
+        sendChordOn();
+      }
+      break;
+    case kChannelScale:
+      // retrig scale upon channel change
+      if (channelScale != value) {
+        sendScaleOff();
+        channelScale = value;
+        sendScaleOn();
+      }
+      break;
       // kRoot is output only, set through MIDI here, but just in case
     case kRoot:
       break;
@@ -250,26 +299,83 @@ protected:
   }
 
   // callbacks for processing MIDI
-  // changing root note 
-  void noteOn(uint8_t note, uint8_t, uint8_t) {
+  // changing root note, retrig scale
+  void noteOn(uint8_t note, uint8_t, uint8_t, uint32_t frame) {
+    sendScaleOff(frame);
     root = note;
     utils_Tonnetz_setRoot(context_processor, note);
+    updateScale();
+    sendScaleOn(frame);
   }
 
-  void process(uint32_t chunkSize, uint32_t frame) {
-    // chord notes
-    static int notes[3] = {-1, -1, -1};
+  void sendChordOff(uint32_t frame=0) {
+    for (int i = 0; i < CHORD_CHORD_SIZE; i++) {
+      if (notes[i] >= 0) {
+        sendNoteOff(notes[i], channelChord-1, frame);
+      }
+    }
+  }
 
+  void sendChordOn(uint32_t frame=0) {
+    for (int i = 0; i < CHORD_CHORD_SIZE; i++) {
+      if (notes[i] >= 0) {
+        sendNoteOn(notes[i], 127, channelChord-1, frame);
+      }
+    }
+  }
+
+  void updateScale() {
+    // which tones are active or not for current scale
+    uint8_t rawScale[CHORD_MAX_SCALE_SIZE] = {false, false, false, false, false, false, false, false, false, false, false, false};
+    int scaleId = utils_Tonnetz_getScaleId(context_processor);
+    utils_Tonnetz_getScale(scaleId, rawScale);
+    // retrieve root from DSP, just to be sure (there might be some discrepancy upon init).
+    // TODO: maybe check for discrepancy?
+    int trueRoot = utils_Tonnetz_getRoot(context_processor);
+    int k = 0;
+    // fill the scale with selected notes, related to root
+    for (int i = 0; i < CHORD_MAX_SCALE_SIZE; i++) {
+      if (rawScale[i]) {
+        scaleNotes[k] = trueRoot + i;
+        // mitigate issue with high root, down one octave, should match how notes within chords are also one octave down in DSP tonnetz
+        if(scaleNotes[k] > 127) {
+          scaleNotes[k] = scaleNotes[k] - 12;
+        }
+        k++;
+      }
+    }
+    scaleSize = k;
+    d_stdout("update scale");
+    // debug
+    for (int i = 0; i < CHORD_MAX_SCALE_SIZE; i++) {
+      d_stdout("%d: %d", i, scaleNotes[i]);
+    }
+  }
+
+  void sendScaleOff(uint32_t frame=0) {
+    for (int i = 0; i < CHORD_MAX_SCALE_SIZE && i < scaleSize; i++) {
+      if (scaleNotes[i] >= 0) {
+        sendNoteOff(scaleNotes[i], channelScale-1, frame);
+      }
+    }
+  }
+
+  void sendScaleOn(uint32_t frame=0) {
+    for (int i = 0; i < CHORD_MAX_SCALE_SIZE && i < scaleSize; i++) {
+      if (scaleNotes[i] >= 0) {
+        sendNoteOn(scaleNotes[i], 127, channelScale-1, frame);
+      }
+    }
+  }
+
+
+  void process(uint32_t chunkSize, uint32_t frame) {
     for (unsigned int i = 0; i < chunkSize; i++) {
       // threshold 0.1 for trigger, new chord upon trigger
       if (fix_to_float(buffIn[i]) >= 0.1 and !trigerring) {
         trigerring = true;
         // turn off previous chord
-        for (int i = 0; i < 3; i++) {
-          if (notes[i] >= 0) {
-            sendNoteOff(notes[i], channelChord, frame);
-          }
-        }
+        sendChordOff(frame);
         // draw and retrieve chord
         utils_Tonnetz_process(context_processor);
         notes[0] = utils_Tonnetz_process_ret_0(context_processor);
@@ -277,12 +383,7 @@ protected:
         notes[2] = utils_Tonnetz_process_ret_2(context_processor);
         d_stdout("trig chord [%d, %d, %d]", notes[0], notes[1], notes[2]);
         // send chord
-        for (int i = 0; i < 3; i++) {
-          if (notes[i] >= 0) {
-            sendNoteOn(notes[i], 127, channelChord, frame);
-          }
-        }
-
+        sendChordOn(frame);
       }
       // nothing to be done when trigger in finished
       else if (fix_to_float(buffIn[i]) < 0.1 and trigerring) {
@@ -295,6 +396,12 @@ private:
   utils_Tonnetz_process_type context_processor;
   // currently receive a trigger
   bool trigerring = false;
+  // chord notes
+  int notes[CHORD_CHORD_SIZE] = {-1, -1, -1};
+  // selected scale
+  int scaleNotes[CHORD_MAX_SCALE_SIZE] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+  // actual number of notes for the scale
+  int scaleSize = 0;
 
   float scale;
   float chord;
@@ -304,8 +411,8 @@ private:
   // same as in DSP
   float root;
   // where to send notes
-  float channelChord = 0;
-  float channelScale = 1;
+  float channelChord;
+  float channelScale;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Chord);
 };

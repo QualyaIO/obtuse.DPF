@@ -18,6 +18,8 @@ enum Parameters {
     kChord,
     kChordSpread,
     kInvSpread,
+    kChannelChord,
+    kChannelScale,
     kJump,
     kRoot, // output
 
