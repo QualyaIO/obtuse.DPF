@@ -191,7 +191,6 @@ protected:
         trigerring = true;
         // advance arp
         lastNote  = utils_Arp_process(context_processor);
-        d_stdout("trig note: %d", lastNote);
         // send MIDI
         if (lastNote >= 0) {
           sendNoteOn(lastNote, 127, 0, frame+i);
@@ -219,7 +218,6 @@ private:
 
   // re-compute active notes and send to arp
   void updateNotes() {
-    d_stdout("update notes");
     // retrieve number of notes currently held and how much can fit in arp
     int nbNotes = utils_Gate_getListSize(context_list);
     // we want most recent notes for arp
@@ -240,12 +238,6 @@ private:
       arpNotes[n] = -1;
       n++;
     }
-
-    // debug
-    for (int i = 0; i < ARP_MAX_NOTES; i++) {
-      d_stdout("%d: %d", i, arpNotes[i]);
-    }
-    
     utils_Arp_setNotes(context_processor, arpNotes);
   }
 

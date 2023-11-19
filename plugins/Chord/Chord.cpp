@@ -345,11 +345,6 @@ protected:
       }
     }
     scaleSize = k;
-    d_stdout("update scale");
-    // debug
-    for (int i = 0; i < CHORD_MAX_SCALE_SIZE; i++) {
-      d_stdout("%d: %d", i, scaleNotes[i]);
-    }
   }
 
   void sendScaleOff(uint32_t frame=0) {
@@ -381,7 +376,6 @@ protected:
         notes[0] = utils_Tonnetz_process_ret_0(context_processor);
         notes[1] = utils_Tonnetz_process_ret_1(context_processor);
         notes[2] = utils_Tonnetz_process_ret_2(context_processor);
-        d_stdout("trig chord [%d, %d, %d]", notes[0], notes[1], notes[2]);
         // send chord
         sendChordOn(frame);
       }
