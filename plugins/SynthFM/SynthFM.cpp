@@ -428,15 +428,24 @@ protected:
   }
 
   void noteOff(uint8_t note, uint8_t channel, uint32_t) {
-    synthFM_Voice_noteOff(context_processor, note, channel);
+    // filter event depending on selected channel
+    if (channelInput == 0 or channelInput - 1 == channel) {
+      synthFM_Voice_noteOff(context_processor, note, channel);
+    }
   }
 
-  void pitchbend(uint8_t, float semitones, uint32_t) {
-    synthFM_Voice_synthPitchBend(context_processor, float_to_fix(semitones));
+  void pitchbend(uint8_t channel, float semitones, uint32_t) {
+    // filter event depending on selected channel
+    if (channelInput == 0 or channelInput - 1 == channel) {
+      synthFM_Voice_synthPitchBend(context_processor, float_to_fix(semitones));
+    }
   }
 
-  void sustain(uint8_t, bool flag, uint32_t) {
-    synthFM_Voice_synthSetSustain(context_processor, flag);
+    void sustain(uint8_t channel, bool flag, uint32_t) {
+    // filter event depending on selected channel
+    if (channelInput == 0 or channelInput - 1 == channel) {
+      synthFM_Voice_synthSetSustain(context_processor, flag);
+    }
   }
 
   void process(uint32_t chunkSize, uint32_t) {

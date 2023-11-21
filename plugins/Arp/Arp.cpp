@@ -243,13 +243,16 @@ protected:
   }
 
   // remove note from active list
-  void noteOff(uint8_t note, uint8_t, uint32_t) {
-    // Do we have the note already?
-    int idx = utils_Gate_search(context_list, note);
-    // If so, remove it, and will update arp
-    if (idx >= 0) {
-      utils_Gate_delete(context_list, idx);
-      updateNotes();
+  void noteOff(uint8_t note, uint8_t channel, uint32_t) {
+    // filter event depending on selected channel
+    if (channelInput == 0 or channelInput - 1 == channel) {
+      // Do we have the note already?
+      int idx = utils_Gate_search(context_list, note);
+      // If so, remove it, and will update arp
+      if (idx >= 0) {
+        utils_Gate_delete(context_list, idx);
+        updateNotes();
+      }
     }
   }
 
