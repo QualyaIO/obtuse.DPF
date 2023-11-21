@@ -14,6 +14,8 @@
 #define DISTRHO_PLUGIN_IS_RT_SAFE   1
 
 enum Parameters {
+    kChannelInput, 
+    kChannelOutput, 
     kMode,
     kRandNotes,
     kRandomize,

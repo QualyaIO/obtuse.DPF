@@ -11,6 +11,7 @@ START_NAMESPACE_DISTRHO
 
 // Wrapper for Arp. Up, down, etc. will refer to note order. Duplicated note brings it to newest.
 // Note: In this version, the duration of the trigger input will be the duration of noteOn / noteOff MIDI events.
+// Note: change of output channel will be effective upon next note played
 // TODO: support MIDI sustain at this level, and/or add an "hold" option?
 class Arp : public ExtendedPlugin {
 public:
@@ -68,6 +69,67 @@ protected:
   void initParameter (uint32_t index, Parameter& parameter) override {
 
     switch (index) {
+    case kChannelInput:
+      parameter.hints = kParameterIsInteger;
+      parameter.name = "Input MIDI channel";
+      parameter.shortName = "in chan";
+      parameter.symbol = "channel";
+      // using enum to explicit omni. 0 for omni and 16 channels
+      parameter.enumValues.count = 17;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "omni (all)";
+        values[0].value = 0;
+        values[1].label = "1";
+        values[1].value = 1;
+        values[2].label = "2";
+        values[2].value = 2;
+        values[3].label = "3";
+        values[3].value = 3;
+        values[4].label = "4";
+        values[4].value = 4;
+        values[5].label = "5";
+        values[5].value = 5;
+        values[6].label = "6";
+        values[6].value = 6;
+        values[7].label = "7";
+        values[7].value = 7;
+        values[8].label = "8";
+        values[8].value = 8;
+        values[9].label = "9";
+        values[9].value = 9;
+        values[10].label = "10";
+        values[10].value = 10;
+        values[11].label = "11";
+        values[11].value = 11;
+        values[12].label = "12";
+        values[12].value = 12;
+        values[13].label = "13";
+        values[13].value = 13;
+        values[14].label = "14";
+        values[14].value = 14;
+        values[15].label = "15";
+        values[15].value = 15;
+        values[16].label = "16";
+        values[16].value = 16;
+      }
+      // select default idx
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 16.0f;
+      break;
+    case kChannelOutput:
+      parameter.hints = kParameterIsInteger;
+      parameter.name = "Output MIDI channel";
+      parameter.shortName = "out chan";
+      parameter.symbol = "channel";
+      // 1-index here
+      parameter.ranges.def = 1.0;
+      parameter.ranges.min = 1.0f;
+      parameter.ranges.max = 16.0f;
+      break;
     case kMode:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Mode";
@@ -128,6 +190,8 @@ protected:
   float getParameterValue(uint32_t index) const override {
     switch (index) {
 
+    case kChannelInput:
+      return channelInput;
     case kMode:
       return mode;
     case kRandNotes:
@@ -143,6 +207,9 @@ protected:
   void setParameterValue(uint32_t index, float value) override {
     // FIXME: check up to which point function is repeatedly called from host even when value does not change
     switch (index) {
+    case kChannelInput:
+      channelInput = value;
+      break;
     case kMode:
       mode = value;
       utils_Arp_setMode(context_processor, value);
@@ -164,12 +231,15 @@ protected:
   // callbacks for processing MIDI
   // keep track of xx last active notes, duplicate no matter the channel will reset position. Using gate's list
   void noteOn(uint8_t note, uint8_t, uint8_t channel, uint32_t frame) {
-    // turn off previous note, if any
-    noteOff(note, channel, frame);
-    // add note to list
-    utils_Gate_push(context_list, note);
-    // update arp
-    updateNotes();
+    // filter event depending on selected channel
+    if (channelInput == 0 or channelInput - 1 == channel) {
+      // turn off previous note, if any -- channel not important here, nothing sent
+      noteOff(note, 0, frame);
+      // add note to list
+      utils_Gate_push(context_list, note);
+      // update arp
+      updateNotes();
+    }
   }
 
   // remove note from active list
@@ -184,23 +254,24 @@ protected:
   }
 
   void process(uint32_t chunkSize, uint32_t frame) {
-    static int lastNote = -1;
     for (unsigned int i = 0; i < chunkSize; i++) {
       // threshold 0.1 for trigger, advance note upon trigger
       if (fix_to_float(buffIn[i]) >= 0.1 and !trigerring) {
         trigerring = true;
         // advance arp
         lastNote  = utils_Arp_process(context_processor);
+        // new note, change MIDI channel to what is currently selected (1-index for parameter)
+        lastChan = channelOutput - 1;
         // send MIDI
         if (lastNote >= 0) {
-          sendNoteOn(lastNote, 127, 0, frame+i);
+          sendNoteOn(lastNote, 127, lastChan, frame+i);
         }
       }
       // turn off note
       else if (fix_to_float(buffIn[i]) < 0.1 and trigerring) {
         trigerring = false;
         if (lastNote >= 0) {
-          sendNoteOff(lastNote, 0, frame+i);
+          sendNoteOff(lastNote, lastChan, frame+i);
         }
       }
     }
@@ -211,7 +282,13 @@ private:
   utils_Gate_list_type context_list;
   // currently receive a trigger
   bool trigerring = false;
+  // saving last value sent for note on and used channel
+  int lastNote = -1;
+  int lastChan = 0;
 
+  // parameters
+  int channelInput;
+  int channelOutput;
   float mode;
   float randNotes;
   float randomize;
