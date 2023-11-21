@@ -74,6 +74,57 @@ protected:
   void initParameter (uint32_t index, Parameter& parameter) override {
 
     switch (index) {
+    case kChannelInput:
+      parameter.hints = kParameterIsInteger;
+      parameter.name = "Input MIDI channel";
+      parameter.shortName = "in chan";
+      parameter.symbol = "channel";
+      // using enum to explicit omni. 0 for omni and 16 channels
+      parameter.enumValues.count = 17;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "omni (all)";
+        values[0].value = 0;
+        values[1].label = "1";
+        values[1].value = 1;
+        values[2].label = "2";
+        values[2].value = 2;
+        values[3].label = "3";
+        values[3].value = 3;
+        values[4].label = "4";
+        values[4].value = 4;
+        values[5].label = "5";
+        values[5].value = 5;
+        values[6].label = "6";
+        values[6].value = 6;
+        values[7].label = "7";
+        values[7].value = 7;
+        values[8].label = "8";
+        values[8].value = 8;
+        values[9].label = "9";
+        values[9].value = 9;
+        values[10].label = "10";
+        values[10].value = 10;
+        values[11].label = "11";
+        values[11].value = 11;
+        values[12].label = "12";
+        values[12].value = 12;
+        values[13].label = "13";
+        values[13].value = 13;
+        values[14].label = "14";
+        values[14].value = 14;
+        values[15].label = "15";
+        values[15].value = 15;
+        values[16].label = "16";
+        values[16].value = 16;
+      }
+      // select default idx
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 16.0f;
+      break;
     case kScale:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Scale";
@@ -228,6 +279,8 @@ protected:
   float getParameterValue(uint32_t index) const override {
     switch (index) {
 
+    case kChannelInput:
+      return channelInput;
     case kScale:
       return scale;
     case kChord:
@@ -249,6 +302,9 @@ protected:
   void setParameterValue(uint32_t index, float value) override {
     // FIXME: check up to which point function is repeatedly called from host even when value does not change
     switch (index) {
+    case kChannelInput:
+      channelInput = value;
+      break;
     case kScale:
       // retrig scale upon change
       sendScaleOff();
@@ -300,12 +356,15 @@ protected:
 
   // callbacks for processing MIDI
   // changing root note, retrig scale
-  void noteOn(uint8_t note, uint8_t, uint8_t, uint32_t frame) {
-    sendScaleOff(frame);
-    root = note;
-    utils_Tonnetz_setRoot(context_processor, note);
-    updateScale();
-    sendScaleOn(frame);
+  void noteOn(uint8_t note, uint8_t, uint8_t channel, uint32_t frame) {
+    // filter event depending on selected channel
+    if (channelInput == 0 or channelInput - 1 == channel) {
+      sendScaleOff(frame);
+      root = note;
+      utils_Tonnetz_setRoot(context_processor, note);
+      updateScale();
+      sendScaleOn(frame);
+    }
   }
 
   void sendChordOff(uint32_t frame=0) {
@@ -363,7 +422,6 @@ protected:
     }
   }
 
-
   void process(uint32_t chunkSize, uint32_t frame) {
     for (unsigned int i = 0; i < chunkSize; i++) {
       // threshold 0.1 for trigger, new chord upon trigger
@@ -397,6 +455,7 @@ private:
   // actual number of notes for the scale
   int scaleSize = 0;
 
+  int channelInput;
   float scale;
   float chord;
   float chordSpread;
@@ -405,8 +464,8 @@ private:
   // same as in DSP
   float root;
   // where to send notes
-  float channelChord;
-  float channelScale;
+  int channelChord;
+  int channelScale;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Chord);
 };
