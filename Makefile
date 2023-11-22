@@ -26,6 +26,7 @@ plugins: dgl
 	$(MAKE) all -C plugins/SynthFM
 	$(MAKE) all -C plugins/Arp
 	$(MAKE) all -C plugins/Chord
+	$(MAKE) all -C plugins/Clock
 
 ifeq ($(CAN_GENERATE_TTL),true)
 gen: plugins utils/lv2_ttl_generator
@@ -48,6 +49,7 @@ clean:
 	$(MAKE) clean -C plugins/SynthFM
 	$(MAKE) clean -C plugins/Arp
 	$(MAKE) clean -C plugins/Chord
+	$(MAKE) clean -C plugins/Clock
 	$(MAKE) clean -C dpf/utils/lv2-ttl-generator
 	rm -rf bin build
 
