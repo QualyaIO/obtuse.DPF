@@ -283,48 +283,64 @@ protected:
 
     const TimePosition& timePos(getTimePosition());
 
-    for (uint32_t i = 0; i < frames; i++) {
-
-      // compute current clock, depending if we follow or not transport
-      // TODO: use more precise computation by keeping count of frame and changes in sample rate
-      // FIXME: loose sync upon start/stop in follow transport, probably because we cannot update this value per frame
-      if (source == 0 or (source == 1 and timePos.playing)) {
-        timeFract += 1./ getSampleRate();
-        while (timeFract >= 1.0) {
-          timeFract -= 1;
-          timeS +=  1;
-        }
-        utils_Clock_setTime(context_processor, timeS, float_to_fix(timeFract));
+    // autonomous mode, rely on botania
+    if (source == 0 or source == 1) {
+      // detect reset
+      // TODO: check that we go indeed back to 0 ticks at start of buffer for all host
+      if (source == 1 and !transportReset and timePos.frame == 0) {
+        utils_Clock_reset(context_processor);
+        transportReset = true;
+      }
+      else if (timePos.frame > 0) {
+        transportReset = false;
       }
 
-      // retrive current beat
-      int ret = utils_Clock_process(context_processor);
-
-
-      // retrieve ticks first, only interested if we have at least one, we might just loose some trigger at some point if there is too much delay
-      // NOTE: gate 1ms will quickly be too long there is too many ticks or BPM
-      int newTicks = utils_Clock_getNbNewTicks(context_processor);
-
-
-      // setting output, any beat is a good beat
-      out_beat[i] = triggerVal(OUT_BEAT, ret > 0, tick);
-      // only first beat of group
-      out_first_beat[i] = triggerVal(OUT_FIRST_BEAT, ret == 1, tick);
-      // beats on first group
-      out_first_group[i] = triggerVal(OUT_FIRST_GROUP, ret == 1 || ret == 2, tick);
-      // beats on second group
-      out_second_group[i] = triggerVal(OUT_SECOND_GROUP, ret == 3, tick);
-      // ticks from clock
-      out_ticks[i] = triggerVal(OUT_TICKS, newTicks > 0, tick);
-
-      tick++;
+      for (uint32_t i = 0; i < frames; i++) {
+        // compute current clock, depending if we follow or not transport
+        // TODO: use more precise computation by keeping count of frame and changes in sample rate
+        // FIXME: loose sync upon start/stop in follow transport, probably because we cannot update this value per frame
+        if (source == 0 or (source == 1 and timePos.playing)) {
+          timeFract += 1./ getSampleRate();
+          while (timeFract >= 1.0) {
+            timeFract -= 1;
+            timeS +=  1;
+          }
+          utils_Clock_setTime(context_processor, timeS, float_to_fix(timeFract));
+        }
+        
+        // retrive current beat
+        int ret = utils_Clock_process(context_processor);
+        
+        
+        // retrieve ticks first, only interested if we have at least one, we might just loose some trigger at some point if there is too much delay
+        // NOTE: gate 1ms will quickly be too long there is too many ticks or BPM
+        int newTicks = utils_Clock_getNbNewTicks(context_processor);
+        
+        // setting output, any beat is a good beat
+        out_beat[i] = triggerVal(OUT_BEAT, ret > 0, tick);
+        // only first beat of group
+        out_first_beat[i] = triggerVal(OUT_FIRST_BEAT, ret == 1, tick);
+        // beats on first group
+        out_first_group[i] = triggerVal(OUT_FIRST_GROUP, ret == 1 || ret == 2, tick);
+        // beats on second group
+        out_second_group[i] = triggerVal(OUT_SECOND_GROUP, ret == 3, tick);
+        // ticks from clock
+        out_ticks[i] = triggerVal(OUT_TICKS, newTicks > 0, tick);
+        
+        tick++;
+      }
+    }
+    // transport mode
+    else {
+      for (uint32_t i = 0; i < frames; i++) {
+        // TODO
+        tick++;
+      }
     }
 
-    //float time = timeS + timeFract;
-
-    // get time position
-    //const TimePosition& timePos(getTimePosition());
-    //d_stdout("frame: %d, time: %f, timePos.frame: %d, valid: %d, playing: %d, BPM: %f", frame, time, timePos.frame,  timePos.bbt.valid, timePos.playing, timePos.bbt.beatsPerMinute);
+    //if (timePos.playing) {
+    //  d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, BPM: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beatsPerMinute);
+    //}
   }
 
 private:
@@ -339,6 +355,8 @@ private:
   bool triggerringOut[NB_OUTS];
   // frame count for last trigger
   unsigned long int tickOut[NB_OUTS];
+  // did we reset clock when back to 0 in transport ?
+  bool transportReset = false;
 
   // parameters
   int source;
