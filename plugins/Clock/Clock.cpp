@@ -1,12 +1,21 @@
 
 #include "ExtendedPlugin.hpp"
 #include "utils.h"
-#include <cassert>
 
 START_NAMESPACE_DISTRHO
 
 // in seconds, how long for each trigger
 #define TRIGGER_LENGTH 0.001
+
+// more explicit outputs
+enum ClockOutputs {
+                   OUT_BEAT,
+                   OUT_FIRST_BEAT,
+                   OUT_FIRST_GROUP,
+                   OUT_SECOND_GROUP,
+                   OUT_TICKS,
+                   NB_OUTS
+};
 
 // Wrapper for Clock.
 // outputs 1ms triggers
@@ -15,6 +24,11 @@ public:
   // Note: do not care with default values since we will sent all parameters upon init
   Clock() : ExtendedPlugin(kParameterCount, 0, 0) {
     utils_Clock_process_init(context_processor);
+    // initialize info about outputs
+    for (int i = 0; i < NB_OUTS; i++) {
+      triggerringOut[i] = false;
+      tickOut[i] = 0;
+    }
   }
 
 protected:
@@ -37,30 +51,30 @@ protected:
       {
         switch (index)
           {
-          case 0:
+          case OUT_BEAT:
             port.hints   = kAudioPortIsCV;
             port.name    = "Beat";
             port.symbol  = "beat";
             return;
-          case 1:
-            port.hints   = kAudioPortIsCV;
-            port.name    = "Tick";
-            port.symbol  = "tick";
-            return;
-          case 2:
+          case OUT_FIRST_BEAT:
             port.hints   = kAudioPortIsCV;
             port.name    = "Fist beat";
             port.symbol  = "fist_beat";
             return;
-          case 3:
+          case OUT_FIRST_GROUP:
             port.hints   = kAudioPortIsCV;
             port.name    = "First group";
             port.symbol  = "first_group";
             return;
-          case 4:
+          case OUT_SECOND_GROUP:
             port.hints   = kAudioPortIsCV;
             port.name    = "Second group";
             port.symbol  = "second_group";
+            return;
+          case OUT_TICKS:
+            port.hints   = kAudioPortIsCV;
+            port.name    = "Tick";
+            port.symbol  = "tick";
             return;
           }
       }
@@ -189,7 +203,28 @@ protected:
     }
   }
 
-  void process(uint32_t chunkSize, uint32_t frame) {
+  // check state of said output and condition, returning value for trigger (or not), i.e. 1.0 or 0.0
+  // outputNum: which output to consider. Warning: not checking bounds
+  // flag: associated condition, will create gate of TRIGGER_LENGTH once switched false
+  // tick: current tick, as in frame number
+  // FIXME: using only current sampling rate for 1ms gate
+  float triggerVal(int outputNum, bool flag, long unsigned int tick) {
+    // starting trigger
+    if (flag) {
+      triggerringOut[outputNum] = true;
+      tickOut[outputNum] = tick;
+    }
+
+    // check if trigger should turn off
+    // FIXME: using only current sampling rate for 1ms gate
+    if (triggerringOut[outputNum] and (tick - tickOut[outputNum]) / getSampleRate() >= TRIGGER_LENGTH) {
+      triggerringOut[outputNum] = false;
+    }
+
+    return triggerringOut[outputNum] ? 1.0 : 0.0;
+  }
+
+  void process(uint32_t chunkSize, uint32_t) {
     double sampleRate = getSampleRate();
     for (uint32_t i = 0; i < chunkSize; i++) {
       // TODO: use more precise computation by keeping count of frame and changes in sample rate
@@ -201,20 +236,8 @@ protected:
       utils_Clock_setTime(context_processor, timeS, float_to_fix(timeFract));
       int ret = utils_Clock_process(context_processor);
 
-      // any beat is a good beat
-      if (ret > 0) {
-        trigerringBeat = true;
-        tickBeat = tick;
-      }
-
-      // check which turns off
-      // FIXME: using only current sampling rate for 1ms gate
-      if (trigerringBeat and (tick - tickBeat) / sampleRate >= TRIGGER_LENGTH) {
-        trigerringBeat = false;
-      }
-
-      // setting output
-      buffOut[i] = trigerringBeat ? float_to_fix(1.0) : float_to_fix(0.0);
+      // setting output, any beat is a good beat
+      buffOut[i] = float_to_fix(triggerVal(OUT_BEAT, ret > 0, tick));
 
       tick++;
     }
@@ -234,10 +257,10 @@ private:
   double timeFract = 0.0;
   // total frame count
   unsigned long int tick = 0;
-  // triggers for different beats
-  bool trigerringBeat = false;
+  // outputs are triggers
+  bool triggerringOut[NB_OUTS];
   // frame count for last trigger
-  unsigned long int tickBeat = 0;
+  unsigned long int tickOut[NB_OUTS];
 
 
   // parameters
