@@ -9,17 +9,19 @@ START_NAMESPACE_DISTRHO
 
 // more explicit outputs
 enum ClockOutputs {
-                   OUT_BEAT,
-                   OUT_FIRST_BEAT,
-                   OUT_FIRST_GROUP,
-                   OUT_SECOND_GROUP,
-                   OUT_TICKS,
+                   OUT_BEAT, // beat also in transport
+                   OUT_FIRST_BEAT, // bar in transport
+                   OUT_FIRST_GROUP, // note in transport (see kNoteBeatRatio)
+                   OUT_SECOND_GROUP, // same as OUT_FIRST_GROUP in transport
+                   OUT_TICKS, // tick also in transport
                    NB_OUTS
 };
 
 // Wrapper for Clock.
 // outputs 1ms triggers
 // TODO: MIDI input to sync directly with it without relying to host?
+// NOTE: in autotomous follow transport it will only pause at the same time of transport (albeit at risk of loosing sync upon pause/play with current implementation) and reset when we are back to 0 (if supported by plugin type and host). Jumping forward or backward will otherwise let the clock run.
+// NOTE: in transport only note to beat ratio parameter is used, bypass botania DSP.
 // NOTE: host time pos not supported in LADSPA/DSSI versions
 class Clock : public ExtendedPlugin {
 public:
@@ -60,18 +62,18 @@ protected:
             return;
           case OUT_FIRST_BEAT:
             port.hints   = kAudioPortIsCV;
-            port.name    = "Fist beat";
-            port.symbol  = "fist_beat";
+            port.name    = "First beat or bar";
+            port.symbol  = "1stBeat_bar";
             return;
           case OUT_FIRST_GROUP:
             port.hints   = kAudioPortIsCV;
-            port.name    = "First group";
-            port.symbol  = "first_group";
+            port.name    = "First group or note";
+            port.symbol  = "1stGroup_note";
             return;
           case OUT_SECOND_GROUP:
             port.hints   = kAudioPortIsCV;
-            port.name    = "Second group";
-            port.symbol  = "second_group";
+            port.name    = "Second group or note";
+            port.symbol  = "2ndGroup_note";
             return;
           case OUT_TICKS:
             port.hints   = kAudioPortIsCV;
@@ -88,6 +90,28 @@ protected:
   void initParameter (uint32_t index, Parameter& parameter) override {
 
     switch (index) {
+    case kSource:
+      parameter.hints = kParameterIsInteger;
+      parameter.name = "Source";
+      parameter.shortName = "source";
+      parameter.symbol = "source";
+      parameter.enumValues.count = 3;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "Autonomous";
+        values[0].value = 0;
+        values[1].label = "Autonomous, follow transport";
+        values[1].value = 1;
+        values[2].label = "Transport";
+        values[2].value = 2;
+      }
+      // select default idx
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 2.0f;
+      break;
     case kBPM:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "BPM";
@@ -142,6 +166,19 @@ protected:
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
       break;
+    case kNoteBeatRatio:
+      // used to select the duration of a "note" by taking the beat as reference. Sligtly cumbersome way to enable any combination without knowledge of time signature.
+      // with a x/4 time signature, 0.25 will be 16th note, 2.0 hale a note, 1.3333 a third of a note ((1/3) / (1/4)). 
+      // TODO: use instead (or also) time signature and pre-defined choice of notes?
+      parameter.hints = kParameterIsAutomatable;
+      parameter.name = "Note to beat ratio";
+      parameter.shortName = "noteBeat";
+      parameter.symbol = "rato";
+      // arbitrary range
+      parameter.ranges.def = 0.25f;
+      parameter.ranges.min = 1.0f/256;
+      parameter.ranges.max = 2.0f;
+      break;
 
     default:
       break;
@@ -154,6 +191,8 @@ protected:
   float getParameterValue(uint32_t index) const override {
     switch (index) {
 
+    case kSource:
+      return source;
     case kBPM:
       return BPM;
     case kTicks:
@@ -166,6 +205,8 @@ protected:
       return groupRatio;
     case kOrderMix:
       return orderMix;
+    case kNoteBeatRatio:
+      return noteBeatRatio;
 
     default:
       return 0.0;
@@ -175,6 +216,9 @@ protected:
   void setParameterValue(uint32_t index, float value) override {
     // FIXME: check up to which point function is repeatedly called from host even when value does not change
     switch (index) {
+    case kSource:
+      source = value;
+      break;
     case kBPM:
       BPM = value;
       utils_Clock_setBPM(context_processor, float_to_fix(BPM));
@@ -198,6 +242,9 @@ protected:
     case kOrderMix:
       orderMix = value;
       utils_Clock_setOrderMix(context_processor, orderMix);
+      break;
+    case kNoteBeatRatio:
+      noteBeatRatio = value;
       break;
 
     default:
@@ -234,17 +281,23 @@ protected:
     float *const out_second_group = outputs[OUT_SECOND_GROUP];
     float *const out_ticks = outputs[OUT_TICKS];
 
+    const TimePosition& timePos(getTimePosition());
+
     for (uint32_t i = 0; i < frames; i++) {
-      // compute current clock
+
+      // compute current clock, depending if we follow or not transport
       // TODO: use more precise computation by keeping count of frame and changes in sample rate
-      timeFract += 1./ getSampleRate();
-      while (timeFract >= 1.0) {
-        timeFract -= 1;
-        timeS +=  1;
+      // FIXME: loose sync upon start/stop in follow transport, probably because we cannot update this value per frame
+      if (source == 0 or (source == 1 and timePos.playing)) {
+        timeFract += 1./ getSampleRate();
+        while (timeFract >= 1.0) {
+          timeFract -= 1;
+          timeS +=  1;
+        }
+        utils_Clock_setTime(context_processor, timeS, float_to_fix(timeFract));
       }
 
       // retrive current beat
-      utils_Clock_setTime(context_processor, timeS, float_to_fix(timeFract));
       int ret = utils_Clock_process(context_processor);
 
 
@@ -287,14 +340,15 @@ private:
   // frame count for last trigger
   unsigned long int tickOut[NB_OUTS];
 
-
   // parameters
+  int source;
   float BPM;
   float swing;
   int orderMix;
   int groupSize;
   float groupRatio;
   int ticks;
+  float noteBeatRatio;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Clock);
 };

@@ -15,13 +15,15 @@
 #define DISTRHO_PLUGIN_WANT_TIMEPOS 1
 
 enum Parameters {
+    kSource,
     kBPM,
     kSwing,
     kOrderMix,
     kGroupSize,
     kGroupRatio,
     kTicks,
-    
+    kNoteBeatRatio,
+
     kParameterCount
 };
 
