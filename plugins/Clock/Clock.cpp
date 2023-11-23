@@ -5,7 +5,11 @@
 
 START_NAMESPACE_DISTRHO
 
+// in seconds, how long for each trigger
+#define TRIGGER_LENGTH 0.001
+
 // Wrapper for Clock.
+// outputs 1ms triggers
 class Clock : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
@@ -186,11 +190,55 @@ protected:
   }
 
   void process(uint32_t chunkSize, uint32_t frame) {
-    // TODO
+    double sampleRate = getSampleRate();
+    for (uint32_t i = 0; i < chunkSize; i++) {
+      // TODO: use more precise computation by keeping count of frame and changes in sample rate
+      timeFract += 1./ sampleRate;
+      while (timeFract >= 1.0) {
+        timeFract -= 1;
+        timeS +=  1;
+      }
+      utils_Clock_setTime(context_processor, timeS, float_to_fix(timeFract));
+      int ret = utils_Clock_process(context_processor);
+
+      // any beat is a good beat
+      if (ret > 0) {
+        trigerringBeat = true;
+        tickBeat = tick;
+      }
+
+      // check which turns off
+      // FIXME: using only current sampling rate for 1ms gate
+      if (trigerringBeat and (tick - tickBeat) / sampleRate >= TRIGGER_LENGTH) {
+        trigerringBeat = false;
+      }
+
+      // setting output
+      buffOut[i] = trigerringBeat ? float_to_fix(1.0) : float_to_fix(0.0);
+
+      tick++;
+    }
+
+    //float time = timeS + timeFract;
+
+    // get time position
+    //const TimePosition& timePos(getTimePosition());
+    //d_stdout("frame: %d, time: %f, timePos.frame: %d, valid: %d, playing: %d, BPM: %f", frame, time, timePos.frame,  timePos.bbt.valid, timePos.playing, timePos.bbt.beatsPerMinute);
   }
 
 private:
   utils_Clock_process_type context_processor;
+
+  // for computing time based on frame count
+  int timeS = 0;
+  double timeFract = 0.0;
+  // total frame count
+  unsigned long int tick = 0;
+  // triggers for different beats
+  bool trigerringBeat = false;
+  // frame count for last trigger
+  unsigned long int tickBeat = 0;
+
 
   // parameters
   float BPM;

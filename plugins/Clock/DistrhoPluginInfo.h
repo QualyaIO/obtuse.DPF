@@ -6,12 +6,13 @@
 #define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/clock"
 #define DISTRHO_PLUGIN_CLAP_ID "botania.clock"
 
-// Note: CV input
 #define DISTRHO_PLUGIN_NUM_INPUTS   0
+// Note: all CV outputs
 #define DISTRHO_PLUGIN_NUM_OUTPUTS  5
 #define DISTRHO_PLUGIN_WANT_MIDI_INPUT 1
 #define DISTRHO_PLUGIN_WANT_MIDI_OUTPUT 0
 #define DISTRHO_PLUGIN_IS_RT_SAFE   1
+#define DISTRHO_PLUGIN_WANT_TIMEPOS 1
 
 enum Parameters {
     kBPM,
