@@ -19,6 +19,8 @@ enum ClockOutputs {
 
 // Wrapper for Clock.
 // outputs 1ms triggers
+// TODO: MIDI input to sync directly with it without relying to host?
+// NOTE: host time pos not supported in LADSPA/DSSI versions
 class Clock : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
@@ -224,20 +226,43 @@ protected:
     return triggerringOut[outputNum] ? 1.0 : 0.0;
   }
 
-  void process(uint32_t chunkSize, uint32_t) {
-    double sampleRate = getSampleRate();
-    for (uint32_t i = 0; i < chunkSize; i++) {
+  // we take care ourselves of the main loop (we don't have MIDI)
+  void run(const float**, float** outputs, uint32_t frames) override {
+    float *const out_beat = outputs[OUT_BEAT];
+    float *const out_first_beat = outputs[OUT_FIRST_BEAT];
+    float *const out_first_group = outputs[OUT_FIRST_GROUP];
+    float *const out_second_group = outputs[OUT_SECOND_GROUP];
+    float *const out_ticks = outputs[OUT_TICKS];
+
+    for (uint32_t i = 0; i < frames; i++) {
+      // compute current clock
       // TODO: use more precise computation by keeping count of frame and changes in sample rate
-      timeFract += 1./ sampleRate;
+      timeFract += 1./ getSampleRate();
       while (timeFract >= 1.0) {
         timeFract -= 1;
         timeS +=  1;
       }
+
+      // retrive current beat
       utils_Clock_setTime(context_processor, timeS, float_to_fix(timeFract));
       int ret = utils_Clock_process(context_processor);
 
+
+      // retrieve ticks first, only interested if we have at least one, we might just loose some trigger at some point if there is too much delay
+      // NOTE: gate 1ms will quickly be too long there is too many ticks or BPM
+      int newTicks = utils_Clock_getNbNewTicks(context_processor);
+
+
       // setting output, any beat is a good beat
-      buffOut[i] = float_to_fix(triggerVal(OUT_BEAT, ret > 0, tick));
+      out_beat[i] = triggerVal(OUT_BEAT, ret > 0, tick);
+      // only first beat of group
+      out_first_beat[i] = triggerVal(OUT_FIRST_BEAT, ret == 1, tick);
+      // beats on first group
+      out_first_group[i] = triggerVal(OUT_FIRST_GROUP, ret == 1 || ret == 2, tick);
+      // beats on second group
+      out_second_group[i] = triggerVal(OUT_SECOND_GROUP, ret == 3, tick);
+      // ticks from clock
+      out_ticks[i] = triggerVal(OUT_TICKS, newTicks > 0, tick);
 
       tick++;
     }
@@ -255,7 +280,7 @@ private:
   // for computing time based on frame count
   int timeS = 0;
   double timeFract = 0.0;
-  // total frame count
+  // total frame count (surely poorly named)
   unsigned long int tick = 0;
   // outputs are triggers
   bool triggerringOut[NB_OUTS];
