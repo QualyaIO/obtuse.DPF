@@ -170,6 +170,7 @@ protected:
     case kNoteBarRatio:
       // used to select the duration of a "note" by taking the bar (mesure) as reference. Sligtly cumbersome way to enable any combination without knowledge of time signature.
       // with a 4/4 time signature, 0.25 will be a quarter note, 1 a full note, 0.3333 a third of a note. 
+      // NOTE: ratio which are not 1/integer will create intervals not equidistant (not a bug, a feature -- otherwise use replace with an integer param to be used as the divider)
       // TODO: use instead (or also) time signature and pre-defined choice of notes?
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Note to bar ratio";
@@ -363,7 +364,7 @@ protected:
         int frameBar = timePos.bbt.bar;
 
         // dealing with notes
-        int notesPerBar = 1./noteBarRatio;
+        double notesPerBar = 1./noteBarRatio;
         // how many ticks in total in bar and in in current bar
         double ticksPerBar = timePos.bbt.beatsPerBar * timePos.bbt.ticksPerBeat;
         double ticksInBar = (frameBeat - 1) * timePos.bbt.ticksPerBeat + framePerfectTick;
