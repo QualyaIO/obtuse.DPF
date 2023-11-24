@@ -339,25 +339,38 @@ protected:
         double secondsPerBeat = 60.0 / timePos.bbt.beatsPerMinute;
         double framesPerBeat  =  getSampleRate() * secondsPerBeat;
         double ticksPerFrame = 0.0;
+        double framePerfectBeat = timePos.bbt.beat;
         if (timePos.bbt.ticksPerBeat > 0.0) {
           ticksPerFrame = timePos.bbt.ticksPerBeat / framesPerBeat;
+          framePerfectBeat = timePos.bbt.beat + timePos.bbt.tick / timePos.bbt.ticksPerBeat;
         }
         double framePerfectTick = timePos.bbt.tick;
+        double framePerfectBar = timePos.bbt.bar;
+        if (timePos.bbt.beatsPerBar > 0) {
+          framePerfectBar = timePos.bbt.bar + framePerfectBeat  / timePos.bbt.beatsPerBar;
+        }
 
         if (timePos.playing) {
-          d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, BPM: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beatsPerMinute);
+          d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, beat: %d,  BPM: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beat, timePos.bbt.beatsPerMinute);
           d_stdout("secondsPerBeat: %f, framesPerBeat: %f, ticksPerBeat: %f, ticksPerFrame: %f", secondsPerBeat, framesPerBeat, timePos.bbt.ticksPerBeat, ticksPerFrame);
         }
 
         for (uint32_t i = 0; i < frames; i++) {
-          // accumulating tick for each frame
           if (timePos.playing) {
+            // accumulating tick for each frame
             framePerfectTick += ticksPerFrame; 
             // clamp to max
-            if (framePerfectTick > timePos.bbt.ticksPerBeat) {
-              framePerfectTick = timePos.bbt.ticksPerBeat;
+            while (framePerfectTick > timePos.bbt.ticksPerBeat) {
+              framePerfectTick = framePerfectTick - timePos.bbt.ticksPerBeat;
             }
-            d_stdout("i: %d, framePerfectTick: %f", i, framePerfectTick);
+            // now beats
+            // FIXME: due to rounding errors there might be few frames difference between tick, beats and bar triggers
+            framePerfectBeat += 1.0/framesPerBeat;
+            // here 1-index
+            while (framePerfectBeat >= timePos.bbt.beatsPerBar + 1) {
+              framePerfectBeat = framePerfectBeat - timePos.bbt.beatsPerBar;
+            }
+            d_stdout("i: %d, framePerfectTick: %f, framePerfectBeat: %f", i, framePerfectTick, framePerfectBeat);
           }
           tick++;
         }
