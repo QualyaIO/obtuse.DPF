@@ -71,7 +71,7 @@ protected:
 
     switch (index) {
     case kChannelInput:
-      parameter.hints = kParameterIsInteger;
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel";
       parameter.shortName = "in chan";
       parameter.symbol = "channel";
@@ -122,7 +122,7 @@ protected:
       parameter.ranges.max = 16.0f;
       break;
     case kChannelOutput:
-      parameter.hints = kParameterIsInteger;
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Output MIDI channel";
       parameter.shortName = "out chan";
       parameter.symbol = "channel";

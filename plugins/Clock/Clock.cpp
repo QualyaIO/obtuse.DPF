@@ -92,7 +92,7 @@ protected:
 
     switch (index) {
     case kSource:
-      parameter.hints = kParameterIsInteger;
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Source";
       parameter.shortName = "source";
       parameter.symbol = "source";

@@ -6,6 +6,7 @@ START_NAMESPACE_DISTRHO
 
 // Wrapper for FM synth
 // TODO: available options such as voice re-use for same note
+// NOTE: parameters related to waveform are CPU intensive
 class SynthFM : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
@@ -50,7 +51,7 @@ protected:
 
     switch (index) {
     case kChannelInput:
-      parameter.hints = kParameterIsInteger;
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel";
       parameter.shortName = "in chan";
       parameter.symbol = "channel";
@@ -146,7 +147,8 @@ protected:
       parameter.ranges.max = maxRatio;
       break;
     case kModulatorWavetable:
-      // FIXME: not automatable due to heavy computation at the moment upon change
+      // NOTE: marked automatable to be exposed in DAW, but CPU intensive to change
+      parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator wavetable";
       parameter.shortName = "Mod wavetbl";
       parameter.symbol = "index";
@@ -155,6 +157,8 @@ protected:
       parameter.ranges.max = maxMorph;
       break;
     case kModulatorWavetablePhase:
+      // NOTE: marked automatable to be exposed in DAW, but CPU intensive to change
+      parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator wavetable phase";
       parameter.shortName = "Mod wavetbl phase";
       parameter.symbol = "phase";
@@ -254,7 +258,8 @@ protected:
       parameter.ranges.max = maxRatio;
       break;
     case kCarrierWavetable:
-      // FIXME: not automatable due to heavy computation at the moment upon change
+      // NOTE: marked automatable to be exposed in DAW, but CPU intensive to change
+      parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier wavetable";
       parameter.shortName = "Car wavetbl";
       parameter.symbol = "index";
@@ -263,6 +268,8 @@ protected:
       parameter.ranges.max = maxMorph;
       break;
     case kCarrierWavetablePhase:
+      // NOTE: marked automatable to be exposed in DAW, but CPU intensive to change
+      parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator wavetable phase";
       parameter.shortName = "Car wavetbl phase";
       parameter.symbol = "phase";
