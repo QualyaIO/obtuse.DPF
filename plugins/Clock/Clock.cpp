@@ -308,13 +308,12 @@ protected:
           utils_Clock_setTime(context_processor, timeS, float_to_fix(timeFract));
         }
         
-        // retrive current beat
-        int ret = utils_Clock_process(context_processor);
-        
-        
-        // retrieve ticks first, only interested if we have at least one, we might just loose some trigger at some point if there is too much delay
+        // retrieve ticks first, only interested if we have at least one, we might just loose some trigger at some point if there is too much delay (e.g. buffer is too long and we skipped beats, check audioscene MIDI player implementation to circumvent that)
         // NOTE: gate 1ms will quickly be too long there is too many ticks or BPM
         int newTicks = utils_Clock_getNbNewTicks(context_processor);
+
+        // retrive current beat
+        int ret = utils_Clock_process(context_processor);
         
         // setting output, any beat is a good beat
         out_beat[i] = triggerVal(OUT_BEAT, ret > 0, tick);
@@ -332,15 +331,48 @@ protected:
     }
     // transport mode
     else {
-      for (uint32_t i = 0; i < frames; i++) {
-        // TODO
-        tick++;
+
+      // only work if we can et info from host
+      if (timePos.bbt.valid) {
+
+        // compute step tick for each frame
+        double secondsPerBeat = 60.0 / timePos.bbt.beatsPerMinute;
+        double framesPerBeat  =  getSampleRate() * secondsPerBeat;
+        double ticksPerFrame = 0.0;
+        if (timePos.bbt.ticksPerBeat > 0.0) {
+          ticksPerFrame = timePos.bbt.ticksPerBeat / framesPerBeat;
+        }
+        double framePerfectTick = timePos.bbt.tick;
+
+        if (timePos.playing) {
+          d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, BPM: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beatsPerMinute);
+          d_stdout("secondsPerBeat: %f, framesPerBeat: %f, ticksPerBeat: %f, ticksPerFrame: %f", secondsPerBeat, framesPerBeat, timePos.bbt.ticksPerBeat, ticksPerFrame);
+        }
+
+        for (uint32_t i = 0; i < frames; i++) {
+          // accumulating tick for each frame
+          if (timePos.playing) {
+            framePerfectTick += ticksPerFrame; 
+            // clamp to max
+            if (framePerfectTick > timePos.bbt.ticksPerBeat) {
+              framePerfectTick = timePos.bbt.ticksPerBeat;
+            }
+            d_stdout("i: %d, framePerfectTick: %f", i, framePerfectTick);
+          }
+          tick++;
+        }
+      }
+      // no support for transport, nullify output
+      else {
+        for (uint32_t i = 0; i < frames; i++) {
+          out_beat[i] = 0.0;
+          out_first_beat[i] = 0.0;
+          out_first_group[i] = 0.0;
+          out_second_group[i] = 0.0;
+          out_ticks[i] = 0.0;
+        }
       }
     }
-
-    //if (timePos.playing) {
-    //  d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, BPM: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beatsPerMinute);
-    //}
   }
 
 private:
