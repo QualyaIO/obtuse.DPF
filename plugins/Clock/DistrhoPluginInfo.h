@@ -22,7 +22,7 @@ enum Parameters {
     kGroupSize,
     kGroupRatio,
     kTicks,
-    kNoteBeatRatio,
+    kNoteBarRatio,
 
     kParameterCount
 };

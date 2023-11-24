@@ -11,7 +11,7 @@ START_NAMESPACE_DISTRHO
 enum ClockOutputs {
                    OUT_BEAT, // beat also in transport
                    OUT_FIRST_BEAT, // bar in transport
-                   OUT_FIRST_GROUP, // note in transport (see kNoteBeatRatio)
+                   OUT_FIRST_GROUP, // note in transport (see kNoteBarRatio)
                    OUT_SECOND_GROUP, // same as OUT_FIRST_GROUP in transport
                    OUT_TICKS, // tick also in transport
                    NB_OUTS
@@ -167,18 +167,18 @@ protected:
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
       break;
-    case kNoteBeatRatio:
-      // used to select the duration of a "note" by taking the beat as reference. Sligtly cumbersome way to enable any combination without knowledge of time signature.
-      // with a x/4 time signature, 0.25 will be 16th note, 2.0 hale a note, 1.3333 a third of a note ((1/3) / (1/4)). 
+    case kNoteBarRatio:
+      // used to select the duration of a "note" by taking the bar (mesure) as reference. Sligtly cumbersome way to enable any combination without knowledge of time signature.
+      // with a 4/4 time signature, 0.25 will be a quarter note, 1 a full note, 0.3333 a third of a note. 
       // TODO: use instead (or also) time signature and pre-defined choice of notes?
       parameter.hints = kParameterIsAutomatable;
-      parameter.name = "Note to beat ratio";
-      parameter.shortName = "noteBeat";
+      parameter.name = "Note to bar ratio";
+      parameter.shortName = "noteBar";
       parameter.symbol = "rato";
-      // arbitrary range
+      // arbitrary range, but limit to 1 max to avoid sync issue when moving around within transport
       parameter.ranges.def = 0.25f;
       parameter.ranges.min = 1.0f/256;
-      parameter.ranges.max = 2.0f;
+      parameter.ranges.max = 1.0f;
       break;
 
     default:
@@ -206,8 +206,8 @@ protected:
       return groupRatio;
     case kOrderMix:
       return orderMix;
-    case kNoteBeatRatio:
-      return noteBeatRatio;
+    case kNoteBarRatio:
+      return noteBarRatio;
 
     default:
       return 0.0;
@@ -226,6 +226,7 @@ protected:
           transportLastTick = timePos.bbt.tick;
           transportLastBeat = timePos.bbt.beat;
           transportLastBar = timePos.bbt.bar;
+          transportLastNote = 0;
         }
       }
       break;
@@ -253,8 +254,8 @@ protected:
       orderMix = value;
       utils_Clock_setOrderMix(context_processor, orderMix);
       break;
-    case kNoteBeatRatio:
-      noteBeatRatio = value;
+    case kNoteBarRatio:
+      noteBarRatio = value;
       break;
 
     default:
@@ -346,11 +347,10 @@ protected:
       bool detectTick = false;
       bool detectBeat = false;
       bool detectBar = false;
+      bool detectNote = false;
 
       // only work if we can et info from host
       if (timePos.bbt.valid) {
-
-
         // compute step tick for each frame
         double secondsPerBeat = 60.0 / timePos.bbt.beatsPerMinute;
         double framesPerBeat  =  getSampleRate() * secondsPerBeat;
@@ -362,10 +362,25 @@ protected:
         int frameBeat = timePos.bbt.beat;
         int frameBar = timePos.bbt.bar;
 
+        // dealing with notes
+        int notesPerBar = 1./noteBarRatio;
+        // how many ticks in total in bar and in in current bar
+        double ticksPerBar = timePos.bbt.beatsPerBar * timePos.bbt.ticksPerBeat;
+        double ticksInBar = (frameBeat - 1) * timePos.bbt.ticksPerBeat + framePerfectTick;
+        double framePerfectNote = 0.0;
+        if (ticksInBar > 0.0) {
+          framePerfectNote = (ticksInBar / ticksPerBar) * notesPerBar;
+        }
+        // step for note
+        double notesPerFrame = 0.0;
+        double framesPerBar = framesPerBeat * timePos.bbt.beatsPerBar;
+        if (framesPerBar > 0) {
+           notesPerFrame = notesPerBar / framesPerBar;
+        }
 
         if (timePos.playing) {
-          d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, beat: %d,  bar: %d, BPM: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beat, timePos.bbt.bar, timePos.bbt.beatsPerMinute);
-          d_stdout("secondsPerBeat: %f, framesPerBeat: %f, ticksPerBeat: %f, ticksPerFrame: %f", secondsPerBeat, framesPerBeat, timePos.bbt.ticksPerBeat, ticksPerFrame);
+          d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, beat: %d,  bar: %d, BPM: %f, notes: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beat, timePos.bbt.bar, timePos.bbt.beatsPerMinute, framePerfectNote);
+          //d_stdout("secondsPerBeat: %f, framesPerBeat: %f, ticksPerBeat: %f, ticksPerFrame: %f", secondsPerBeat, framesPerBeat, timePos.bbt.ticksPerBeat, ticksPerFrame);
 
 
           // detect reset
@@ -377,7 +392,11 @@ protected:
             d_stdout("beat reset %d", frameBeat);
             detectBeat = true;
             transportLastBeat = frameBeat;
+            d_stdout("note reset");
+            detectNote = true;
+            transportLastNote = framePerfectNote;
             transportReset = true;
+
           }
           else if (timePos.frame > 0) {
             transportReset = false;
@@ -403,13 +422,20 @@ protected:
               detectTick = true;
             }
           }
+          if ((int) framePerfectNote != transportLastNote) {
+            transportLastNote = framePerfectNote;
+            d_stdout("note rescue %d", transportLastNote);
+            detectNote = true;
+          }
 
         }
 
         for (uint32_t i = 0; i < frames; i++) {
           if (timePos.playing) {
             // accumulating tick for each frame
-            framePerfectTick += ticksPerFrame; 
+            framePerfectTick += ticksPerFrame;  
+            framePerfectNote+= notesPerFrame; 
+            //d_stdout("fpn %f", framePerfectNote);
             // detect new ticks
             if ((int) framePerfectTick > transportLastTick) {
               transportLastTick = framePerfectTick;
@@ -417,13 +443,15 @@ protected:
               detectTick = true;
             }
             // detect beats
-            while (framePerfectTick >= timePos.bbt.ticksPerBeat) {
-              framePerfectTick = framePerfectTick - timePos.bbt.ticksPerBeat;
-              frameBeat += 1;
-              transportLastBeat = frameBeat;
-              transportLastTick = framePerfectTick;
-              d_stdout("beat %d", frameBeat);
-              detectBeat = true;
+            if (timePos.bbt.ticksPerBeat > 0) {
+              while (framePerfectTick >= timePos.bbt.ticksPerBeat) {
+                framePerfectTick -= timePos.bbt.ticksPerBeat;
+                frameBeat += 1;
+                transportLastBeat = frameBeat;
+                transportLastTick = framePerfectTick;
+                d_stdout("beat %d", frameBeat);
+                detectBeat = true;
+              }
             }
             // now bars
             while (frameBeat >= timePos.bbt.beatsPerBar + 1) {
@@ -433,22 +461,43 @@ protected:
               transportLastBar = frameBar;
               d_stdout("bar %d", frameBar);
               detectBar = true;
+              // new bar, reset note, so we sync here
+              d_stdout("note from bar %d", transportLastNote);
+              detectNote = true;
+              framePerfectNote = 0;
+              transportLastNote = framePerfectNote;
             }
+            // now notes
+            if ((int) framePerfectNote > transportLastNote) {
+              transportLastNote = framePerfectNote;
+              d_stdout("note %d", transportLastNote);
+              detectNote = true;
+            }
+            if (notesPerBar > 0) {
+              while (framePerfectNote >= notesPerBar) {
+                framePerfectNote -= notesPerBar;
+                transportLastNote = framePerfectNote;
+              }
+            }
+            
+            
             //d_stdout("i: %d, framePerfectTick: %f", i, framePerfectTick);
           }
           // beat as well
           out_beat[i] = triggerVal(OUT_BEAT, detectBeat, tick);
           // here bar
           out_first_beat[i] = triggerVal(OUT_FIRST_BEAT, detectBar, tick);
-          // TODO, note
-          out_first_group[i] = 0.0f;
-          out_second_group[i] = 0.0f;
+          // note
+          out_first_group[i] = triggerVal(OUT_FIRST_GROUP, detectNote, tick);
+          // same output, but duplicate to sync trigger
+          out_second_group[i] = triggerVal(OUT_SECOND_GROUP, detectNote, tick);
           // ticks
           out_ticks[i] = triggerVal(OUT_TICKS, detectTick, tick);
           // reset flags and advance for next
           detectBeat = false;
           detectBar = false;
           detectTick = false;
+          detectNote = false;
           tick++;
         }
       }
@@ -483,6 +532,7 @@ private:
   int transportLastTick = 0;
   int transportLastBeat = 0;
   int transportLastBar = 0;
+  int transportLastNote = 0;
 
   // parameters
   int source;
@@ -492,7 +542,7 @@ private:
   int groupSize;
   float groupRatio;
   int ticks;
-  float noteBeatRatio;
+  float noteBarRatio;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Clock);
 };
