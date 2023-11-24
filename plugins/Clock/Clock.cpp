@@ -21,6 +21,7 @@ enum ClockOutputs {
 // outputs 1ms triggers
 // TODO: MIDI input to sync directly with it without relying to host?
 // NOTE: in autotomous follow transport it will only pause at the same time of transport (albeit at risk of loosing sync upon pause/play with current implementation) and reset when we are back to 0 (if supported by plugin type and host). Jumping forward or backward will otherwise let the clock run.
+// NOTE: in transport, will retrigger upon change in timeline
 // NOTE: in transport only note to beat ratio parameter is used, bypass botania DSP.
 // NOTE: host time pos not supported in LADSPA/DSSI versions
 class Clock : public ExtendedPlugin {
@@ -218,6 +219,15 @@ protected:
     switch (index) {
     case kSource:
       source = value;
+      // will trigger upon next tick/beat/bar when switched to autonomous
+      if (source == 2) {
+        const TimePosition& timePos(getTimePosition());
+        if (timePos.bbt.valid) {
+          transportLastTick = timePos.bbt.tick;
+          transportLastBeat = timePos.bbt.beat;
+          transportLastBar = timePos.bbt.bar;
+        }
+      }
       break;
     case kBPM:
       BPM = value;
@@ -332,46 +342,113 @@ protected:
     // transport mode
     else {
 
+      // do we get something new here?
+      bool detectTick = false;
+      bool detectBeat = false;
+      bool detectBar = false;
+
       // only work if we can et info from host
       if (timePos.bbt.valid) {
+
 
         // compute step tick for each frame
         double secondsPerBeat = 60.0 / timePos.bbt.beatsPerMinute;
         double framesPerBeat  =  getSampleRate() * secondsPerBeat;
         double ticksPerFrame = 0.0;
-        double framePerfectBeat = timePos.bbt.beat;
         if (timePos.bbt.ticksPerBeat > 0.0) {
           ticksPerFrame = timePos.bbt.ticksPerBeat / framesPerBeat;
-          framePerfectBeat = timePos.bbt.beat + timePos.bbt.tick / timePos.bbt.ticksPerBeat;
         }
         double framePerfectTick = timePos.bbt.tick;
-        double framePerfectBar = timePos.bbt.bar;
-        if (timePos.bbt.beatsPerBar > 0) {
-          framePerfectBar = timePos.bbt.bar + framePerfectBeat  / timePos.bbt.beatsPerBar;
-        }
+        int frameBeat = timePos.bbt.beat;
+        int frameBar = timePos.bbt.bar;
+
 
         if (timePos.playing) {
-          d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, beat: %d,  BPM: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beat, timePos.bbt.beatsPerMinute);
+          d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, beat: %d,  bar: %d, BPM: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beat, timePos.bbt.bar, timePos.bbt.beatsPerMinute);
           d_stdout("secondsPerBeat: %f, framesPerBeat: %f, ticksPerBeat: %f, ticksPerFrame: %f", secondsPerBeat, framesPerBeat, timePos.bbt.ticksPerBeat, ticksPerFrame);
+
+
+          // detect reset
+          // TODO: check that we go indeed back to 0 ticks at start of buffer for all host
+          if (!transportReset and timePos.frame == 0) {
+            d_stdout("bar reset %d", frameBar);
+            detectBar = true;
+            transportLastBar = frameBar;
+            d_stdout("beat reset %d", frameBeat);
+            detectBeat = true;
+            transportLastBeat = frameBeat;
+            transportReset = true;
+          }
+          else if (timePos.frame > 0) {
+            transportReset = false;
+          }
+
+          // detect change in position, or we missed bar/beat/tick
+          // NOTE: side effect is that we will trigger upon repositioning
+          // NOTE: detect separately each to enable "rescue" mode, it could be logical to retrig beat upon bar change if we reposition
+          if (frameBar != transportLastBar) {
+            d_stdout("bar rescue %d", frameBar);
+            detectBar = true;
+            transportLastBar = frameBar;
+          }
+          if (frameBeat != transportLastBeat) {
+            d_stdout("beat rescue %d", frameBeat);
+            detectBeat = true;
+            transportLastBeat = frameBeat;
+          }
+          if ((int) framePerfectTick != transportLastTick) {
+            transportLastTick = framePerfectTick;
+            if (transportLastTick > 0) {
+              d_stdout("tick rescue %d", transportLastTick);
+              detectTick = true;
+            }
+          }
+
         }
 
         for (uint32_t i = 0; i < frames; i++) {
           if (timePos.playing) {
             // accumulating tick for each frame
             framePerfectTick += ticksPerFrame; 
-            // clamp to max
-            while (framePerfectTick > timePos.bbt.ticksPerBeat) {
+            // detect new ticks
+            if ((int) framePerfectTick > transportLastTick) {
+              transportLastTick = framePerfectTick;
+              //d_stdout("tick %d", transportLastTick);
+              detectTick = true;
+            }
+            // detect beats
+            while (framePerfectTick >= timePos.bbt.ticksPerBeat) {
               framePerfectTick = framePerfectTick - timePos.bbt.ticksPerBeat;
+              frameBeat += 1;
+              transportLastBeat = frameBeat;
+              transportLastTick = framePerfectTick;
+              d_stdout("beat %d", frameBeat);
+              detectBeat = true;
             }
-            // now beats
-            // FIXME: due to rounding errors there might be few frames difference between tick, beats and bar triggers
-            framePerfectBeat += 1.0/framesPerBeat;
-            // here 1-index
-            while (framePerfectBeat >= timePos.bbt.beatsPerBar + 1) {
-              framePerfectBeat = framePerfectBeat - timePos.bbt.beatsPerBar;
+            // now bars
+            while (frameBeat >= timePos.bbt.beatsPerBar + 1) {
+              frameBeat = frameBeat - timePos.bbt.beatsPerBar;
+              transportLastBeat = frameBeat;
+              frameBar += 1;
+              transportLastBar = frameBar;
+              d_stdout("bar %d", frameBar);
+              detectBar = true;
             }
-            d_stdout("i: %d, framePerfectTick: %f, framePerfectBeat: %f", i, framePerfectTick, framePerfectBeat);
+            //d_stdout("i: %d, framePerfectTick: %f", i, framePerfectTick);
           }
+          // beat as well
+          out_beat[i] = triggerVal(OUT_BEAT, detectBeat, tick);
+          // here bar
+          out_first_beat[i] = triggerVal(OUT_FIRST_BEAT, detectBar, tick);
+          // TODO, note
+          out_first_group[i] = 0.0f;
+          out_second_group[i] = 0.0f;
+          // ticks
+          out_ticks[i] = triggerVal(OUT_TICKS, detectTick, tick);
+          // reset flags and advance for next
+          detectBeat = false;
+          detectBar = false;
+          detectTick = false;
           tick++;
         }
       }
@@ -402,6 +479,10 @@ private:
   unsigned long int tickOut[NB_OUTS];
   // did we reset clock when back to 0 in transport ?
   bool transportReset = false;
+  // check last triggers for transport
+  int transportLastTick = 0;
+  int transportLastBeat = 0;
+  int transportLastBar = 0;
 
   // parameters
   int source;

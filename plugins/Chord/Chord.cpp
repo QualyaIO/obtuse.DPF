@@ -18,6 +18,7 @@ START_NAMESPACE_DISTRHO
 // Note: send chord via MIDI, hence will change behavior of things like arp if used after, compared to plain DSP or VCV (e.g. use of note off will temporarily change number of active notes in arp). Will also note off / note off all 3 notes for each new chord, even if unchanged.
 // Note: changing chord or scale midi channel will note off on pevious chan / note on on current chan pending chord or scale. 
 // Note: changing root note or scale will output scale in MIDI, hence beware of spamming midi if automated
+// TODO: add reset input? (e.g. transport to beginning)
 class Chord : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init

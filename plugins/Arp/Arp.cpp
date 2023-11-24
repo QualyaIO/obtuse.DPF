@@ -13,6 +13,7 @@ START_NAMESPACE_DISTRHO
 // Note: In this version, the duration of the trigger input will be the duration of noteOn / noteOff MIDI events.
 // Note: change of output channel will be effective upon next note played
 // TODO: support MIDI sustain at this level, and/or add an "hold" option?
+// TODO: add reset input? (e.g. transport to beginning)
 class Arp : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
