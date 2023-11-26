@@ -306,6 +306,11 @@ protected:
     float *const out_second_group = outputs[OUT_SECOND_GROUP];
     float *const out_ticks = outputs[OUT_TICKS];
 
+    // HACK to safeguard against host not supporting CV
+    if (out_beat == NULL or out_first_beat == NULL or out_first_group == NULL or out_second_group == NULL or out_ticks == NULL) {
+      return;
+    }
+
     const TimePosition& timePos(getTimePosition());
 
     // autonomous mode, rely on botania

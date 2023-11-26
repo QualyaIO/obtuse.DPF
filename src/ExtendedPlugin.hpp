@@ -175,16 +175,21 @@ protected:
 
       // copy to input buffer
 #if DISTRHO_PLUGIN_NUM_INPUTS > 0
-      for (int i = 0; i < chunkSize; i++) {
-        buffIn[i] = float_to_fix(in[k+i]);
+      // we could have NULL pointer, e.g. if asked for CV but not supported
+      if (in != NULL) {
+	for (uint32_t i = 0; i < chunkSize; i++) {
+	  buffIn[i] = float_to_fix(in[k+i]);
+	}
       }
 #endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
       // let subclass output buffer
       process(chunkSize, k);
       // copy to output buffer
 #if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
-      for (int i = 0; i < chunkSize; i++) {
-        out[k+i] = fix_to_float(buffOut[i]);
+      if (out != NULL) {
+	for (uint32_t i = 0; i < chunkSize; i++) {
+	  out[k+i] = fix_to_float(buffOut[i]);
+	}
       }
 #endif // DISTRHO_PLUGIN_NUM_OUTPUTS > 0
       // advance
@@ -220,16 +225,20 @@ protected:
       uint32_t chunkSize = ((frames - k) >= BUFFER_SIZE )?BUFFER_SIZE:(frames - k);
       // copy to input buffer
 #if DISTRHO_PLUGIN_NUM_INPUTS > 0
-      for (int i = 0; i < chunkSize; i++) {
-        buffIn[i] = float_to_fix(in[k+i]);
+      if (in != NULL) {
+	for (uint32_t i = 0; i < chunkSize; i++) {
+	  buffIn[i] = float_to_fix(in[k+i]);
+	}
       }
 #endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
       // let subclass output buffer
       process(chunkSize, k);
       // copy to output buffer
 #if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
-      for (int i = 0; i < chunkSize; i++) {
-        out[k+i] = fix_to_float(buffOut[i]);
+      if (out != NULL) {
+	for (uint32_t i = 0; i < chunkSize; i++) {
+	  out[k+i] = fix_to_float(buffOut[i]);
+	}
       }
 #endif // DISTRHO_PLUGIN_NUM_OUTPUTS > 0
       // advance
