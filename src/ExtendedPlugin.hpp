@@ -16,7 +16,14 @@ class ExtendedPlugin : public Plugin {
 public:
 
   // will forward to Plugin
-  ExtendedPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount) : Plugin(parameterCount, programCount, stateCount) {}
+  ExtendedPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount) : Plugin(parameterCount, programCount, stateCount) {
+    // init buffer
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+      buffIn[i] = float_to_fix(0.0);
+      buffOut[i] = float_to_fix(0.0);
+    }
+
+  }
 
 protected:
   // to be filled by sub-class
