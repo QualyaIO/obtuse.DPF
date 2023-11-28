@@ -376,10 +376,10 @@ protected:
     case kModulatorMode:
       // 0 is phase above
       if (value > 0.5f) {
-        synthFM_Voice_synthSetModulatorTargetLevel(context_processor, false);
+        synthFM_Voice_synthSetModulatorTargetLevel(context_processor, true);
       }
       else {
-        synthFM_Voice_synthSetModulatorTargetLevel(context_processor, true);
+        synthFM_Voice_synthSetModulatorTargetLevel(context_processor, false);
       }
       modulatorMode = value;
       break;
