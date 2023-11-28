@@ -193,6 +193,8 @@ protected:
 
     case kChannelInput:
       return channelInput;
+    case kChannelOutput:
+      return channelOutput;
     case kMode:
       return mode;
     case kRandNotes:
@@ -210,6 +212,9 @@ protected:
     switch (index) {
     case kChannelInput:
       channelInput = value;
+      break;
+    case kChannelOutput:
+      channelOutput = value;
       break;
     case kMode:
       mode = value;
