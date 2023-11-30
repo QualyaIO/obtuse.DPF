@@ -29,17 +29,11 @@ BUILD_CXX_FLAGS += -I../../botania/src -I../../src
 # --------------------------------------------------------------
 # Enable all possible plugin types
 
-ifeq ($(HAVE_OPENGL),true)
-
 TARGETS += jack
-
 # Note: no dssi because we have MIDI out
-
 TARGETS += lv2_sep
 TARGETS += vst2
 TARGETS += vst3
 TARGETS += clap
-
-endif # HAVE_OPENGL
 
 all: $(TARGETS)
