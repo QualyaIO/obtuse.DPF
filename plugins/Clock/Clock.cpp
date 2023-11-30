@@ -398,20 +398,14 @@ protected:
         }
 
         if (timePos.playing) {
-          d_stdout("frames: %d, timePos.frame: %d, tick: %f, barStartTick: %f, beat: %d,  bar: %d, BPM: %f, notes: %f", frames, timePos.frame, timePos.bbt.tick, timePos.bbt.barStartTick, timePos.bbt.beat, timePos.bbt.bar, timePos.bbt.beatsPerMinute, framePerfectNote);
-          //d_stdout("secondsPerBeat: %f, framesPerBeat: %f, ticksPerBeat: %f, ticksPerFrame: %f", secondsPerBeat, framesPerBeat, timePos.bbt.ticksPerBeat, ticksPerFrame);
-
 
           // detect reset
           // TODO: check that we go indeed back to 0 ticks at start of buffer for all host
           if (!transportReset and timePos.frame == 0) {
-            d_stdout("bar reset %d", frameBar);
             detectBar = true;
             transportLastBar = frameBar;
-            d_stdout("beat reset %d", frameBeat);
             detectBeat = true;
             transportLastBeat = frameBeat;
-            d_stdout("note reset");
             detectNote = true;
             transportLastNote = framePerfectNote;
             transportReset = true;
@@ -425,25 +419,21 @@ protected:
           // NOTE: side effect is that we will trigger upon repositioning
           // NOTE: detect separately each to enable "rescue" mode, it could be logical to retrig beat upon bar change if we reposition
           if (frameBar != transportLastBar) {
-            d_stdout("bar rescue %d", frameBar);
             detectBar = true;
             transportLastBar = frameBar;
           }
           if (frameBeat != transportLastBeat) {
-            d_stdout("beat rescue %d", frameBeat);
             detectBeat = true;
             transportLastBeat = frameBeat;
           }
           if ((int) framePerfectTick != transportLastTick) {
             transportLastTick = framePerfectTick;
             if (transportLastTick > 0) {
-              d_stdout("tick rescue %d", transportLastTick);
               detectTick = true;
             }
           }
           if ((int) framePerfectNote != transportLastNote) {
             transportLastNote = framePerfectNote;
-            d_stdout("note rescue %d", transportLastNote);
             detectNote = true;
           }
 
@@ -454,11 +444,9 @@ protected:
             // accumulating tick for each frame
             framePerfectTick += ticksPerFrame;  
             framePerfectNote+= notesPerFrame; 
-            //d_stdout("fpn %f", framePerfectNote);
             // detect new ticks
             if ((int) framePerfectTick > transportLastTick) {
               transportLastTick = framePerfectTick;
-              //d_stdout("tick %d", transportLastTick);
               detectTick = true;
             }
             // detect beats
@@ -468,7 +456,6 @@ protected:
                 frameBeat += 1;
                 transportLastBeat = frameBeat;
                 transportLastTick = framePerfectTick;
-                d_stdout("beat %d", frameBeat);
                 detectBeat = true;
               }
             }
@@ -478,10 +465,8 @@ protected:
               transportLastBeat = frameBeat;
               frameBar += 1;
               transportLastBar = frameBar;
-              d_stdout("bar %d", frameBar);
               detectBar = true;
               // new bar, reset note, so we sync here
-              d_stdout("note from bar %d", transportLastNote);
               detectNote = true;
               framePerfectNote = 0;
               transportLastNote = framePerfectNote;
@@ -489,7 +474,6 @@ protected:
             // now notes
             if ((int) framePerfectNote > transportLastNote) {
               transportLastNote = framePerfectNote;
-              d_stdout("note %d", transportLastNote);
               detectNote = true;
             }
             if (notesPerBar > 0) {
@@ -498,9 +482,6 @@ protected:
                 transportLastNote = framePerfectNote;
               }
             }
-            
-            
-            //d_stdout("i: %d, framePerfectTick: %f", i, framePerfectTick);
           }
           // beat as well
           out_beat[i] = triggerVal(OUT_BEAT, detectBeat, tick);
