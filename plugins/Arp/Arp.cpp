@@ -10,7 +10,8 @@ START_NAMESPACE_DISTRHO
 #define ARP_NB_MODES 6
 
 // Wrapper for Arp. Up, down, etc. will refer to note order. Duplicated note brings it to newest.
-// Note: In this version, the duration of the trigger input will be the duration of noteOn / noteOff MIDI events.
+// Note: In this version, the duration of the CV trigger input will be the duration of the output noteOn / noteOff MIDI events.
+// Note: trigger can also happen through MIDI if the dedicated channel is set, output noteOn/noteOff event will be synced.
 // Note: change of output channel will be effective upon next note played
 // TODO: support MIDI sustain at this level, and/or add an "hold" option?
 // TODO: add reset input? (e.g. transport to beginning)
@@ -56,7 +57,8 @@ protected:
         switch (index)
           {
           case 0:
-            port.hints   = kAudioPortIsCV;
+            // trigger can happen through MIDI, hence optional
+            port.hints   = kAudioPortIsCV | kCVPortIsOptional;
             port.name    = "Trigger Input";
             port.symbol  = "trigg_in";
             return;
@@ -120,6 +122,59 @@ protected:
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 16.0f;
+      break;
+    case kChannelTriggerInput:
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Input MIDI channel for triggers";
+      parameter.shortName = "trig chan";
+      parameter.symbol = "channel";
+      // using enum to explicit omni. 0 for omni and 16 channels, option to disable.
+      parameter.enumValues.count = 18;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "omni (all)";
+        values[0].value = 0;
+        values[1].label = "1";
+        values[1].value = 1;
+        values[2].label = "2";
+        values[2].value = 2;
+        values[3].label = "3";
+        values[3].value = 3;
+        values[4].label = "4";
+        values[4].value = 4;
+        values[5].label = "5";
+        values[5].value = 5;
+        values[6].label = "6";
+        values[6].value = 6;
+        values[7].label = "7";
+        values[7].value = 7;
+        values[8].label = "8";
+        values[8].value = 8;
+        values[9].label = "9";
+        values[9].value = 9;
+        values[10].label = "10";
+        values[10].value = 10;
+        values[11].label = "11";
+        values[11].value = 11;
+        values[12].label = "12";
+        values[12].value = 12;
+        values[13].label = "13";
+        values[13].value = 13;
+        values[14].label = "14";
+        values[14].value = 14;
+        values[15].label = "15";
+        values[15].value = 15;
+        values[16].label = "16";
+        values[16].value = 16;
+        values[17].label = "disable";
+        values[17].value = 17;
+      }
+      // select default idx
+      parameter.ranges.def = 17.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 17.0f;
       break;
     case kChannelOutput:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
@@ -193,6 +248,8 @@ protected:
 
     case kChannelInput:
       return channelInput;
+    case kChannelTriggerInput:
+      return channelTriggerInput;
     case kChannelOutput:
       return channelOutput;
     case kMode:
@@ -212,6 +269,9 @@ protected:
     switch (index) {
     case kChannelInput:
       channelInput = value;
+      break;
+    case kChannelTriggerInput:
+      channelTriggerInput = value;
       break;
     case kChannelOutput:
       channelOutput = value;
@@ -246,10 +306,14 @@ protected:
       // update arp
       updateNotes();
     }
+    // same for triggering -- only if not triggered
+    if (channelTriggerInput == 0 or channelTriggerInput - 1 == channel) {
+      arpOn(frame);
+    }
   }
 
   // remove note from active list
-  void noteOff(uint8_t note, uint8_t channel, uint32_t) {
+  void noteOff(uint8_t note, uint8_t channel, uint32_t frame) {
     // filter event depending on selected channel
     if (channelInput == 0 or channelInput - 1 == channel) {
       // Do we have the note already?
@@ -260,6 +324,30 @@ protected:
         updateNotes();
       }
     }
+    // turn off current arp, if any
+    if (channelTriggerInput == 0 or channelTriggerInput - 1 == channel) {
+      arpOff(frame);
+    }
+  }
+
+  // draw arp and send noteOn
+  void arpOn(uint32_t frame) {
+    // advance arp
+    lastNote  = utils_Arp_process(context_processor);
+    // new note, change MIDI channel to what is currently selected (1-index for parameter)
+    lastChan = channelOutput - 1;
+    // send MIDI
+    if (lastNote >= 0) {
+      sendNoteOn(lastNote, 127, lastChan, frame);
+    }
+  }
+
+  // turn off last arp note, if any
+  void arpOff(uint32_t frame) {
+    if (lastNote >= 0) {
+      sendNoteOff(lastNote, lastChan, frame);
+      lastNote = -1;
+    }
   }
 
   void process(uint32_t chunkSize, uint32_t frame) {
@@ -267,21 +355,12 @@ protected:
       // threshold 0.1 for trigger, advance note upon trigger
       if (fix_to_float(buffIn[i]) >= 0.1 and !trigerring) {
         trigerring = true;
-        // advance arp
-        lastNote  = utils_Arp_process(context_processor);
-        // new note, change MIDI channel to what is currently selected (1-index for parameter)
-        lastChan = channelOutput - 1;
-        // send MIDI
-        if (lastNote >= 0) {
-          sendNoteOn(lastNote, 127, lastChan, frame+i);
-        }
+        arpOn(frame + i);
       }
       // turn off note
       else if (fix_to_float(buffIn[i]) < 0.1 and trigerring) {
         trigerring = false;
-        if (lastNote >= 0) {
-          sendNoteOff(lastNote, lastChan, frame+i);
-        }
+        arpOff(frame + i);
       }
     }
   }
@@ -297,6 +376,7 @@ private:
 
   // parameters
   int channelInput;
+  int channelTriggerInput;
   int channelOutput;
   float mode;
   float randNotes;
