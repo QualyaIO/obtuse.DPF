@@ -15,6 +15,7 @@ START_NAMESPACE_DISTRHO
 // Note: change of output channel will be effective upon next note played
 // TODO: support MIDI sustain at this level, and/or add an "hold" option?
 // TODO: add reset input? (e.g. transport to beginning)
+// FIXME: ensure that notes when sent at the same frame have deterministic order (e.g. lower to high)?
 class Arp : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
@@ -234,6 +235,15 @@ protected:
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
       break;
+    case kStepPersist:
+      parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
+      parameter.name = "Step persist";
+      parameter.shortName = "stp persist";
+      parameter.symbol = "toggle";
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
+      break;
 
     default:
       break;
@@ -258,6 +268,8 @@ protected:
       return randNotes;
     case kRandomize:
       return randomize;
+    case kStepPersist:
+      return stepPersist;
 
     default:
       return 0.0;
@@ -288,6 +300,9 @@ protected:
       randomize = value;
       utils_Arp_setPRandomize(context_processor, float_to_fix(value));
       break;
+    case kStepPersist:
+      stepPersist = value;
+      utils_Arp_setStepPersist(context_processor, stepPersist);
 
     default:
       break;
@@ -381,6 +396,7 @@ private:
   float mode;
   float randNotes;
   float randomize;
+  int stepPersist;
 
   // re-compute active notes and send to arp
   void updateNotes() {

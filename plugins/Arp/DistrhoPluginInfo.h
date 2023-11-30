@@ -20,6 +20,7 @@ enum Parameters {
     kMode,
     kRandNotes,
     kRandomize,
+    kStepPersist,
 
     kParameterCount
 };
