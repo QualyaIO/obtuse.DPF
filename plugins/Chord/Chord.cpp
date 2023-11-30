@@ -18,6 +18,7 @@ START_NAMESPACE_DISTRHO
 // Note: send chord via MIDI, hence will change behavior of things like arp if used after, compared to plain DSP or VCV (e.g. use of note off will temporarily change number of active notes in arp). Will also note off / note off all 3 notes for each new chord, even if unchanged.
 // Note: changing chord or scale midi channel will note off on pevious chan / note on on current chan pending chord or scale. 
 // Note: changing root note or scale will output scale in MIDI, hence beware of spamming midi if automated
+// Note: in this version chord change can also be triggered through midi, and any noteOn event on the corresponding MIDI channel.
 // TODO: add reset input? (e.g. transport to beginning)
 class Chord : public ExtendedPlugin {
 public:
@@ -61,7 +62,8 @@ protected:
         switch (index)
           {
           case 0:
-            port.hints   = kAudioPortIsCV;
+            // trigger can happen through MIDI, hence optional
+            port.hints   = kAudioPortIsCV | kCVPortIsOptional;
             port.name    = "Trigger Input";
             port.symbol  = "trigg_in";
             return;
@@ -77,8 +79,8 @@ protected:
     switch (index) {
     case kChannelInput:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
-      parameter.name = "Input MIDI channel";
-      parameter.shortName = "in chan";
+      parameter.name = "Input MIDI channel for root";
+      parameter.shortName = "root chan";
       parameter.symbol = "channel";
       // using enum to explicit omni. 0 for omni and 16 channels
       parameter.enumValues.count = 17;
@@ -125,6 +127,59 @@ protected:
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 16.0f;
+      break;
+    case kChannelTriggerInput:
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Input MIDI channel for triggers";
+      parameter.shortName = "trig chan";
+      parameter.symbol = "channel";
+      // using enum to explicit omni. 0 for omni and 16 channels, option to disable.
+      parameter.enumValues.count = 18;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "omni (all)";
+        values[0].value = 0;
+        values[1].label = "1";
+        values[1].value = 1;
+        values[2].label = "2";
+        values[2].value = 2;
+        values[3].label = "3";
+        values[3].value = 3;
+        values[4].label = "4";
+        values[4].value = 4;
+        values[5].label = "5";
+        values[5].value = 5;
+        values[6].label = "6";
+        values[6].value = 6;
+        values[7].label = "7";
+        values[7].value = 7;
+        values[8].label = "8";
+        values[8].value = 8;
+        values[9].label = "9";
+        values[9].value = 9;
+        values[10].label = "10";
+        values[10].value = 10;
+        values[11].label = "11";
+        values[11].value = 11;
+        values[12].label = "12";
+        values[12].value = 12;
+        values[13].label = "13";
+        values[13].value = 13;
+        values[14].label = "14";
+        values[14].value = 14;
+        values[15].label = "15";
+        values[15].value = 15;
+        values[16].label = "16";
+        values[16].value = 16;
+        values[17].label = "disable";
+        values[17].value = 17;
+      }
+      // select default idx
+      parameter.ranges.def = 17.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 17.0f;
       break;
     case kScale:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
@@ -282,6 +337,8 @@ protected:
 
     case kChannelInput:
       return channelInput;
+    case kChannelTriggerInput:
+      return channelTriggerInput;
     case kScale:
       return scale;
     case kChord:
@@ -305,6 +362,9 @@ protected:
     switch (index) {
     case kChannelInput:
       channelInput = value;
+      break;
+    case kChannelTriggerInput:
+      channelTriggerInput = value;
       break;
     case kScale:
       // retrig scale upon change
@@ -366,6 +426,10 @@ protected:
       updateScale();
       sendScaleOn(frame);
     }
+    // same for triggering -- only if not triggered
+    if (channelTriggerInput == 0 or channelTriggerInput - 1 == channel) {
+      switchChord(frame);
+    }
   }
 
   void sendChordOff(uint32_t frame=0) {
@@ -423,20 +487,25 @@ protected:
     }
   }
 
+  void switchChord(uint32_t frame=0) {
+    // turn off previous chord
+    sendChordOff(frame);
+    // draw and retrieve chord
+    utils_Tonnetz_process(context_processor);
+    notes[0] = utils_Tonnetz_process_ret_0(context_processor);
+    notes[1] = utils_Tonnetz_process_ret_1(context_processor);
+    notes[2] = utils_Tonnetz_process_ret_2(context_processor);
+    // send chord
+    sendChordOn(frame);
+  }
+
   void process(uint32_t chunkSize, uint32_t frame) {
     for (unsigned int i = 0; i < chunkSize; i++) {
       // threshold 0.1 for trigger, new chord upon trigger
       if (fix_to_float(buffIn[i]) >= 0.1 and !trigerring) {
         trigerring = true;
-        // turn off previous chord
-        sendChordOff(frame);
-        // draw and retrieve chord
-        utils_Tonnetz_process(context_processor);
-        notes[0] = utils_Tonnetz_process_ret_0(context_processor);
-        notes[1] = utils_Tonnetz_process_ret_1(context_processor);
-        notes[2] = utils_Tonnetz_process_ret_2(context_processor);
-        // send chord
-        sendChordOn(frame);
+        // order to switch chord at the exact frame
+        switchChord(frame + i);
       }
       // nothing to be done when trigger in finished
       else if (fix_to_float(buffIn[i]) < 0.1 and trigerring) {
@@ -457,6 +526,7 @@ private:
   int scaleSize = 0;
 
   int channelInput;
+  int channelTriggerInput;
   float scale;
   float chord;
   float chordSpread;

@@ -15,6 +15,7 @@
 
 enum Parameters {
     kChannelInput,
+    kChannelTriggerInput,
     kScale,
     kChord,
     kChordSpread,
