@@ -11,6 +11,7 @@
 
 
 // wrapper to factorize code between plugins. Consider at the moment at most one input and one output
+// TODO: option to process MIDI event with frame-perfect accuracy? (at the moment precision of the call is chunk size)
 class ExtendedPlugin : public Plugin {
 
 public:
