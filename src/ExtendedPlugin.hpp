@@ -32,13 +32,13 @@ protected:
   fix16_t buffOut[BUFFER_SIZE];
 
   // The following functions will be called upon encountering MIDI events, to be implemented by subclasses. channel: 0..15. frame: frame number within the buffer of the MIDI event
-  virtual void noteOn(uint8_t note, uint8_t velocity, uint8_t channel, uint32_t frame) {};
-  virtual void noteOff(uint8_t note, uint8_t channel, uint32_t frame) {};
+  virtual void noteOn(uint8_t /*note*/, uint8_t /*velocity*/, uint8_t /*channel*/, uint32_t /*frame*/) {};
+  virtual void noteOff(uint8_t /*note*/, uint8_t /*channel*/, uint32_t /*frame*/) {};
   // pitch bend from -2 to +2 semitones
-  virtual void pitchbend(uint8_t chanel, float value, uint32_t frame) {};
-  virtual void cc(uint8_t number, uint8_t value, uint8_t channel, uint32_t frame) {};
+  virtual void pitchbend(uint8_t /*chanel*/, float /*value*/, uint32_t /*frame*/) {};
+  virtual void cc(uint8_t /*number*/, uint8_t /*value*/, uint8_t /*channel*/, uint32_t /*frame*/) {};
   // special CC
-  virtual void sustain(uint8_t channel, bool flag, uint32_t frame) {};
+  virtual void sustain(uint8_t /*channel*/, bool /*flag*/, uint32_t /*frame*/) {};
 
   // deal with MIDI input
   void processMidiEvent(const MidiEvent midiEvent) {
@@ -144,14 +144,23 @@ protected:
 #endif // DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
 
   // should read from buffIn and write to buffOut, and process a specific amount of samples, with reference of the starting frame
-  virtual void process(uint32_t nbSamples, uint32_t frame) {};
+  virtual void process(uint32_t /*nbSamples*/, uint32_t /*frame*/) {};
 
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
   // only at most one input and/or one output
-  void run(const float** inputs, float** outputs, uint32_t frames,
-             const MidiEvent* midiEvents, uint32_t midiEventCount) override {
+  void run(const float**
+	   // fighting unused parameters...
+#if DISTRHO_PLUGIN_NUM_INPUTS > 0
+	   inputs
+#endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
+	   , float**
+#if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
+	   outputs
+#endif // DISTRHO_PLUGIN_NUM_OUTPUTS > 0
+	   , uint32_t frames,
+	   const MidiEvent* midiEvents, uint32_t midiEventCount) override {
 
     // deal with audio I/O
 #if DISTRHO_PLUGIN_NUM_INPUTS > 0
@@ -216,7 +225,15 @@ protected:
 #else // DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
   // only at most one input and/or one output 
-  void run(const float** inputs, float** outputs, uint32_t frames) override {
+  void run(const float**
+#if DISTRHO_PLUGIN_NUM_INPUTS > 0
+	   inputs
+#endif // DISTRHO_PLUGIN_NUM_INPUTS > 0
+	   , float**
+#if DISTRHO_PLUGIN_NUM_OUTPUTS > 0
+	   outputs
+#endif // DISTRHO_PLUGIN_NUM_OUTPUTS > 0
+	   , uint32_t frames) override {
 
     // deal with audio I/O
 #if DISTRHO_PLUGIN_NUM_INPUTS > 0
