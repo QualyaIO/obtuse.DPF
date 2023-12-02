@@ -6,6 +6,7 @@
 START_NAMESPACE_DISTRHO
 
 // Wrapper for Gate.
+// NOTE: in this version there is an option to set duration as a ratio of the bar length, updated at each frame
 // TODO: add duration as per bar or note with transport
 // TODO: add option for immediate note off with transport
 // FIXME: immediately change MIDI output channel, not taking care of matching noteOff with noteOff
@@ -99,11 +100,20 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Gate duration";
       parameter.shortName = "gate dur";
-      parameter.symbol = "seconds";
+      parameter.symbol = "seconds (or bar ratio)";
       // range min is 1ms from (current) DSP, max is arbitrary
       parameter.ranges.def = 0.2f;
       parameter.ranges.min = 0.001f;
       parameter.ranges.max = 10.0f;
+      break;
+    case kDurationModeBar:
+      parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
+      parameter.name = "Duration as bar ratio";
+      parameter.shortName = "dur bar ratio";
+      parameter.symbol = "toggle";
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
       break;
 
     default:
@@ -123,9 +133,31 @@ protected:
       return channelOutput;
     case kDuration:
       return duration;
+    case kDurationModeBar:
+      return durationModeBar;
 
     default:
       return 0.0;
+    }
+  }
+
+  // change gate duration depending on option (seconds or bar)
+  void updateDuration() {
+    float newDuration = duration;
+    // convert from bar length to duration in seconds
+    if (durationModeBar) {
+      double secondsPerBar = 1.0;
+      // update duration as per bar if possible
+      const TimePosition& timePos(getTimePosition());
+      if (timePos.bbt.valid) {
+        secondsPerBar = 60.0 / timePos.bbt.beatsPerMinute * timePos.bbt.beatsPerBar;
+      }
+      newDuration = secondsPerBar * duration;
+    }
+    
+    if (newDuration != lastDuration) {
+      lastDuration = newDuration;
+      utils_Gate_setDuration(context_processor, float_to_fix(lastDuration));
     }
   }
   
@@ -140,9 +172,11 @@ protected:
       break;
     case kDuration:
       duration = value;
-      utils_Gate_setDuration(context_processor, float_to_fix(value));
+      updateDuration();
       break;
-
+    case kDurationModeBar:
+      durationModeBar = value;
+      updateDuration();
     default:
       break;
     }
@@ -160,6 +194,9 @@ protected:
   }
 
   void process(uint32_t chunkSize, uint32_t frame) {
+    // update duration (if necessary) depending on options
+    updateDuration();
+    // make it run
     for (unsigned int i = 0; i < chunkSize; i++) {
       // update clock
       timeFract += 1./ getSampleRate();
@@ -190,11 +227,14 @@ private:
   // for computing time based on frame count
   int timeS = 0;
   double timeFract = 0.0;
+  // last bar value, to avoid too many updated
+  double lastDuration = -1;
 
   // parameters
   int channelInput;
   int channelOutput;
   float duration;
+  int durationModeBar;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Gate);
 };
