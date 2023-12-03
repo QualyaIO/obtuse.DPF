@@ -109,7 +109,7 @@ struct MetaSampler {
    void setLoopEnd(int loopE);
    void setPitchBend(float semitones);
    void setSustain(bool flag);
-   float process(int nb, fix16_t (&oBuffer)[128]);
+   void process(int nb, fix16_t (&oBuffer)[128]);
 
 private:
    // all variants of the processor

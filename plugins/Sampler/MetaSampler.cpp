@@ -916,8 +916,8 @@ void MetaSampler::noteOff(int note, int channel) {
    }
 }
 
-float MetaSampler::process(int nb, fix16_t (&oBuffer)[128]) {
-   switch(selectedSample) {
+void MetaSampler::process(int nb, fix16_t (&oBuffer)[128]) {
+  switch(selectedSample) {
    case 1:
      synthSamplerCello_Voice_process_bufferTo(processorCello, nb, oBuffer);
      break;

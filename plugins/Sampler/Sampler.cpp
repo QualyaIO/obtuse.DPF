@@ -95,7 +95,7 @@ protected:
         parameter.enumValues.values = values;
         for (int i = 0; i < MetaSampler::getNbSamples(); i++) {
           values[i].label = String(MetaSampler::getSampleName(i));
-          values[0].value = i;
+          values[i].value = i;
         }
       }
       // select default idx
@@ -105,7 +105,7 @@ protected:
       break;
     case kOverride:
       parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
-      parameter.name = "Override sample's parameters";
+      parameter.name = "Override loop";
       parameter.shortName = "override";
       parameter.symbol = "override";
       parameter.ranges.def = 0.0f;
