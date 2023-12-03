@@ -189,6 +189,8 @@ protected:
 
     case kChannelInput:
       return channelInput;
+    case kSample:
+      return sample;
     case kOverride:
       return overrideConfig;
     case kLoop:

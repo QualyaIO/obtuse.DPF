@@ -351,6 +351,10 @@ protected:
       return jump;
     case kRoot:
       return root;
+    case kChannelChord:
+      return channelChord;
+    case kChannelScale:
+      return channelScale;
 
     default:
       return 0.0;
@@ -394,17 +398,17 @@ protected:
       // retrig chord upon channel change
       if (channelChord != value) {
         sendChordOff();
-        channelChord = value;
         sendChordOn();
       }
+      channelChord = value;
       break;
     case kChannelScale:
       // retrig scale upon channel change
       if (channelScale != value) {
         sendScaleOff();
-        channelScale = value;
         sendScaleOn();
       }
+      channelScale = value;
       break;
       // kRoot is output only, set through MIDI here, but just in case
     case kRoot:
