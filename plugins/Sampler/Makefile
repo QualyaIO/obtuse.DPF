@@ -14,7 +14,6 @@ NAME = sampler
 
 FILES_DSP = \
 	../../botania/src/vultin.cpp \
-	../../botania/src/synthFM.cpp \
         ../../botania/src/synthSampler.cpp \
         ../../botania/src/synthSamplerCello.cpp \
         ../../botania/src/synthSamplerClarinet.cpp \

@@ -25,6 +25,7 @@ plugins: dgl
 	$(MAKE) all -C plugins/Saturator
 	$(MAKE) all -C plugins/SynthFM
 	$(MAKE) all -C plugins/Sampler
+	$(MAKE) all -C plugins/Drummer
 	$(MAKE) all -C plugins/Arp
 	$(MAKE) all -C plugins/Chord
 	$(MAKE) all -C plugins/Clock
@@ -50,6 +51,7 @@ clean:
 	$(MAKE) clean -C plugins/Saturator
 	$(MAKE) clean -C plugins/SynthFM
 	$(MAKE) clean -C plugins/Sampler
+	$(MAKE) clean -C plugins/Drummer
 	$(MAKE) clean -C plugins/Arp
 	$(MAKE) clean -C plugins/Chord
 	$(MAKE) clean -C plugins/Clock

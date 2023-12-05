@@ -87,7 +87,6 @@ protected:
       parameter.name = "Sample";
       parameter.shortName = "sample";
       parameter.symbol = "index";
-      // using enum to explicit omni. 0 for omni and 16 channels
       parameter.enumValues.count = MetaSampler::getNbSamples();
       parameter.enumValues.restrictedMode = true;
       {
