@@ -15,6 +15,7 @@
 
 enum Parameters {
     kChannelInput,
+    kPitchBendRange,
     kKit,
 
     kParameterCount

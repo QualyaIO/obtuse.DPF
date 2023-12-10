@@ -34,8 +34,8 @@ protected:
   // The following functions will be called upon encountering MIDI events, to be implemented by subclasses. channel: 0..15. frame: frame number within the buffer of the MIDI event
   virtual void noteOn(uint8_t /*note*/, uint8_t /*velocity*/, uint8_t /*channel*/, uint32_t /*frame*/) {};
   virtual void noteOff(uint8_t /*note*/, uint8_t /*channel*/, uint32_t /*frame*/) {};
-  // pitch bend from -2 to +2 semitones
-  virtual void pitchbend(uint8_t /*chanel*/, float /*value*/, uint32_t /*frame*/) {};
+  // pitch bend, ratio between -1 and 1, to be converted by plugin in semitones
+  virtual void pitchbend(uint8_t /*chanel*/, float /*ratio*/, uint32_t /*frame*/) {};
   virtual void cc(uint8_t /*number*/, uint8_t /*value*/, uint8_t /*channel*/, uint32_t /*frame*/) {};
   // special CC
   virtual void sustain(uint8_t /*channel*/, bool /*flag*/, uint32_t /*frame*/) {};
@@ -88,16 +88,15 @@ protected:
 	if (midiEvent.size > 2) {
 	  // retrieve full value
 	  int pitchBend = midiEvent.data[1] | (midiEvent.data[2] << 7);
-	  float semitones = 0.0;
-	  // compute semitones, for now will bend +/- one tone
-	  // from 0 (-2 semitones) to 16383 (+2 semitones), 8192: no bend
+	  float ratio = 0.0;
+	  // from 0 (-1 ratio) to 16383 (+1 ratio), 8192: no bend
 	  if (pitchBend > 8192) {
-	    semitones =  2.0 * (pitchBend - 8192) / (8191);
+	    ratio =  1.0 * (pitchBend - 8192) / (8191);
 	  }
 	  else if (pitchBend < 8192) {
-	    semitones =  - 2.0 * (8192 - pitchBend) / (8192);
+	    ratio =  -1.0 * (8192 - pitchBend) / (8192);
 	  }
-	  pitchbend(chan, semitones, midiEvent.frame);
+	  pitchbend(chan, ratio, midiEvent.frame);
 	}
 	break;
       }

@@ -5,6 +5,7 @@
 START_NAMESPACE_DISTRHO
 
 // Wrapper for all sampler synth
+// FIXME: MPE flag is a hack, does not differentiate between channel, same pitch bend range applied to all
 // TODO: available options such as voice re-use for same note
 // NOTE: compared to VCV, the "override" switch when turned off will reload sampler to default 
 // NOTE: while set to automatable, changing orreride or sample will reset playing notes, discard things like sustain or pitchbend
@@ -81,6 +82,17 @@ protected:
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 16.0f;
+      break;
+    case kPitchBendRange:
+      // TODO: use a dedicated param for master pitch bend and one for MPE pitch bend
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Pitch bend range";
+      parameter.shortName = "PB range";
+      parameter.symbol = "+/- semitones";
+      // NOTE: default would be 48 for MPE messages (channel 2 to 16) and 2 only for master pitch bend (channel 1)
+      parameter.ranges.def = 2.0f;
+      parameter.ranges.min = 1.0f;
+      parameter.ranges.max = 96.0f;
       break;
     case kSample:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
@@ -188,6 +200,8 @@ protected:
 
     case kChannelInput:
       return channelInput;
+    case kPitchBendRange:
+      return pitchBendRange;
     case kSample:
       return sample;
     case kOverride:
@@ -236,6 +250,9 @@ protected:
     switch (index) {
     case kChannelInput:
       channelInput = value;
+      break;
+    case kPitchBendRange:
+      pitchBendRange = value;
       break;
     case kSample:
       if (value != sample) {
@@ -300,10 +317,10 @@ protected:
     }
   }
 
-  void pitchbend(uint8_t channel, float semitones, uint32_t) {
+  void pitchbend(uint8_t channel, float ratio, uint32_t) {
     // filter event depending on selected channel
     if (channelInput == 0 or channelInput - 1 == channel) {
-      sampler.setPitchBend(semitones);
+      sampler.setPitchBend(ratio * pitchBendRange);
     }
   }
 
@@ -329,6 +346,7 @@ private:
 
   // parameters
   int channelInput;
+  int pitchBendRange;
   // init to impossible value to let first init happen
   int sample = -1;
   int overrideConfig;

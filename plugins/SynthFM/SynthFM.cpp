@@ -5,6 +5,7 @@
 START_NAMESPACE_DISTRHO
 
 // Wrapper for FM synth
+// FIXME: MPE flag is a hack, does not differentiate between channel, same pitch bend range applied to all
 // TODO: available options such as voice re-use for same note
 // NOTE: parameters related to waveform are CPU intensive
 class SynthFM : public ExtendedPlugin {
@@ -100,6 +101,17 @@ protected:
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 16.0f;
+      break;
+    case kPitchBendRange:
+      // TODO: use a dedicated param for master pitch bend and one for MPE pitch bend
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Pitch bend range";
+      parameter.shortName = "PB range";
+      parameter.symbol = "+/- semitones";
+      // NOTE: default would be 48 for MPE messages (channel 2 to 16) and 2 only for master pitch bend (channel 1)
+      parameter.ranges.def = 2.0f;
+      parameter.ranges.min = 1.0f;
+      parameter.ranges.max = 96.0f;
       break;
     case kModulatorAttack:
       parameter.hints = kParameterIsAutomatable;
@@ -291,6 +303,8 @@ protected:
 
     case kChannelInput:
       return channelInput;
+    case kPitchBendRange:
+      return pitchBendRange;
     case kModulatorAttack:
       return modulatorAttack;
     case kModulatorDecay:
@@ -339,6 +353,9 @@ protected:
     switch (index) {
     case kChannelInput:
       channelInput = value;
+      break;
+    case kPitchBendRange:
+      pitchBendRange = value;
       break;
     case kModulatorAttack:
       modulatorAttack = value;
@@ -441,10 +458,10 @@ protected:
     }
   }
 
-  void pitchbend(uint8_t channel, float semitones, uint32_t) {
+  void pitchbend(uint8_t channel, float ratio, uint32_t) {
     // filter event depending on selected channel
     if (channelInput == 0 or channelInput - 1 == channel) {
-      synthFM_Voice_synthPitchBend(context_processor, float_to_fix(semitones));
+      synthFM_Voice_synthPitchBend(context_processor, float_to_fix(ratio * pitchBendRange));
     }
   }
 
@@ -470,6 +487,7 @@ private:
 
   // parameters
   int channelInput;
+  int pitchBendRange;
 
   float modulatorAttack;
   float modulatorDecay;
