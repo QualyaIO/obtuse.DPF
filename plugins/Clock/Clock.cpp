@@ -59,38 +59,27 @@ protected:
         switch (index)
           {
           case OUT_BEAT:
-            // FIXME: CLAP & CV crash, at least in bitwig 5, hotfix
-            if (strcmp(getPluginFormatName(), "CLAP") != 0) {
-              port.hints   = kAudioPortIsCV;
-            }
+            port.hints   = kAudioPortIsCV;
             port.name    = "Beat";
             port.symbol  = "beat";
             return;
           case OUT_FIRST_BEAT:
-            if (strcmp(getPluginFormatName(), "CLAP") != 0) {
-              port.hints   = kAudioPortIsCV;
-            }
+            port.hints   = kAudioPortIsCV;
             port.name    = "First beat or bar";
             port.symbol  = "1stBeat_bar";
             return;
           case OUT_FIRST_GROUP:
-            if (strcmp(getPluginFormatName(), "CLAP") != 0) {
-              port.hints   = kAudioPortIsCV;
-            }
+            port.hints   = kAudioPortIsCV;
             port.name    = "First group or note";
             port.symbol  = "1stGroup_note";
             return;
           case OUT_SECOND_GROUP:
-            if (strcmp(getPluginFormatName(), "CLAP") != 0) {
-              port.hints   = kAudioPortIsCV;
-            }
+            port.hints   = kAudioPortIsCV;
             port.name    = "Second group or note";
             port.symbol  = "2ndGroup_note";
             return;
           case OUT_TICKS:
-            if (strcmp(getPluginFormatName(), "CLAP") != 0) {
-              port.hints   = kAudioPortIsCV;
-            }
+            port.hints   = kAudioPortIsCV;
             port.name    = "Tick";
             port.symbol  = "tick";
             return;
