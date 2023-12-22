@@ -10,12 +10,12 @@ START_NAMESPACE_DISTRHO
 #define TRIGGER_LENGTH 0.0002
 
 // Wrapper for Trigger.
-// TODO: reset on transport reset as with Clock? (or some other input, e.g. automatable param)
+// Note: in this version there is a flag to reset on transport reset, as with Clock
 // TODO: alternate MIDI input/output to be used with Arp or Chord? 
-class Clock : public ExtendedPlugin {
+class Trigger : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
-  Clock() : ExtendedPlugin(kParameterCount, 0, 0) {
+  Trigger() : ExtendedPlugin(kParameterCount, 0, 0) {
     utils_Trigger_process_init(context_processor);
   }
 
@@ -78,10 +78,64 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Loop length";
       parameter.shortName = "loop lgth";
-      parameter.symbol = "length";
+      parameter.symbol = "steps";
       parameter.ranges.def = 16.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 128.0f;
+      break;
+    case kStartPos:
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Loop start position";
+      parameter.shortName = "loop start";
+      parameter.symbol = "step";
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 127.0f;
+      break;
+    case kDensity:
+      parameter.hints = kParameterIsAutomatable;
+      parameter.name = "Density";
+      parameter.shortName = "dsty";
+      parameter.symbol = "ratio";
+      parameter.ranges.def = 0.5f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
+      break;
+    case kBalance:
+      parameter.hints = kParameterIsAutomatable;
+      parameter.name = "Balance";
+      parameter.shortName = "blce";
+      parameter.symbol = "ratio";
+      parameter.ranges.def = 0.5f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
+      break;
+    case kEvolve:
+      parameter.hints = kParameterIsAutomatable;
+      parameter.name = "Evolve";
+      parameter.shortName = "evlv";
+      parameter.symbol = "ratio";
+      parameter.ranges.def = 0.5f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
+      break;
+    case kMagnitude:
+      parameter.hints = kParameterIsAutomatable;
+      parameter.name = "Magnitude";
+      parameter.shortName = "mag";
+      parameter.symbol = "ratio";
+      parameter.ranges.def = 0.5f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
+      break;
+    case kTransportReset:
+      parameter.hints = kParameterIsAutomatable | kParameterIsBoolean;
+      parameter.name = "Reset on transport reset";
+      parameter.shortName = "trans rst";
+      parameter.symbol = "rest";
+      parameter.ranges.def = 1.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
       break;
 
     default:
@@ -406,9 +460,6 @@ protected:
 private:
   utils_Clock_process_type context_processor;
 
-  // for computing time based on frame count
-  int timeS = 0;
-  double timeFract = 0.0;
   // total frame count (surely poorly named)
   unsigned long int tick = 0;
   // outputs are triggers
@@ -433,9 +484,9 @@ private:
   int ticks;
   float noteBarRatio;
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Clock);
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Trigger);
 };
 
-Plugin *createPlugin() { return new Clock(); }
+Plugin *createPlugin() { return new Trigger(); }
 
 END_NAMESPACE_DISTRHO

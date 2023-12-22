@@ -22,6 +22,7 @@ enum Parameters {
     kBalance,
     kEvolve,
     kMagnitude,
+    kTransportReset,
 
     kParameterCount
 };
