@@ -88,7 +88,7 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Pitch bend range";
       parameter.shortName = "PB range";
-      parameter.symbol = "+/- semitones";
+      parameter.symbol = "semitones";
       // NOTE: default would be 48 for MPE messages (channel 2 to 16) and 2 only for master pitch bend (channel 1)
       parameter.ranges.def = 2.0f;
       parameter.ranges.min = 1.0f;

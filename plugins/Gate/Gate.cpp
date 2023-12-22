@@ -100,7 +100,7 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Gate duration";
       parameter.shortName = "gate dur";
-      parameter.symbol = "seconds (or bar ratio)";
+      parameter.symbol = "seconds_or_ratio";
       // range min is 1ms from (current) DSP, max is arbitrary
       parameter.ranges.def = 0.2f;
       parameter.ranges.min = 0.001f;
