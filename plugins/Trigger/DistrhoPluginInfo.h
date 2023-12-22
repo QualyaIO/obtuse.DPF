@@ -12,6 +12,7 @@
 #define DISTRHO_PLUGIN_WANT_MIDI_INPUT 0
 #define DISTRHO_PLUGIN_WANT_MIDI_OUTPUT 0
 #define DISTRHO_PLUGIN_IS_RT_SAFE   1
+#define DISTRHO_PLUGIN_WANT_TIMEPOS 1
 
 enum Parameters {
     kClockDivider,
@@ -22,7 +23,7 @@ enum Parameters {
     kBalance,
     kEvolve,
     kMagnitude,
-    kTransportReset,
+    kDoTransportReset,
 
     kParameterCount
 };
