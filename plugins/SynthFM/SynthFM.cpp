@@ -179,11 +179,11 @@ protected:
       parameter.ranges.max = 1.0f;
       break;
     case kModulatorLevel:
-      parameter.hints = kParameterIsAutomatable | kParameterIsBoolean;
+      parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator level";
       parameter.shortName = "Mod lvl";
       parameter.symbol = "level";
-      parameter.ranges.def = 0.0f;
+      parameter.ranges.def = 0.1f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
       break;
