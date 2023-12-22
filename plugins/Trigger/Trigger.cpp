@@ -35,15 +35,27 @@ protected:
   // ports
   void initAudioPort(bool input, uint32_t index, AudioPort& port) override
   {
-    if (!input)
+    if (input)
+      {
+        switch (index)
+          {
+          case 0:
+            // trigger can happen through MIDI, hence optional
+            port.hints   = kAudioPortIsCV;
+            port.name    = "Trigger Input";
+            port.symbol  = "trigg_in";
+            return;
+          }
+      }
+    else
       {
         switch (index)
           {
           case 0:
             // only way to trigger, hence not optional
             port.hints   = kAudioPortIsCV;
-            port.name    = "Trigger Input";
-            port.symbol  = "trigg_in";
+            port.name    = "Trigger Output";
+            port.symbol  = "trigg_out";
             return;
           }
       }
