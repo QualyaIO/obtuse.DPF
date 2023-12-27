@@ -79,7 +79,7 @@ protected:
       return 0.0;
     }
   }
-  
+ 
   void setParameterValue(uint32_t index, float value) override {
     // FIXME: check up to which point function is repeatedly called from host even when value does not change
     switch (index) {
@@ -92,7 +92,7 @@ protected:
       break;
     case kDelay:
       delay = value;
-      effectsXL_CombFF_setDelayms(context_processor, float_to_fix(delay));
+      updateDelay();
       break;
     default:
       break;
@@ -147,7 +147,7 @@ protected:
   {
     effectsXL_CombFF_setSamplerate(context_processor, float_to_fix((float)newSampleRate / 1000.0f));
     // apply again delay because in the DSP ultimately a number of sample is used
-    effectsXL_CombFF_setDelayms(context_processor, float_to_fix(delay));
+    updateDelay();
   }
   
 private:
@@ -158,6 +158,15 @@ private:
   float decay;
   // init with some value since it will be used upon sample rate change
   float delay = 10.0;
+
+  void updateDelay() {
+      // HOTFIX: make sure we do not overflow fixed float
+      float realDelay = delay;
+      if (getSampleRate() > 0 and realDelay > (32767.0f / getSampleRate()) * 1000) {
+        realDelay = (32767.0f / getSampleRate()) * 1000;
+      }
+      effectsXL_CombFF_setDelayms(context_processor, float_to_fix(realDelay));
+  }
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CombFF);
 };
