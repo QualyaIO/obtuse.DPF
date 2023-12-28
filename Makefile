@@ -33,6 +33,7 @@ plugins: dgl
 	$(MAKE) all -C plugins/Trigger
 	$(MAKE) all -C plugins/SVF
 	$(MAKE) all -C plugins/CombFF
+	$(MAKE) all -C plugins/CombFB
 
 ifeq ($(CAN_GENERATE_TTL),true)
 gen: plugins utils/lv2_ttl_generator
@@ -62,6 +63,7 @@ clean:
 	$(MAKE) clean -C plugins/Trigger
 	$(MAKE) clean -C plugins/SVF
 	$(MAKE) clean -C plugins/CombFF
+	$(MAKE) clean -C plugins/CombFB
 	$(MAKE) clean -C dpf/utils/lv2-ttl-generator
 	rm -rf bin build
 

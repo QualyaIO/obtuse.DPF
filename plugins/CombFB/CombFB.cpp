@@ -4,28 +4,28 @@
 
 START_NAMESPACE_DISTRHO
 
-// Wrapper for combFF
+// Wrapper for combFB
 // NOTE: output not guaranteed to be kept in -1..1 range, use Saturator after
 // TODO: expose limits due to buffer size?
 // FIXME: audio glitches upon change in delay while playing
-class CombFF : public ExtendedPlugin {
+class CombFB : public ExtendedPlugin {
 public:
-  CombFF() : ExtendedPlugin(kParameterCount, 0, 0) {
-    effectsXL_CombFF_process_init(context_processor);
-    effectsXL_CombFF_setSamplerate(context_processor, float_to_fix((float)getSampleRate() / 1000.0f));
+  CombFB() : ExtendedPlugin(kParameterCount, 0, 0) {
+    effectsXL_CombFB_process_init(context_processor);
+    effectsXL_CombFB_setSamplerate(context_processor, float_to_fix((float)getSampleRate() / 1000.0f));
   }
 
 protected:
   // metadata
-  const char *getLabel() const override { return "BotaniaCombFF"; }
+  const char *getLabel() const override { return "BotaniaCombFB"; }
   const char *getDescription() const override {
-    return "I comb forward filter things.";
+    return "I comb backward filter things.";
   }
   const char *getMaker() const override { return "jfrey"; }
   const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
-    return d_cconst('B','C','F','F'); 
+    return d_cconst('B','C','F','B'); 
   }
 
   // params
@@ -89,7 +89,7 @@ protected:
       break;
     case kDecay:
       decay = value;
-      effectsXL_CombFF_setDecay(context_processor, float_to_fix(decay));
+      effectsXL_CombFB_setDecay(context_processor, float_to_fix(decay));
       break;
     case kDelay:
       delay = value;
@@ -130,7 +130,7 @@ protected:
           }
         }
         // run DSP
-        effectsXL_CombFF_process_bufferTo(context_processor, chunkSize, buffIn, buffOut);
+        effectsXL_CombFB_process_bufferTo(context_processor, chunkSize, buffIn, buffOut);
         // copy to output buffer, with dry/wet
         if (out != NULL) {
           for (uint32_t i = 0; i < chunkSize; i++) {
@@ -146,13 +146,13 @@ protected:
   // Optional callback to inform synth about a sample rate change on the plugin side.
   void sampleRateChanged(double newSampleRate) override
   {
-    effectsXL_CombFF_setSamplerate(context_processor, float_to_fix((float)newSampleRate / 1000.0f));
+    effectsXL_CombFB_setSamplerate(context_processor, float_to_fix((float)newSampleRate / 1000.0f));
     // apply again delay because in the DSP ultimately a number of sample is used
     updateDelay();
   }
   
 private:
-  effectsXL_CombFF_process_type context_processor;
+  effectsXL_CombFB_process_type context_processor;
 
   // parameters
   float dryWet;
@@ -166,12 +166,12 @@ private:
       if (getSampleRate() > 0 and realDelay > (32767.0f / getSampleRate()) * 1000) {
         realDelay = (32767.0f / getSampleRate()) * 1000;
       }
-      effectsXL_CombFF_setDelayms(context_processor, float_to_fix(realDelay));
+      effectsXL_CombFB_setDelayms(context_processor, float_to_fix(realDelay));
   }
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CombFF);
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CombFB);
 };
 
-Plugin *createPlugin() { return new CombFF(); }
+Plugin *createPlugin() { return new CombFB(); }
 
 END_NAMESPACE_DISTRHO
