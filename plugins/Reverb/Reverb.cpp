@@ -8,7 +8,7 @@ START_NAMESPACE_DISTRHO
 // NOTE: output not guaranteed to be kept in -1..1 range, use Saturator after
 // NOTE: using regular buffer size, as in VCV, thus limited max delay
 // TODO: expose limits due to buffer size?
-// FIXME: audio glitches upon change in delay while playing. Also be wary of small delays (e.g. < 10ms, in DSP less than 345 samples).
+// FIXME: audio glitches upon change in delay while playing. Also be wary of small delays (e.g. < 10ms).
 class Reverb : public ExtendedPlugin {
 public:
   Reverb() : ExtendedPlugin(kParameterCount, 0, 0) {
@@ -56,7 +56,7 @@ protected:
       parameter.name = "Delay";
       parameter.shortName = "del";
       parameter.symbol = "ms";
-      // actually max delay will depend on buffer size, with medium 2048 buffer and 44100 fs it's only 46ms
+      // actually max delay will depend on buffer size, with medium 2048 buffer and 44100 fs it's only 46ms. Also min delay is capped to avoid glitches.
       parameter.ranges.def = 50.0f;
       parameter.ranges.min = 1.0f;
       parameter.ranges.max = 100.0f;
@@ -166,6 +166,10 @@ private:
       float realDelay = delay;
       if (getSampleRate() > 0 and realDelay > (32767.0f / getSampleRate()) * 1000) {
         realDelay = (32767.0f / getSampleRate()) * 1000;
+      }
+      // HOTFIX: make sure the delay is high enough to avoid ugly glitches. Very dependent on current DSP implementation, with 345 samples in biggest line.
+      else if (getSampleRate() > 0 and realDelay < (346.0f / getSampleRate()) * 1000) {
+        realDelay = (346.0f / getSampleRate()) * 1000;
       }
       effects_Reverb_setDelayms(context_processor, float_to_fix(realDelay));
   }
