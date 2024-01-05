@@ -20,12 +20,13 @@ enum ClockOutputs {
 };
 
 // Wrapper for Clock.
-// outputs 1ms triggers
+// outputs 0.2ms triggers
 // TODO: MIDI input to sync directly with it without relying to host?
 // NOTE: in autotomous follow transport it will only pause at the same time of transport (albeit at risk of loosing sync upon pause/play with current implementation) and reset when we are back to 0 (if supported by plugin type and host). Jumping forward or backward will otherwise let the clock run.
 // NOTE: in transport, will retrigger upon change in timeline
 // NOTE: in transport only note to beat ratio parameter is used, bypass botania DSP.
 // NOTE: host time pos not supported in LADSPA/DSSI versions
+// NOTE: when host handles poorly multiple outputs, user can override with desired information -- e.g. the first two ones
 class Clock : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
@@ -35,6 +36,8 @@ public:
     for (int i = 0; i < NB_OUTS; i++) {
       triggerringOut[i] = false;
       tickOut[i] = 0;
+      // will also be set in initParameter
+      outputSelect[i] = i;
     }
   }
 
@@ -52,10 +55,12 @@ protected:
   }
 
   // ports
+  // TODO: leave names even if can be overrode?
   void initAudioPort(bool input, uint32_t index, AudioPort& port) override
   {
     if (!input)
       {
+        // NOTE: to sync with initParameter and default override
         switch (index)
           {
           case OUT_BEAT:
@@ -183,6 +188,136 @@ protected:
       parameter.ranges.min = 1.0f/256;
       parameter.ranges.max = 1.0f;
       break;
+    case kOverrideOut1:
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Override output 1";
+      parameter.shortName = "out1";
+      parameter.symbol = "type";
+      parameter.enumValues.count = NB_OUTS;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "Default (beat)";
+        values[0].value = OUT_BEAT;
+        values[1].label = "First beat or bar";
+        values[1].value = OUT_FIRST_BEAT;
+        values[2].label = "First group or note";
+        values[2].value = OUT_FIRST_GROUP;
+        values[3].label = "Second group or note";
+        values[3].value = OUT_SECOND_GROUP;
+        values[4].label = "Ticks";
+        values[4].value = OUT_TICKS;
+      }
+      // select default idx
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = NB_OUTS - 1;
+      break;
+    case kOverrideOut2:
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Override output 2";
+      parameter.shortName = "out2";
+      parameter.symbol = "type";
+      parameter.enumValues.count = NB_OUTS;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "Beat";
+        values[0].value = OUT_BEAT;
+        values[1].label = "Default (first beat or bar)";
+        values[1].value = OUT_FIRST_BEAT;
+        values[2].label = "First group or note";
+        values[2].value = OUT_FIRST_GROUP;
+        values[3].label = "Second group or note";
+        values[3].value = OUT_SECOND_GROUP;
+        values[4].label = "Ticks";
+        values[4].value = OUT_TICKS;
+      }
+      // select default idx
+      parameter.ranges.def = 1.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = NB_OUTS - 1;
+      break;
+    case kOverrideOut3:
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Override output 3";
+      parameter.shortName = "out3";
+      parameter.symbol = "type";
+      parameter.enumValues.count = NB_OUTS;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "Beat";
+        values[0].value = OUT_BEAT;
+        values[1].label = "First beat or bar";
+        values[1].value = OUT_FIRST_BEAT;
+        values[2].label = "Default (first group or note)";
+        values[2].value = OUT_FIRST_GROUP;
+        values[3].label = "Second group or note";
+        values[3].value = OUT_SECOND_GROUP;
+        values[4].label = "Ticks";
+        values[4].value = OUT_TICKS;
+      }
+      // select default idx
+      parameter.ranges.def = 2.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = NB_OUTS - 1;
+      break;
+    case kOverrideOut4:
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Override output 4";
+      parameter.shortName = "out4";
+      parameter.symbol = "type";
+      parameter.enumValues.count = NB_OUTS;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "Beat";
+        values[0].value = OUT_BEAT;
+        values[1].label = "First beat or bar";
+        values[1].value = OUT_FIRST_BEAT;
+        values[2].label = "First group or note";
+        values[2].value = OUT_FIRST_GROUP;
+        values[3].label = "Default (second group or note)";
+        values[3].value = OUT_SECOND_GROUP;
+        values[4].label = "Ticks";
+        values[4].value = OUT_TICKS;
+      }
+      // select default idx
+      parameter.ranges.def = 3.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = NB_OUTS - 1;
+      break;
+    case kOverrideOut5:
+      parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
+      parameter.name = "Override output 5";
+      parameter.shortName = "out5";
+      parameter.symbol = "type";
+      parameter.enumValues.count = NB_OUTS;
+      parameter.enumValues.restrictedMode = true;
+      {
+        ParameterEnumerationValue* const values = new ParameterEnumerationValue[parameter.enumValues.count];
+        parameter.enumValues.values = values;
+        values[0].label = "Beat";
+        values[0].value = OUT_BEAT;
+        values[1].label = "First beat or bar";
+        values[1].value = OUT_FIRST_BEAT;
+        values[2].label = "First group or note";
+        values[2].value = OUT_FIRST_GROUP;
+        values[3].label = "Second group or note";
+        values[3].value = OUT_SECOND_GROUP;
+        values[4].label = "Default (ticks)";
+        values[4].value = OUT_TICKS;
+      }
+      // select default idx
+      parameter.ranges.def = 4.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = NB_OUTS - 1;
+      break;
 
     default:
       break;
@@ -211,6 +346,16 @@ protected:
       return orderMix;
     case kNoteBarRatio:
       return noteBarRatio;
+    case kOverrideOut1:
+      return outputSelect[OUT_BEAT];
+    case kOverrideOut2:
+      return outputSelect[OUT_FIRST_BEAT];
+    case kOverrideOut3:
+      return outputSelect[OUT_FIRST_GROUP];
+    case kOverrideOut4:
+      return outputSelect[OUT_SECOND_GROUP];
+    case kOverrideOut5:
+      return outputSelect[OUT_TICKS];
 
     default:
       return 0.0;
@@ -260,6 +405,21 @@ protected:
     case kNoteBarRatio:
       noteBarRatio = value;
       break;
+    case kOverrideOut1:
+      outputSelect[OUT_BEAT] = value;
+      break;
+    case kOverrideOut2:
+      outputSelect[OUT_FIRST_BEAT] = value;
+      break;
+    case kOverrideOut3:
+      outputSelect[OUT_FIRST_GROUP] = value;
+      break;
+    case kOverrideOut4:
+      outputSelect[OUT_SECOND_GROUP] = value;
+      break;
+    case kOverrideOut5:
+      outputSelect[OUT_TICKS] = value;
+      break;
 
     default:
       break;
@@ -300,6 +460,9 @@ protected:
       return;
     }
 
+    // outputs for each sample
+    float outs[NB_OUTS];
+
     const TimePosition& timePos(getTimePosition());
 
     // autonomous mode, rely on botania
@@ -333,17 +496,25 @@ protected:
 
         // retrive current beat
         int ret = utils_Clock_process(context_processor);
-        
+
+        // we run all outputs no matter the overrides to keep them in sync upon change
         // setting output, any beat is a good beat
-        out_beat[i] = triggerVal(OUT_BEAT, ret > 0, tick);
+        outs[OUT_BEAT] = triggerVal(OUT_BEAT, ret > 0, tick);
         // only first beat of group
-        out_first_beat[i] = triggerVal(OUT_FIRST_BEAT, ret == 1, tick);
+        outs[OUT_FIRST_BEAT] = triggerVal(OUT_FIRST_BEAT, ret == 1, tick);
         // beats on first group
-        out_first_group[i] = triggerVal(OUT_FIRST_GROUP, ret == 1 || ret == 2, tick);
+        outs[OUT_FIRST_GROUP] = triggerVal(OUT_FIRST_GROUP, ret == 1 || ret == 2, tick);
         // beats on second group
-        out_second_group[i] = triggerVal(OUT_SECOND_GROUP, ret == 3, tick);
+        outs[OUT_SECOND_GROUP] = triggerVal(OUT_SECOND_GROUP, ret == 3, tick);
         // ticks from clock
-        out_ticks[i] = triggerVal(OUT_TICKS, newTicks > 0, tick);
+        outs[OUT_TICKS] = triggerVal(OUT_TICKS, newTicks > 0, tick);
+        
+        // redirect outputs
+        out_beat[i] = outs[outputSelect[OUT_BEAT]];
+        out_first_beat[i] = outs[outputSelect[OUT_FIRST_BEAT]];
+        out_first_group[i] = outs[outputSelect[OUT_FIRST_GROUP]];
+        out_second_group[i] = outs[outputSelect[OUT_SECOND_GROUP]];
+        out_ticks[i] = outs[outputSelect[OUT_TICKS]];
         
         tick++;
       }
@@ -473,15 +644,21 @@ protected:
             }
           }
           // beat as well
-          out_beat[i] = triggerVal(OUT_BEAT, detectBeat, tick);
+          outs[OUT_BEAT] = triggerVal(OUT_BEAT, detectBeat, tick);
           // here bar
-          out_first_beat[i] = triggerVal(OUT_FIRST_BEAT, detectBar, tick);
+          outs[OUT_FIRST_BEAT] = triggerVal(OUT_FIRST_BEAT, detectBar, tick);
           // note
-          out_first_group[i] = triggerVal(OUT_FIRST_GROUP, detectNote, tick);
+          outs[OUT_FIRST_GROUP] = triggerVal(OUT_FIRST_GROUP, detectNote, tick);
           // same output, but duplicate to sync trigger
-          out_second_group[i] = triggerVal(OUT_SECOND_GROUP, detectNote, tick);
+          outs[OUT_SECOND_GROUP] = triggerVal(OUT_SECOND_GROUP, detectNote, tick);
           // ticks
-          out_ticks[i] = triggerVal(OUT_TICKS, detectTick, tick);
+          outs[OUT_TICKS] = triggerVal(OUT_TICKS, detectTick, tick);
+          // redirect outputs
+          out_beat[i] = outs[outputSelect[OUT_BEAT]];
+          out_first_beat[i] = outs[outputSelect[OUT_FIRST_BEAT]];
+          out_first_group[i] = outs[outputSelect[OUT_FIRST_GROUP]];
+          out_second_group[i] = outs[outputSelect[OUT_SECOND_GROUP]];
+          out_ticks[i] = outs[outputSelect[OUT_TICKS]];
           // reset flags and advance for next
           detectBeat = false;
           detectBar = false;
@@ -522,6 +699,8 @@ private:
   int transportLastBeat = 0;
   int transportLastBar = 0;
   int transportLastNote = 0;
+  // user can override outputs
+  int outputSelect[NB_OUTS];
 
   // parameters
   int source;

@@ -23,6 +23,11 @@ enum Parameters {
     kGroupRatio,
     kTicks,
     kNoteBarRatio,
+    kOverrideOut1,
+    kOverrideOut2,
+    kOverrideOut3,
+    kOverrideOut4,
+    kOverrideOut5,
 
     kParameterCount
 };
