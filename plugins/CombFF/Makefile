@@ -12,7 +12,9 @@ NAME = combFF
 # --------------------------------------------------------------
 # Files to build
 
+# vultin.cpp here for win64 compilation during CI
 FILES_DSP = \
+	../../botania/src/vultin.cpp \
 	../../botania/src/effectsXL.cpp \
 	CombFF.cpp
 
