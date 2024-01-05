@@ -1,6 +1,6 @@
 [submodule "dpf"]
 	path = dpf
-	url = git@github.com:jfrey-xx/DPF.git
+	url = https://github.com/jfrey-xx/DPF.git
 [submodule "botania"]
 	path = botania
 	url = git@gitlab.com:ullo/funky/botania/botania.dsp.git
