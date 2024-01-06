@@ -489,10 +489,11 @@ private:
   int channelInput;
   int pitchBendRange;
 
-  float modulatorAttack;
-  float modulatorDecay;
-  float modulatorSustain;
-  float modulatorRelease;
+  // giving some default values to ADSR here to avoid calls with uninitialized variable upon parameters' init
+  float modulatorAttack = 0.01;
+  float modulatorDecay = 0.01;
+  float modulatorSustain = 0.5;
+  float modulatorRelease = 0.01;
   float modulatorRatio;
   float modulatorWavetable;
   float modulatorWavetablePhase;
@@ -501,10 +502,10 @@ private:
   float modulatorShift;
   float modulatorFeedback;
 
-  float carrierAttack;
-  float carrierDecay;
-  float carrierSustain;
-  float carrierRelease;
+  float carrierAttack = 0.01;
+  float carrierDecay = 0.01;
+  float carrierSustain = 0.5;
+  float carrierRelease = 0.01;
   float carrierRatio;
   float carrierWavetable;
   float carrierWavetablePhase;
