@@ -20,7 +20,6 @@ protected:
     return "I filter things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','S','V','F'); 
@@ -34,7 +33,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Filter type";
       parameter.shortName = "Type";
-      parameter.symbol = "filter";
+      parameter.symbol = "filtertype";
+      parameter.unit = "filter";
       parameter.enumValues.count = 5;
       parameter.enumValues.restrictedMode = true;
       {
@@ -60,7 +60,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Frequency";
       parameter.shortName = "Freq";
-      parameter.symbol = "Hz";
+      parameter.symbol = "frequency";
+      parameter.unit = "Hz";
       parameter.ranges.def = 5.0f;
       parameter.ranges.min = 0.0f;
       // FIXME: fixed max value here (same as in VCV), in the DSP code it is caped and related sampling rate and nyquist
@@ -70,7 +71,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Q coeff";
       parameter.shortName = "Q";
-      parameter.symbol = "coeff";
+      parameter.symbol = "qcoeff";
+      parameter.unit = "coeff";
       // NOTE: arbitrary range
       parameter.ranges.def = 1.0f;
       parameter.ranges.min = 0.0001f;

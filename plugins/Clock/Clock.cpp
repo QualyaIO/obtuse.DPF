@@ -48,7 +48,6 @@ protected:
     return "I clock things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','C','L','K'); 
@@ -103,6 +102,7 @@ protected:
       parameter.name = "Source";
       parameter.shortName = "source";
       parameter.symbol = "source";
+      parameter.unit = "source";
       parameter.enumValues.count = 3;
       parameter.enumValues.restrictedMode = true;
       {
@@ -125,6 +125,7 @@ protected:
       parameter.name = "BPM";
       parameter.shortName = "BPM";
       parameter.symbol = "BPM";
+      parameter.unit = "BPM";
       parameter.ranges.def = 120.0f;
       parameter.ranges.min = fix_to_float(utils_Clock_getMinBPM());
       parameter.ranges.max = fix_to_float(utils_Clock_getMaxBPM());
@@ -133,7 +134,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Ticks";
       parameter.shortName = "Ticks";
-      parameter.symbol = "PPQN";
+      parameter.symbol = "ticks";
+      parameter.unit = "PPQN";
       parameter.ranges.def = 24.0f;
       parameter.ranges.min = utils_Clock_getMinTicks();
       parameter.ranges.max = utils_Clock_getMaxTicks();
@@ -142,7 +144,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Swing";
       parameter.shortName = "swing";
-      parameter.symbol = "ratio";
+      parameter.symbol = "swing";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -151,7 +154,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Group size";
       parameter.shortName = "grp size";
-      parameter.symbol = "beats";
+      parameter.symbol = "groupsize";
+      parameter.unit = "beats";
       parameter.ranges.def = 4.0f;
       parameter.ranges.min = utils_Clock_getMinGroupSize();
       parameter.ranges.max = utils_Clock_getMaxGroupSize();
@@ -160,7 +164,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Group ratio";
       parameter.shortName = "grp ratio";
-      parameter.symbol = "ratio";
+      parameter.symbol = "groupratio";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -169,7 +174,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
       parameter.name = "Mix group order";
       parameter.shortName = "grp order";
-      parameter.symbol = "order";
+      parameter.symbol = "grouporder";
+      parameter.unit = "order";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -182,7 +188,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Note to bar ratio";
       parameter.shortName = "noteBar";
-      parameter.symbol = "rato";
+      parameter.symbol = "notetobar";
+      parameter.unit = "ratio";
       // arbitrary range, but limit to 1 max to avoid sync issue when moving around within transport
       parameter.ranges.def = 0.25f;
       parameter.ranges.min = 1.0f/256;
@@ -192,7 +199,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Override output 1";
       parameter.shortName = "out1";
-      parameter.symbol = "type";
+      parameter.symbol = "overrideout1";
+      parameter.unit = "type";
       parameter.enumValues.count = NB_OUTS;
       parameter.enumValues.restrictedMode = true;
       {
@@ -218,7 +226,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Override output 2";
       parameter.shortName = "out2";
-      parameter.symbol = "type";
+      parameter.symbol = "overrideout2";
+      parameter.unit = "type";
       parameter.enumValues.count = NB_OUTS;
       parameter.enumValues.restrictedMode = true;
       {
@@ -244,7 +253,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Override output 3";
       parameter.shortName = "out3";
-      parameter.symbol = "type";
+      parameter.symbol = "overrideout3";
+      parameter.unit = "type";
       parameter.enumValues.count = NB_OUTS;
       parameter.enumValues.restrictedMode = true;
       {
@@ -270,7 +280,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Override output 4";
       parameter.shortName = "out4";
-      parameter.symbol = "type";
+      parameter.symbol = "overrideout4";
+      parameter.unit = "type";
       parameter.enumValues.count = NB_OUTS;
       parameter.enumValues.restrictedMode = true;
       {
@@ -296,7 +307,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Override output 5";
       parameter.shortName = "out5";
-      parameter.symbol = "type";
+      parameter.symbol = "overrideout5";
+      parameter.unit = "type";
       parameter.enumValues.count = NB_OUTS;
       parameter.enumValues.restrictedMode = true;
       {

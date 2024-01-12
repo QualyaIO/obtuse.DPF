@@ -26,7 +26,6 @@ protected:
     return "I trigger things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','T','R','G'); 
@@ -71,7 +70,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Clock divider";
       parameter.shortName = "clk div";
-      parameter.symbol = "divider";
+      parameter.symbol = "clockdivider";
+      parameter.unit = "divider";
       // arbitrary max divider
       parameter.ranges.def = 2.0f;
       parameter.ranges.min = 1.0f;
@@ -81,7 +81,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Clock shift";
       parameter.shortName = "clk sht";
-      parameter.symbol = "shift";
+      parameter.symbol = "clockshift";
+      parameter.unit = "shift";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1023.0f;
@@ -90,7 +91,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Loop length";
       parameter.shortName = "loop lgth";
-      parameter.symbol = "steps";
+      parameter.symbol = "looplength";
+      parameter.unit = "steps";
       parameter.ranges.def = 16.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 128.0f;
@@ -99,7 +101,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Loop start position";
       parameter.shortName = "loop start";
-      parameter.symbol = "step";
+      parameter.symbol = "loopstart";
+      parameter.unit = "step";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 127.0f;
@@ -108,7 +111,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Density";
       parameter.shortName = "dsty";
-      parameter.symbol = "ratio";
+      parameter.symbol = "density";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -117,7 +121,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Balance";
       parameter.shortName = "blce";
-      parameter.symbol = "ratio";
+      parameter.symbol = "balance";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -126,7 +131,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Evolve";
       parameter.shortName = "evlv";
-      parameter.symbol = "ratio";
+      parameter.symbol = "evolve";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -135,7 +141,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Magnitude";
       parameter.shortName = "mag";
-      parameter.symbol = "ratio";
+      parameter.symbol = "magnitude";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -144,7 +151,8 @@ protected:
       parameter.hints = kParameterIsAutomatable | kParameterIsBoolean;
       parameter.name = "Reset on transport reset";
       parameter.shortName = "trans rst";
-      parameter.symbol = "rest";
+      parameter.symbol = "resetontransport";
+      parameter.unit = "toggle";
       parameter.ranges.def = 1.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;

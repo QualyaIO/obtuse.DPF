@@ -48,7 +48,6 @@ protected:
     return "I generate chords things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','C','R','D'); 
@@ -81,7 +80,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel for root";
       parameter.shortName = "root chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "inchannel";
+      parameter.unit = "channel";
       // using enum to explicit omni. 0 for omni and 16 channels
       parameter.enumValues.count = 17;
       parameter.enumValues.restrictedMode = true;
@@ -132,7 +132,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel for triggers";
       parameter.shortName = "trig chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "intriggerchannel";
+      parameter.unit = "channel";
       // using enum to explicit omni. 0 for omni and 16 channels, option to disable.
       parameter.enumValues.count = 18;
       parameter.enumValues.restrictedMode = true;
@@ -186,6 +187,7 @@ protected:
       parameter.name = "Scale";
       parameter.shortName = "Scale";
       parameter.symbol = "scale";
+      parameter.unit = "scale";
       parameter.enumValues.count = CHORD_NB_SCALES;
       parameter.enumValues.restrictedMode = true;
       {
@@ -243,6 +245,7 @@ protected:
       parameter.name = "Chord";
       parameter.shortName = "Chord";
       parameter.symbol = "chord";
+      parameter.unit = "chord";
       parameter.enumValues.count = CHORD_NB_CHORDS;
       parameter.enumValues.restrictedMode = true;
       {
@@ -271,7 +274,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Chord spread";
       parameter.shortName = "Chord sprd";
-      parameter.symbol = "spread";
+      parameter.symbol = "chordspread";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -280,7 +284,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Inversion spread";
       parameter.shortName = "Inv sprd";
-      parameter.symbol = "spread";
+      parameter.symbol = "inversionspread";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -289,7 +294,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Jump probability";
       parameter.shortName = "Jump proba";
-      parameter.symbol = "p";
+      parameter.symbol = "jumpprobability";
+      parameter.unit = "p";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -298,7 +304,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Chord MIDI channel";
       parameter.shortName = "chord chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "chordchannel";
+      parameter.unit = "channel";
       // 1-index here
       parameter.ranges.def = 1.0;
       parameter.ranges.min = 1.0f;
@@ -308,7 +315,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Scale MIDI channel";
       parameter.shortName = "scale chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "scalechannel";
+      parameter.unit = "channel";
       // 1-index here
       parameter.ranges.def = 2.0;
       parameter.ranges.min = 1.0f;
@@ -318,7 +326,8 @@ protected:
       parameter.hints = kParameterIsInteger|kParameterIsOutput;
       parameter.name = "Root note";
       parameter.shortName = "note";
-      parameter.symbol = "note";
+      parameter.symbol = "rootnote";
+      parameter.unit = "note";
       parameter.ranges.def = root;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 127.0f;

@@ -23,7 +23,6 @@ protected:
     return "I do FM things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','S','F','M'); 
@@ -55,7 +54,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel";
       parameter.shortName = "in chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "inchannel";
+      parameter.unit = "channel";
       // using enum to explicit omni. 0 for omni and 16 channels
       parameter.enumValues.count = 17;
       parameter.enumValues.restrictedMode = true;
@@ -107,7 +107,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Pitch bend range";
       parameter.shortName = "PB range";
-      parameter.symbol = "semitones";
+      parameter.symbol = "pitchbend";
+      parameter.unit = "semitones";
       // NOTE: default would be 48 for MPE messages (channel 2 to 16) and 2 only for master pitch bend (channel 1)
       parameter.ranges.def = 2.0f;
       parameter.ranges.min = 1.0f;
@@ -117,7 +118,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator attack";
       parameter.shortName = "Mod A";
-      parameter.symbol = "seconds";
+      parameter.symbol = "modulatorattack";
+      parameter.unit = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minA;
       parameter.ranges.max = maxA;
@@ -126,7 +128,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator decay";
       parameter.shortName = "Mod D";
-      parameter.symbol = "seconds";
+      parameter.symbol = "modulatordecay";
+      parameter.unit = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minD;
       parameter.ranges.max = maxD;
@@ -135,7 +138,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator sustain";
       parameter.shortName = "Mod S";
-      parameter.symbol = "seconds";
+      parameter.symbol = "modulatorsustain";
+      parameter.unit = "seconds";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = minS;
       parameter.ranges.max = maxS;
@@ -144,7 +148,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator release";
       parameter.shortName = "Mod R";
-      parameter.symbol = "seconds";
+      parameter.symbol = "modulatorrelease";
+      parameter.unit = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minR;
       parameter.ranges.max = maxR;
@@ -153,7 +158,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator ratio";
       parameter.shortName = "Mod ratio";
-      parameter.symbol = "ratio";
+      parameter.symbol = "modulatorratio";
+      parameter.unit = "ratio";
       parameter.ranges.def = 2.0f;
       parameter.ranges.min = -maxRatio;
       parameter.ranges.max = maxRatio;
@@ -163,7 +169,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator wavetable";
       parameter.shortName = "Mod wavetbl";
-      parameter.symbol = "index";
+      parameter.symbol = "modulatorwavetable";
+      parameter.unit = "index";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = maxMorph;
@@ -173,7 +180,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator wavetable phase";
       parameter.shortName = "Mod wavetbl phase";
-      parameter.symbol = "phase";
+      parameter.symbol = "modulatorphase";
+      parameter.unit = "phase";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -182,7 +190,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator level";
       parameter.shortName = "Mod lvl";
-      parameter.symbol = "level";
+      parameter.symbol = "modulatorlevel";
+      parameter.unit = "level";
       parameter.ranges.def = 0.1f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -191,7 +200,8 @@ protected:
       parameter.hints = kParameterIsAutomatable | kParameterIsInteger;
       parameter.name = "Modulator target";
       parameter.shortName = "Mod target";
-      parameter.symbol = "target";
+      parameter.symbol = "modulatortarget";
+      parameter.unit = "target";
       parameter.enumValues.count = 2;
       parameter.enumValues.restrictedMode = true;
       {
@@ -209,7 +219,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator phase shift";
       parameter.shortName = "Mod phase shift";
-      parameter.symbol = "shift";
+      parameter.symbol = "modulatorshift";
+      parameter.unit = "shift";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -218,7 +229,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Modulator feedback";
       parameter.shortName = "Mod fbk";
-      parameter.symbol = "feedback";
+      parameter.symbol = "modulatorfeedback";
+      parameter.unit = "feedback";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -228,7 +240,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier attack";
       parameter.shortName = "Car A";
-      parameter.symbol = "seconds";
+      parameter.symbol = "carrierattack";
+      parameter.unit = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minA;
       parameter.ranges.max = maxA;
@@ -237,7 +250,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier decay";
       parameter.shortName = "Car D";
-      parameter.symbol = "seconds";
+      parameter.symbol = "carrierdecay";
+      parameter.unit = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minD;
       parameter.ranges.max = maxD;
@@ -246,7 +260,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier sustain";
       parameter.shortName = "Car S";
-      parameter.symbol = "seconds";
+      parameter.symbol = "carriersustain";
+      parameter.unit = "seconds";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = minS;
       parameter.ranges.max = maxS;
@@ -255,7 +270,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier release";
       parameter.shortName = "Car R";
-      parameter.symbol = "seconds";
+      parameter.symbol = "carrierrelease";
+      parameter.unit = "seconds";
       parameter.ranges.def = 0.01f;
       parameter.ranges.min = minR;
       parameter.ranges.max = maxR;
@@ -264,7 +280,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier ratio";
       parameter.shortName = "Car ratio";
-      parameter.symbol = "ratio";
+      parameter.symbol = "carrierratio";
+      parameter.unit = "ratio";
       parameter.ranges.def = 1.0f;
       parameter.ranges.min = -maxRatio;
       parameter.ranges.max = maxRatio;
@@ -274,7 +291,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Carrier wavetable";
       parameter.shortName = "Car wavetbl";
-      parameter.symbol = "index";
+      parameter.symbol = "carrierwavetable";
+      parameter.unit = "index";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = maxMorph;
@@ -282,9 +300,10 @@ protected:
     case kCarrierWavetablePhase:
       // NOTE: marked automatable to be exposed in DAW, but CPU intensive to change
       parameter.hints = kParameterIsAutomatable;
-      parameter.name = "Modulator wavetable phase";
+      parameter.name = "Carrier wavetable phase";
       parameter.shortName = "Car wavetbl phase";
-      parameter.symbol = "phase";
+      parameter.symbol = "carrierphase";
+      parameter.unit = "phase";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;

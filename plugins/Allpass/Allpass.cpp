@@ -22,7 +22,6 @@ protected:
     return "I allpass forward filter things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','A','L','P'); 
@@ -36,7 +35,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Dry/Wet";
       parameter.shortName = "dw";
-      parameter.symbol = "ratio";
+      parameter.symbol = "drywet";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -45,7 +45,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Decay";
       parameter.shortName = "Dec";
-      parameter.symbol = "ratio";
+      parameter.symbol = "decay";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -54,7 +55,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Delay";
       parameter.shortName = "del";
-      parameter.symbol = "ms";
+      parameter.symbol = "delay";
+      parameter.unit = "ms";
    // actually max delay will depend on buffer size, with XL 16384 buffer and 44100 fs it's only 371ms
       parameter.ranges.def = 50.0f;
       parameter.ranges.min = 0.0f;

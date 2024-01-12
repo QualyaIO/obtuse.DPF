@@ -23,7 +23,6 @@ protected:
     return "I comb reverb things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','R','V','B'); 
@@ -37,7 +36,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Dry/Wet";
       parameter.shortName = "dw";
-      parameter.symbol = "ratio";
+      parameter.symbol = "drywet";
+      parameter.unit = "ratio";
       parameter.ranges.def = 0.5f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -46,7 +46,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Reverberation time (T60)";
       parameter.shortName = "Reverb";
-      parameter.symbol = "seconds";
+      parameter.symbol = "reverberationtime";
+      parameter.unit = "seconds";
       parameter.ranges.def = 10.0f;
       parameter.ranges.min = 0.001f;
       parameter.ranges.max = 60.0f;
@@ -55,7 +56,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Delay";
       parameter.shortName = "del";
-      parameter.symbol = "ms";
+      parameter.symbol = "delay";
+      parameter.unit = "ms";
       // actually max delay will depend on buffer size, with medium 2048 buffer and 44100 fs it's only 46ms. Also min delay is capped to avoid glitches.
       parameter.ranges.def = 50.0f;
       parameter.ranges.min = 1.0f;

@@ -17,7 +17,6 @@ protected:
     return "I clip/saturate things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','S','A','T'); 
@@ -32,6 +31,7 @@ protected:
       parameter.name = "Threshold";
       parameter.shortName = "Thresh";
       parameter.symbol = "threshold";
+      parameter.unit = "level";
       parameter.ranges.def = 0.8f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -43,6 +43,7 @@ protected:
       parameter.name = "Coeff";
       parameter.shortName = "Coeff";
       parameter.symbol = "coeff";
+      parameter.unit = "coeff";
       parameter.ranges.def = 1.0f;
       parameter.ranges.min = fix_to_float(effects_Saturator_getMinCoeff());
       parameter.ranges.max = fix_to_float(effects_Saturator_getMaxCoeff());

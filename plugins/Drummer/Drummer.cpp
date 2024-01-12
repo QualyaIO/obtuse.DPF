@@ -20,7 +20,6 @@ protected:
     return "I doum doum things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','D','R','M'); 
@@ -34,7 +33,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel";
       parameter.shortName = "in chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "inchannel";
+      parameter.unit = "channel";
       // using enum to explicit omni. 0 for omni and 16 channels
       parameter.enumValues.count = 17;
       parameter.enumValues.restrictedMode = true;
@@ -86,7 +86,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Pitch bend range";
       parameter.shortName = "PB range";
-      parameter.symbol = "semitones";
+      parameter.symbol = "pitchbend";
+      parameter.unit = "semitones";
       // NOTE: default would be 48 for MPE messages (channel 2 to 16) and 2 only for master pitch bend (channel 1)
       parameter.ranges.def = 2.0f;
       parameter.ranges.min = 1.0f;
@@ -96,7 +97,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Kit";
       parameter.shortName = "kit";
-      parameter.symbol = "index";
+      parameter.symbol = "kit";
+      parameter.unit = "index";
       parameter.enumValues.count = MetaDrummer::getNbKits();
       parameter.enumValues.restrictedMode = true;
       {

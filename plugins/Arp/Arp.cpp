@@ -44,7 +44,6 @@ protected:
     return "I arp things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','A','R','P'); 
@@ -77,7 +76,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel";
       parameter.shortName = "in chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "inchannel";
+      parameter.unit = "channel";
       // using enum to explicit omni. 0 for omni and 16 channels
       parameter.enumValues.count = 17;
       parameter.enumValues.restrictedMode = true;
@@ -128,7 +128,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel for triggers";
       parameter.shortName = "trig chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "intriggerchannel";
+      parameter.unit = "channel";
       // using enum to explicit omni. 0 for omni and 16 channels, option to disable.
       parameter.enumValues.count = 18;
       parameter.enumValues.restrictedMode = true;
@@ -181,7 +182,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Output MIDI channel";
       parameter.shortName = "out chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "outchannel";
+      parameter.unit = "channel";
       // 1-index here
       parameter.ranges.def = 1.0;
       parameter.ranges.min = 1.0f;
@@ -192,6 +194,7 @@ protected:
       parameter.name = "Mode";
       parameter.shortName = "Mode";
       parameter.symbol = "mode";
+      parameter.unit = "mode";
       // we want to make sure we are on par with API
       parameter.enumValues.count = ARP_NB_MODES;
       parameter.enumValues.restrictedMode = true;
@@ -221,7 +224,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Random notes amount";
       parameter.shortName = "Rand notes";
-      parameter.symbol = "amount";
+      parameter.symbol = "randomnotes";
+      parameter.unit = "amount";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -230,7 +234,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Randomize probability";
       parameter.shortName = "Randomize";
-      parameter.symbol = "p";
+      parameter.symbol = "randomize";
+      parameter.unit = "p";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -239,7 +244,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
       parameter.name = "Step persist";
       parameter.shortName = "stp persist";
-      parameter.symbol = "toggle";
+      parameter.symbol = "steppersist";
+      parameter.unit = "toggle";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;

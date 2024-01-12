@@ -22,7 +22,6 @@ protected:
     return "I do samples things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','S','M','P'); 
@@ -36,7 +35,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel";
       parameter.shortName = "in chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "inchannel";
+      parameter.unit = "channel";
       // using enum to explicit omni. 0 for omni and 16 channels
       parameter.enumValues.count = 17;
       parameter.enumValues.restrictedMode = true;
@@ -88,7 +88,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Pitch bend range";
       parameter.shortName = "PB range";
-      parameter.symbol = "semitones";
+      parameter.symbol = "pitchbend";
+      parameter.unit = "semitones";
       // NOTE: default would be 48 for MPE messages (channel 2 to 16) and 2 only for master pitch bend (channel 1)
       parameter.ranges.def = 2.0f;
       parameter.ranges.min = 1.0f;
@@ -98,7 +99,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Sample";
       parameter.shortName = "sample";
-      parameter.symbol = "index";
+      parameter.symbol = "sample";
+      parameter.unit = "index";
       parameter.enumValues.count = MetaSampler::getNbSamples();
       parameter.enumValues.restrictedMode = true;
       {
@@ -118,7 +120,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
       parameter.name = "Override loop";
       parameter.shortName = "override";
-      parameter.symbol = "override";
+      parameter.symbol = "overrideloop";
+      parameter.unit = "toggle";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -128,6 +131,7 @@ protected:
       parameter.name = "Enable looping";
       parameter.shortName = "loop";
       parameter.symbol = "loop";
+      parameter.unit = "toggle";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -136,7 +140,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Loop start";
       parameter.shortName = "loop S";
-      parameter.symbol = "sample";
+      parameter.symbol = "loopstart";
+      parameter.unit = "sample";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = MetaSampler::getMaxLoopSize();
@@ -145,7 +150,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger;
       parameter.name = "Loop end";
       parameter.shortName = "loop E";
-      parameter.symbol = "sample";
+      parameter.symbol = "loopend";
+      parameter.unit = "sample";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = MetaSampler::getMaxLoopSize();
@@ -154,7 +160,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsBoolean|kParameterIsOutput;
       parameter.name = "Effective loop enabled";
       parameter.shortName = "dflt loop";
-      parameter.symbol = "loop";
+      parameter.symbol = "effeciveloop";
+      parameter.unit = "toggle";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
@@ -163,7 +170,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger|kParameterIsOutput;
       parameter.name = "Effective loop start";
       parameter.shortName = "dflt loop S";
-      parameter.symbol = "sample";
+      parameter.symbol = "effectiveloopstart";
+      parameter.unit = "sample";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = MetaSampler::getMaxLoopSize();
@@ -172,7 +180,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger|kParameterIsOutput;
       parameter.name = "Effective loop end";
       parameter.shortName = "dflt loop E";
-      parameter.symbol = "sample";
+      parameter.symbol = "effectiveloopend";
+      parameter.unit = "sample";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = MetaSampler::getMaxLoopSize();
@@ -181,7 +190,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsInteger|kParameterIsOutput;
       parameter.name = "Sample size";
       parameter.shortName = "size";
-      parameter.symbol = "samples";
+      parameter.symbol = "samplesize";
+      parameter.unit = "samples";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = MetaSampler::getMaxLoopSize();

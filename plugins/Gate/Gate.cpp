@@ -25,7 +25,6 @@ protected:
     return "I gate things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  const char *getLicense() const override { return "Custom"; }
   uint32_t getVersion() const override { return d_version(1,0,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('B','G','A','T'); 
@@ -39,7 +38,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Input MIDI channel";
       parameter.shortName = "in chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "inchannel";
+      parameter.unit = "channel";
       // using enum to explicit omni. 0 for omni and 16 channels
       parameter.enumValues.count = 17;
       parameter.enumValues.restrictedMode = true;
@@ -90,7 +90,8 @@ protected:
       parameter.hints = kParameterIsInteger | kParameterIsAutomatable;
       parameter.name = "Output MIDI channel";
       parameter.shortName = "out chan";
-      parameter.symbol = "channel";
+      parameter.symbol = "outchannel";
+      parameter.unit = "channel";
       // 1-index here
       parameter.ranges.def = 1.0;
       parameter.ranges.min = 1.0f;
@@ -100,7 +101,8 @@ protected:
       parameter.hints = kParameterIsAutomatable;
       parameter.name = "Gate duration";
       parameter.shortName = "gate dur";
-      parameter.symbol = "seconds_or_ratio";
+      parameter.symbol = "duration";
+      parameter.unit = "seconds_or_ratio";
       // range min is 1ms from (current) DSP, max is arbitrary
       parameter.ranges.def = 0.2f;
       parameter.ranges.min = 0.001f;
@@ -110,7 +112,8 @@ protected:
       parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
       parameter.name = "Duration as bar ratio";
       parameter.shortName = "dur bar ratio";
-      parameter.symbol = "toggle";
+      parameter.symbol = "durationbarratio";
+      parameter.unit = "toggle";
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
