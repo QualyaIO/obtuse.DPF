@@ -3,7 +3,7 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "SVF"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/SVF"
+#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/svf"
 #define DISTRHO_PLUGIN_CLAP_ID "botania.SVF"
 
 

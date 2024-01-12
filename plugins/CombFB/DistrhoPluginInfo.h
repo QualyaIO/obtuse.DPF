@@ -3,7 +3,7 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "CombFB"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/CombFB"
+#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/combfb"
 #define DISTRHO_PLUGIN_CLAP_ID "botania.CombFB"
 
 

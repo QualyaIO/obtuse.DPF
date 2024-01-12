@@ -3,7 +3,7 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "Allpass"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/Allpass"
+#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/allpass"
 #define DISTRHO_PLUGIN_CLAP_ID "botania.Allpass"
 
 
