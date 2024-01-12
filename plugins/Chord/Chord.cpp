@@ -539,8 +539,8 @@ private:
   // same as in DSP
   float root;
   // where to send notes
-  int channelChord;
-  int channelScale;
+  int channelChord = -1;
+  int channelScale = -1;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Chord);
 };
