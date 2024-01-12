@@ -349,7 +349,7 @@ private:
   int pitchBendRange;
   // init to impossible value to let first init happen
   int sample = -1;
-  int overrideConfig;
+  int overrideConfig = false;
   int loop;
   int loopStart;
   int loopEnd;
