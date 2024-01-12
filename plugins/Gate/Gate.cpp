@@ -234,7 +234,7 @@ private:
   int channelInput;
   int channelOutput;
   float duration;
-  int durationModeBar;
+  int durationModeBar = false;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Gate);
 };
