@@ -17,6 +17,8 @@ enum Parameters {
     kChannelInput,
     kPitchBendRange,
     kKit,
+    // reuse flag for voice
+    kReuse,
 
     kParameterCount
 };

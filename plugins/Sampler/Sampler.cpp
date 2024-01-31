@@ -196,6 +196,16 @@ protected:
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = MetaSampler::getMaxLoopSize();
       break;
+    case kReuse:
+      parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
+      parameter.name = "Reuse voices";
+      parameter.shortName = "reuse";
+      parameter.symbol = "reuse";
+      parameter.unit = "toggle";
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
+      break;
 
     default:
       break;
@@ -230,6 +240,8 @@ protected:
       return effectiveLoopEnd;
     case kSize:
       return size;
+    case kReuse:
+      return reuse;
       
     default:
       return 0.0;
@@ -307,6 +319,10 @@ protected:
       }
       break;
 
+    case kReuse:
+      reuse = value;
+      sampler.setReuse(reuse);
+
     default:
       break;
     }
@@ -367,7 +383,7 @@ private:
   int effectiveLoopStart = 0;
   int effectiveLoopEnd = 0;
   int size = 0;
-  
+  int reuse;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Sampler);
 };

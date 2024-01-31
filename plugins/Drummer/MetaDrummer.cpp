@@ -53,6 +53,27 @@ void MetaDrummer::setPitchBend(float semitones) {
    }
 }
 
+void MetaDrummer::setReuse(bool flag) {
+   switch(selectedKit) {
+   case 1:
+      synthDrummerBbox_Voice_setReuse(processorBbox, flag);
+      break;
+   case 2:
+      synthDrummerFoleyType_Voice_setReuse(processorFoleyType, flag);
+      break;
+   case 3:
+      synthDrummerNes_Voice_setReuse(processorNes, flag);
+      break;
+   case 4:
+      synthDrummerTamaRockstar_Voice_setReuse(processorTamaRockstar, flag);
+      break;
+   case 0:
+   default:
+      synthDrummer_Voice_setReuse(processor808, flag);
+      break;
+   }
+}
+
 void MetaDrummer::noteOn(int note, int velocity, int channel) {
    switch(selectedKit) {
    case 1:

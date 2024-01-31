@@ -114,6 +114,16 @@ protected:
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = MetaDrummer::getNbKits()-1;
       break;
+    case kReuse:
+      parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
+      parameter.name = "Reuse voices";
+      parameter.shortName = "reuse";
+      parameter.symbol = "reuse";
+      parameter.unit = "toggle";
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
+      break;
 
     default:
       break;
@@ -132,6 +142,8 @@ protected:
       return pitchBendRange;
     case kKit:
       return kit;
+    case kReuse:
+      return reuse;
       
     default:
       return 0.0;
@@ -163,6 +175,9 @@ protected:
         updateDrummer();
       }
       break;
+    case kReuse:
+      reuse = value;
+      drummer.setReuse(reuse);
 
     default:
       break;
@@ -209,6 +224,7 @@ private:
   int pitchBendRange;
   // init to impossible value to let first init happen
   int kit = -1;
+  int reuse;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Drummer);
 };

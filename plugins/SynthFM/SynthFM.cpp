@@ -308,6 +308,16 @@ protected:
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = 1.0f;
       break;
+    case kReuse:
+      parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
+      parameter.name = "Reuse voices";
+      parameter.shortName = "reuse";
+      parameter.symbol = "reuse";
+      parameter.unit = "toggle";
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
+      break;
 
     default:
       break;
@@ -361,6 +371,9 @@ protected:
       return carrierWavetable;
     case kCarrierWavetablePhase:
       return carrierWavetablePhase;
+
+    case kReuse:
+      return reuse;
 
     default:
       return 0.0;
@@ -457,6 +470,10 @@ protected:
       carrierWavetablePhase = value;
       break;
 
+    case kReuse:
+      reuse = value;
+      synthFM_Voice_setReuse(context_processor, value);
+
     default:
       break;
     }
@@ -529,6 +546,7 @@ private:
   float carrierWavetable;
   float carrierWavetablePhase;
 
+  int reuse;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SynthFM);
 };

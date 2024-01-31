@@ -28,7 +28,8 @@ enum Parameters {
     kEffectiveLoopEnd,
     // number of samples here
     kSize,
-    // TODO: add also default value?
+    // reuse flag for voice
+    kReuse,
 
     kParameterCount
 };

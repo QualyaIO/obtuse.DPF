@@ -747,6 +747,90 @@ void MetaSampler::setSustain(bool flag) {
    }
 }
 
+void MetaSampler::setReuse(bool flag) {
+   switch(selectedSample) {
+   case 1:
+      synthSamplerCello_Voice_setReuse(processorCello, flag);
+      break;
+   case 2:
+      synthSamplerClarinet_Voice_setReuse(processorClarinet, flag);
+      break;
+   case 3:
+      synthSamplerPiano_Voice_setReuse(processorPiano, flag);
+      break;
+   case 4:
+      synthSamplerAmbientLead_Voice_setReuse(processorAmbientLead, flag);
+      break;
+   case 5:
+      synthSamplerAuthenticStrings_Voice_setReuse(processorAuthenticStrings, flag);
+      break;
+   case 6:
+      synthSamplerBoesendorferGrandPiano_Voice_setReuse(processorBoesendorferGrandPiano, flag);
+      break;
+   case 7:
+      synthSamplerCelesta_Voice_setReuse(processorCelesta, flag);
+      break;
+   case 8:
+      synthSamplerClarinets_Voice_setReuse(processorClarinets, flag);
+      break;
+   case 9:
+      synthSamplerClassicSuitcaseMk1_Voice_setReuse(processorClassicSuitcaseMk1, flag);
+      break;
+   case 10:
+      synthSamplerCosmos_Voice_setReuse(processorCosmos, flag);
+      break;
+   case 11:
+      synthSamplerDreamVoice_Voice_setReuse(processorDreamVoice, flag);
+      break;
+   case 12:
+      synthSamplerDrivenSynthLead_Voice_setReuse(processorDrivenSynthLead, flag);
+      break;
+   case 13:
+      synthSamplerGlassMarimbaSoft_Voice_setReuse(processorGlassMarimbaSoft, flag);
+      break;
+   case 14:
+      synthSamplerIndianSitar_Voice_setReuse(processorIndianSitar, flag);
+      break;
+   case 15:
+      synthSamplerJapaneseShakuhachiFlute_Voice_setReuse(processorJapaneseShakuhachiFlute, flag);
+      break;
+   case 16:
+      synthSamplerKoto_Voice_setReuse(processorKoto, flag);
+      break;
+   case 17:
+      synthSamplerMagnificentDrone_Voice_setReuse(processorMagnificentDrone, flag);
+      break;
+   case 18:
+      synthSamplerMysticVibes_Voice_setReuse(processorMysticVibes, flag);
+      break;
+   case 19:
+      synthSamplerPowerFifths_Voice_setReuse(processorPowerFifths, flag);
+      break;
+   case 20:
+      synthSamplerPulsingPatterns_Voice_setReuse(processorPulsingPatterns, flag);
+      break;
+   case 21:
+      synthSamplerShootingStar_Voice_setReuse(processorShootingStar, flag);
+      break;
+   case 22:
+      synthSamplerTimeWarp_Voice_setReuse(processorTimeWarp, flag);
+      break;
+   case 23:
+      synthSamplerTranquility_Voice_setReuse(processorTranquility, flag);
+      break;
+   case 24:
+      synthSamplerVocalCluster_Voice_setReuse(processorVocalCluster, flag);
+      break;
+   case 25:
+      synthSamplerZenGarden_Voice_setReuse(processorZenGarden, flag);
+      break;
+   case 0:
+   default:
+      synthSampler_Voice_setReuse(processorOcarina, flag);
+      break;
+   }
+}
+
 
 void MetaSampler::noteOn(int note, int velocity, int channel) {
    switch(selectedSample) {

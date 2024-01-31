@@ -37,6 +37,9 @@ enum Parameters {
     kCarrierWavetable,
     kCarrierWavetablePhase,
 
+    // reuse flag for voice
+    kReuse,
+
     kParameterCount
 };
 

@@ -33,6 +33,7 @@ struct MetaDrummer {
    void switchTo(int kit);
    // wrapping functions
    void setSamplerate(float sr);
+   void setReuse(bool flag);
    void noteOn(int note, int velocity, int channel);
    void noteOff(int note, int channel);
    void setPitchBend(float semitones);
