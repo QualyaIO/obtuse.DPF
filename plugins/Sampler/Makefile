@@ -22,7 +22,7 @@ FILES_DSP = \
         ../../botania/src/synthSamplerAuthenticStrings.cpp \
         ../../botania/src/synthSamplerBoesendorferGrandPiano.cpp \
         ../../botania/src/synthSamplerCelesta.cpp \
-        ../../botania/src/synthSamplerClarinets.cpp \
+        ../../botania/src/synthSamplerSoftClarinet.cpp \
         ../../botania/src/synthSamplerClassicSuitcaseMk1.cpp \
         ../../botania/src/synthSamplerCosmos.cpp \
         ../../botania/src/synthSamplerDreamVoice.cpp \

@@ -22,18 +22,18 @@ START_NAMESPACE_DISTRHO
 // TODO: add reset input? (e.g. transport to beginning)
 class Chord : public ExtendedPlugin {
 public:
-  // Note: do not care with default values since we will sent all parameters upon init
-  Chord() : ExtendedPlugin(kParameterCount, 0, 0), root(60.0f) {
-    utils_Tonnetz_process_init(context_processor);
-    utils_Tonnetz_setRoot(context_processor, root);
+  // Note: do not care with most default values since we will sent all parameters upon init
+  Chord() : ExtendedPlugin(kParameterCount, 0, 0), root(60) {
+    utils_Chord_process_init(context_processor);
+    utils_Chord_setRoot(context_processor, root);
 
     DISTRHO_SAFE_ASSERT_RETURN(
-                               (CHORD_NB_SCALES  == utils_Tonnetz_getNbScales(context_processor)) &&
+                               (CHORD_NB_SCALES  == utils_Chord_getNbScales(context_processor)) &&
                                "Number of scales for chord different than expected (20)"
                                ,;
            );
     DISTRHO_SAFE_ASSERT_RETURN(
-                               (CHORD_NB_SCALES  == utils_Tonnetz_getNbScales(context_processor)) &&
+                               (CHORD_NB_SCALES  == utils_Chord_getNbScales(context_processor)) &&
                                "Number of scales for chord different than expected (20)"
                                ,;
            );
@@ -235,7 +235,7 @@ protected:
         values[19].value = 19;
       }
       // select default idx
-      parameter.ranges.def = 0.0f;
+      parameter.ranges.def = 1.0f;
       parameter.ranges.min = 0.0f;
       // we must define max range to be able to select all values, 1 by default
       parameter.ranges.max = (float) (parameter.enumValues.count - 1);
@@ -265,7 +265,7 @@ protected:
         values[5].value = 5;
       }
       // select default idx
-      parameter.ranges.def = 0.0f;
+      parameter.ranges.def = 1.0f;
       parameter.ranges.min = 0.0f;
       // we must define max range to be able to select all values, 1 by default
       parameter.ranges.max = (float) (parameter.enumValues.count - 1);
@@ -329,8 +329,8 @@ protected:
       parameter.symbol = "rootnote";
       parameter.unit = "note";
       parameter.ranges.def = root;
-      parameter.ranges.min = 0.0f;
-      parameter.ranges.max = 127.0f;
+      parameter.ranges.min = 0;
+      parameter.ranges.max = 127;
       break;
 
     default:
@@ -383,25 +383,25 @@ protected:
       // retrig scale upon change
       sendScaleOff();
       scale = value;
-      utils_Tonnetz_setScale(context_processor, value);
+      utils_Chord_setScale(context_processor, value);
       updateScale();
       sendScaleOn();
       break;
     case kChord:
       chord = value;
-      utils_Tonnetz_setChord(context_processor, value);
+      utils_Chord_setChord(context_processor, value);
       break;
     case kChordSpread:
       chordSpread = value;
-      utils_Tonnetz_setChordSpread(context_processor, float_to_fix(value));
+      utils_Chord_setChordSpread(context_processor, float_to_fix(value));
       break;
     case kInvSpread:
       invSpread = value;
-      utils_Tonnetz_setInversionSpread(context_processor, float_to_fix(value));
+      utils_Chord_setInversionSpread(context_processor, float_to_fix(value));
       break;
     case kJump:
       jump = value;
-      utils_Tonnetz_setJump(context_processor, float_to_fix(value));
+      utils_Chord_setJump(context_processor, float_to_fix(value));
       break;
     case kChannelChord:
       // retrig chord upon channel change
@@ -435,7 +435,7 @@ protected:
     if (channelInput == 0 or channelInput - 1 == channel) {
       sendScaleOff(frame);
       root = note;
-      utils_Tonnetz_setRoot(context_processor, note);
+      utils_Chord_setRoot(context_processor, note);
       updateScale();
       sendScaleOn(frame);
     }
@@ -464,17 +464,17 @@ protected:
   void updateScale() {
     // which tones are active or not for current scale
     uint8_t rawScale[CHORD_MAX_SCALE_SIZE] = {false, false, false, false, false, false, false, false, false, false, false, false};
-    int scaleId = utils_Tonnetz_getScaleId(context_processor);
-    utils_Tonnetz_getScale(scaleId, rawScale);
+    int scaleId = utils_Chord_getScaleId(context_processor);
+    utils_Chord_getScale(scaleId, rawScale);
     // retrieve root from DSP, just to be sure (there might be some discrepancy upon init).
     // TODO: maybe check for discrepancy?
-    int trueRoot = utils_Tonnetz_getRoot(context_processor);
+    int trueRoot = utils_Chord_getRoot(context_processor);
     int k = 0;
     // fill the scale with selected notes, related to root
     for (int i = 0; i < CHORD_MAX_SCALE_SIZE; i++) {
       if (rawScale[i]) {
         scaleNotes[k] = trueRoot + i;
-        // mitigate issue with high root, down one octave, should match how notes within chords are also one octave down in DSP tonnetz
+        // mitigate issue with high root, down one octave, should match how notes within chords are also one octave down in DSP Chord
         if(scaleNotes[k] > 127) {
           scaleNotes[k] = scaleNotes[k] - 12;
         }
@@ -504,10 +504,10 @@ protected:
     // turn off previous chord
     sendChordOff(frame);
     // draw and retrieve chord
-    utils_Tonnetz_process(context_processor);
-    notes[0] = utils_Tonnetz_process_ret_0(context_processor);
-    notes[1] = utils_Tonnetz_process_ret_1(context_processor);
-    notes[2] = utils_Tonnetz_process_ret_2(context_processor);
+    utils_Chord_process(context_processor);
+    notes[0] = utils_Chord_process_ret_0(context_processor);
+    notes[1] = utils_Chord_process_ret_1(context_processor);
+    notes[2] = utils_Chord_process_ret_2(context_processor);
     // send chord
     sendChordOn(frame);
   }
@@ -528,7 +528,7 @@ protected:
   }
 
 private:
-  utils_Tonnetz_process_type context_processor;
+  utils_Chord_process_type context_processor;
   // currently receive a trigger
   bool trigerring = false;
   // chord notes
@@ -546,7 +546,7 @@ private:
   float invSpread;
   float jump;
   // same as in DSP
-  float root;
+  int root;
   // where to send notes
   int channelChord = -1;
   int channelScale = -1;
