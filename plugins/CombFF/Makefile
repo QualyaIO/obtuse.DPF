@@ -28,10 +28,8 @@ include ../../dpf/Makefile.plugins.mk
 BUILD_CXX_FLAGS += -isystem../../botania/src -I../../src
 
 # --------------------------------------------------------------
-# Enable all possible plugin types
+# Select plugins
 
-TARGETS += jack
-TARGETS += dssi
 TARGETS += lv2_sep
 TARGETS += vst2
 TARGETS += vst3
