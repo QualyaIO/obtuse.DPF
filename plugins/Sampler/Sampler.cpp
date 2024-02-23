@@ -156,6 +156,16 @@ protected:
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = MetaSampler::getMaxLoopSize();
       break;
+    case kReuse:
+      parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
+      parameter.name = "Reuse voices";
+      parameter.shortName = "reuse";
+      parameter.symbol = "reuse";
+      parameter.unit = "toggle";
+      parameter.ranges.def = 0.0f;
+      parameter.ranges.min = 0.0f;
+      parameter.ranges.max = 1.0f;
+      break;
     case kEffectiveLoop:
       parameter.hints = kParameterIsAutomatable|kParameterIsBoolean|kParameterIsOutput;
       parameter.name = "Effective loop enabled";
@@ -195,16 +205,6 @@ protected:
       parameter.ranges.def = 0.0f;
       parameter.ranges.min = 0.0f;
       parameter.ranges.max = MetaSampler::getMaxLoopSize();
-      break;
-    case kReuse:
-      parameter.hints = kParameterIsAutomatable|kParameterIsBoolean;
-      parameter.name = "Reuse voices";
-      parameter.shortName = "reuse";
-      parameter.symbol = "reuse";
-      parameter.unit = "toggle";
-      parameter.ranges.def = 0.0f;
-      parameter.ranges.min = 0.0f;
-      parameter.ranges.max = 1.0f;
       break;
 
     default:
