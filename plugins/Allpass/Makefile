@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = allpass
+NAME = obtuse-allpass
 
 # --------------------------------------------------------------
 # Files to build

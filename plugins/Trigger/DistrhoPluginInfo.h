@@ -2,7 +2,7 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "Trigger"
+#define DISTRHO_PLUGIN_NAME  "ObtuseTrigger"
 #define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/trigger"
 #define DISTRHO_PLUGIN_CLAP_ID "obtuse.trigger"
 

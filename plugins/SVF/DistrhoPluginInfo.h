@@ -2,7 +2,7 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "SVF"
+#define DISTRHO_PLUGIN_NAME  "ObtuseSVF"
 #define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/svf"
 #define DISTRHO_PLUGIN_CLAP_ID "obtuse.svf"
 

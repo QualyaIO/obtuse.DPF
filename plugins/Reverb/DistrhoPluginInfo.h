@@ -2,7 +2,7 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "Reverb"
+#define DISTRHO_PLUGIN_NAME  "ObtuseReverb"
 #define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/reverb"
 #define DISTRHO_PLUGIN_CLAP_ID "obtuse.reverb"
 

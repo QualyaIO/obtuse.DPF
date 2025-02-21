@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = drummer
+NAME = obtuse-drummer
 
 # --------------------------------------------------------------
 # Files to build

@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = saturator
+NAME = obtuse-saturator
 
 # --------------------------------------------------------------
 # Files to build

@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = sampler
+NAME = obtuse-sampler
 
 # --------------------------------------------------------------
 # Files to build

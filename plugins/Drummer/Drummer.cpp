@@ -19,7 +19,7 @@ protected:
   const char *getDescription() const override {
     return "I doum doum things.";
   }
-  const char *getMaker() const override { return "jfrey"; }
+  const char *getMaker() const override { return "Qualya"; }
   uint32_t getVersion() const override { return d_version(0,1,0); }
   int64_t getUniqueId() const override { 
     return d_cconst('O','D','R','M');

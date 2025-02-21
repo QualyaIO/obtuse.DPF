@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = reverbF
+NAME = obtuse-reverb
 
 # --------------------------------------------------------------
 # Files to build

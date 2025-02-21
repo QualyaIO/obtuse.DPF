@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = trigger
+NAME = obtuse-trigger
 
 # --------------------------------------------------------------
 # Files to build

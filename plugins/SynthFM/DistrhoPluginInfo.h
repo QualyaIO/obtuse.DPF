@@ -2,7 +2,7 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "SynthFM"
+#define DISTRHO_PLUGIN_NAME  "ObtuseSynthFM"
 #define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/synthfm"
 #define DISTRHO_PLUGIN_CLAP_ID "obtuse.synthfm"
 

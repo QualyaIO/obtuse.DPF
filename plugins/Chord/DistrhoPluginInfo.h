@@ -2,7 +2,7 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "Chord"
+#define DISTRHO_PLUGIN_NAME  "ObtuseChord"
 #define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/chord"
 #define DISTRHO_PLUGIN_CLAP_ID "obtuse.chord"
 

@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = combFB
+NAME = obtuse-combfb
 
 # --------------------------------------------------------------
 # Files to build

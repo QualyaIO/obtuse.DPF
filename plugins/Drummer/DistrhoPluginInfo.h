@@ -2,7 +2,7 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "Drummer"
+#define DISTRHO_PLUGIN_NAME  "ObtuseDrummer"
 #define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/drummer"
 #define DISTRHO_PLUGIN_CLAP_ID "obtuse.drummer"
 

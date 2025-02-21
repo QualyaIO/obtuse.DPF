@@ -2,7 +2,7 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "Sampler"
+#define DISTRHO_PLUGIN_NAME  "ObtuseSampler"
 #define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/sampler"
 #define DISTRHO_PLUGIN_CLAP_ID "obtuse.sampler"
 

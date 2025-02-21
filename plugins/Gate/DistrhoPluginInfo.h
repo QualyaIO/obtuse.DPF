@@ -2,7 +2,7 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "Gate"
+#define DISTRHO_PLUGIN_NAME  "ObtuseGate"
 #define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/gate"
 #define DISTRHO_PLUGIN_CLAP_ID "obtuse.gate"
 

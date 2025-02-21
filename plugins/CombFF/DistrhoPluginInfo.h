@@ -2,7 +2,7 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME  "CombFF"
+#define DISTRHO_PLUGIN_NAME  "ObtuseCombFF"
 #define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/combff"
 #define DISTRHO_PLUGIN_CLAP_ID "obtuse.combff"
 

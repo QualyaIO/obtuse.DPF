@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = synthfm
+NAME = obtuse-synthfm
 
 # --------------------------------------------------------------
 # Files to build
