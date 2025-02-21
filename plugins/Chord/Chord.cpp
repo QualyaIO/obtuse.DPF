@@ -1,6 +1,7 @@
 
 #include "ExtendedPlugin.hpp"
 #include "utils.h"
+#include <ctime>
 
 START_NAMESPACE_DISTRHO
 
@@ -25,6 +26,8 @@ public:
   // Note: do not care with most default values since we will sent all parameters upon init
   Chord() : ExtendedPlugin(kParameterCount, 0, 0), root(60) {
     utils_Chord_process_init(context_processor);
+    // seed with current second and cpu clock to get something more granular
+    utils_Chord_setSeed(context_processor, time(NULL) + (unsigned) clock());
     utils_Chord_setRoot(context_processor, root);
 
     DISTRHO_SAFE_ASSERT_RETURN(

@@ -5,6 +5,11 @@ Audio plugins version of [Obtuse DSP](https://github.com/QualyaIO/obtuse.DSP) (V
 
 - VST3: some hosts do not support "internal" parameters and will display numerous extra parameters related to MIDI CC,see https://github.com/DISTRHO/DPF/issues/345
 - VST3: some hosts (e.g. Ardour) will prevent automation when MIDI input is set.
+- seeds for arp, chord and trigg can be the same for several plugins when they are instantiated at the same time
+
+# TODO
+
+- option to get and manually set seed where applicable?
 
 # Dev
 

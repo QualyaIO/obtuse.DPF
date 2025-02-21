@@ -2,6 +2,7 @@
 #include "ExtendedPlugin.hpp"
 #include "utils.h"
 #include <cassert>
+#include <ctime>
 
 START_NAMESPACE_DISTRHO
 
@@ -31,6 +32,8 @@ public:
                                "Number of notes held in arp differs from expected (16)"
                                ,;);
     utils_Arp_process_init(context_processor);
+    // seed with current second and cpu clock to get something more granular
+    utils_Arp_setSeed(context_processor, time(NULL) + (unsigned) clock());
     utils_Gate_list_init(context_list);
 
     // will init notes to -1
