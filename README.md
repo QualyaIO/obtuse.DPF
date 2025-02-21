@@ -17,6 +17,6 @@ Using git submodule to get source from obtuse (itself using git LFS), and also f
 
 # Changelog
 
-## v0.1.0 (current)
+## v0.1.0 (2025-02-21)
 
 - first proper release
