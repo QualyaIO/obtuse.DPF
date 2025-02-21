@@ -15,7 +15,7 @@ START_NAMESPACE_DISTRHO
 // FIXME: scale sent only upon change in root or scale at the moment... change that?
 // TODO: implement reset input
 // TODO: ouput parameter for current chord?
-// Note: send chord via MIDI, hence will change behavior of things like arp if used after, compared to plain DSP or VCV (e.g. use of note off will temporarily change number of active notes in arp). Will also note off / note off all 3 notes for each new chord, even if unchanged.
+// Note: send chord via MIDI, hence will change behavior of things like arp if used after, compared to plain DSP or VCV (e.g. use of note off will temporarily change number of active notes in arp). Will also note off / note on all 3 notes for each new chord, even if unchanged.
 // Note: changing chord or scale midi channel will note off on pevious chan / note on on current chan pending chord or scale. 
 // Note: changing root note or scale will output scale in MIDI, hence beware of spamming midi if automated
 // Note: in this version chord change can also be triggered through midi, and any noteOn event on the corresponding MIDI channel.
@@ -43,14 +43,14 @@ public:
 
 protected:
   // metadata
-  const char *getLabel() const override { return "BotaniaChord"; }
+  const char *getLabel() const override { return "ObtuseChord"; }
   const char *getDescription() const override {
     return "I generate chords things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  uint32_t getVersion() const override { return d_version(1,0,0); }
+  uint32_t getVersion() const override { return d_version(0,1,0); }
   int64_t getUniqueId() const override { 
-    return d_cconst('B','C','R','D'); 
+    return d_cconst('O','C','R','D');
   }
 
   // ports

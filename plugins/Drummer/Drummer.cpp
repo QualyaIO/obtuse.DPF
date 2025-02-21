@@ -15,14 +15,14 @@ public:
 
 protected:
   // metadata
-  const char *getLabel() const override { return "BotaniaDrummer"; }
+  const char *getLabel() const override { return "ObtuseDrummer"; }
   const char *getDescription() const override {
     return "I doum doum things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  uint32_t getVersion() const override { return d_version(1,0,0); }
+  uint32_t getVersion() const override { return d_version(0,1,0); }
   int64_t getUniqueId() const override { 
-    return d_cconst('B','D','R','M'); 
+    return d_cconst('O','D','R','M');
   }
 
   // params

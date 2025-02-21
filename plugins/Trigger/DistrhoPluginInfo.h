@@ -3,8 +3,8 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "Trigger"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/trigger"
-#define DISTRHO_PLUGIN_CLAP_ID "botania.trigger"
+#define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/trigger"
+#define DISTRHO_PLUGIN_CLAP_ID "obtuse.trigger"
 
 // Note: in and out are CV
 #define DISTRHO_PLUGIN_NUM_INPUTS   1

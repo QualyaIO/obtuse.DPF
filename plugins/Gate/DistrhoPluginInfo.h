@@ -3,8 +3,8 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "Gate"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/gate"
-#define DISTRHO_PLUGIN_CLAP_ID "botania.gate"
+#define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/gate"
+#define DISTRHO_PLUGIN_CLAP_ID "obtuse.gate"
 
 #define DISTRHO_PLUGIN_NUM_INPUTS   0
 #define DISTRHO_PLUGIN_NUM_OUTPUTS  0

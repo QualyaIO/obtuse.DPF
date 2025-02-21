@@ -17,14 +17,14 @@ public:
 
 protected:
   // metadata
-  const char *getLabel() const override { return "BotaniaCombFB"; }
+  const char *getLabel() const override { return "ObtuseCombFB"; }
   const char *getDescription() const override {
     return "I comb backward filter things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  uint32_t getVersion() const override { return d_version(1,0,0); }
+  uint32_t getVersion() const override { return d_version(0,1,0); }
   int64_t getUniqueId() const override { 
-    return d_cconst('B','C','F','B'); 
+    return d_cconst('O','C','F','B');
   }
 
   // params

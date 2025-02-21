@@ -3,8 +3,8 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "SynthFM"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/synthfm"
-#define DISTRHO_PLUGIN_CLAP_ID "botania.synthfm"
+#define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/synthfm"
+#define DISTRHO_PLUGIN_CLAP_ID "obtuse.synthfm"
 
 #define DISTRHO_PLUGIN_NUM_INPUTS   0
 #define DISTRHO_PLUGIN_NUM_OUTPUTS  1

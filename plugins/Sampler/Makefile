@@ -13,33 +13,33 @@ NAME = sampler
 # Files to build
 
 FILES_DSP = \
-	../../botania/src/vultin.cpp \
-        ../../botania/src/synthSampler.cpp \
-        ../../botania/src/synthSamplerCello.cpp \
-        ../../botania/src/synthSamplerClarinet.cpp \
-        ../../botania/src/synthSamplerPiano.cpp \
-        ../../botania/src/synthSamplerAmbientLead.cpp \
-        ../../botania/src/synthSamplerAuthenticStrings.cpp \
-        ../../botania/src/synthSamplerBoesendorferGrandPiano.cpp \
-        ../../botania/src/synthSamplerCelesta.cpp \
-        ../../botania/src/synthSamplerSoftClarinet.cpp \
-        ../../botania/src/synthSamplerClassicSuitcaseMk1.cpp \
-        ../../botania/src/synthSamplerCosmos.cpp \
-        ../../botania/src/synthSamplerDreamVoice.cpp \
-        ../../botania/src/synthSamplerDrivenSynthLead.cpp \
-        ../../botania/src/synthSamplerGlassMarimbaSoft.cpp \
-        ../../botania/src/synthSamplerIndianSitar.cpp \
-        ../../botania/src/synthSamplerJapaneseShakuhachiFlute.cpp \
-        ../../botania/src/synthSamplerKoto.cpp \
-        ../../botania/src/synthSamplerMagnificentDrone.cpp \
-        ../../botania/src/synthSamplerMysticVibes.cpp \
-        ../../botania/src/synthSamplerPowerFifths.cpp \
-        ../../botania/src/synthSamplerPulsingPatterns.cpp \
-        ../../botania/src/synthSamplerShootingStar.cpp \
-        ../../botania/src/synthSamplerTimeWarp.cpp \
-        ../../botania/src/synthSamplerTranquility.cpp \
-        ../../botania/src/synthSamplerVocalCluster.cpp \
-        ../../botania/src/synthSamplerZenGarden.cpp \
+	../../obtuse/src/vultin.cpp \
+        ../../obtuse/src/synthSampler.cpp \
+        ../../obtuse/src/synthSamplerCello.cpp \
+        ../../obtuse/src/synthSamplerClarinet.cpp \
+        ../../obtuse/src/synthSamplerPiano.cpp \
+        ../../obtuse/src/synthSamplerAmbientLead.cpp \
+        ../../obtuse/src/synthSamplerAuthenticStrings.cpp \
+        ../../obtuse/src/synthSamplerBoesendorferGrandPiano.cpp \
+        ../../obtuse/src/synthSamplerCelesta.cpp \
+        ../../obtuse/src/synthSamplerSoftClarinet.cpp \
+        ../../obtuse/src/synthSamplerClassicSuitcaseMk1.cpp \
+        ../../obtuse/src/synthSamplerCosmos.cpp \
+        ../../obtuse/src/synthSamplerDreamVoice.cpp \
+        ../../obtuse/src/synthSamplerDrivenSynthLead.cpp \
+        ../../obtuse/src/synthSamplerGlassMarimbaSoft.cpp \
+        ../../obtuse/src/synthSamplerIndianSitar.cpp \
+        ../../obtuse/src/synthSamplerJapaneseShakuhachiFlute.cpp \
+        ../../obtuse/src/synthSamplerKoto.cpp \
+        ../../obtuse/src/synthSamplerMagnificentDrone.cpp \
+        ../../obtuse/src/synthSamplerMysticVibes.cpp \
+        ../../obtuse/src/synthSamplerPowerFifths.cpp \
+        ../../obtuse/src/synthSamplerPulsingPatterns.cpp \
+        ../../obtuse/src/synthSamplerShootingStar.cpp \
+        ../../obtuse/src/synthSamplerTimeWarp.cpp \
+        ../../obtuse/src/synthSamplerTranquility.cpp \
+        ../../obtuse/src/synthSamplerVocalCluster.cpp \
+        ../../obtuse/src/synthSamplerZenGarden.cpp \
 	MetaSampler.cpp \
 	Sampler.cpp
 
@@ -49,8 +49,8 @@ FILES_DSP = \
 include ../../dpf/Makefile.plugins.mk
 
 # --------------------------------------------------------------
-# Adding botania (ignoring its warnings) and custom libs
-BUILD_CXX_FLAGS += -isystem../../botania/src -I../../src
+# Adding obtuse (ignoring its warnings) and custom libs
+BUILD_CXX_FLAGS += -isystem../../obtuse/src -I../../src
 
 # --------------------------------------------------------------
 # Select plugins

@@ -18,14 +18,14 @@ public:
 
 protected:
   // metadata
-  const char *getLabel() const override { return "BotaniaReverb"; }
+  const char *getLabel() const override { return "ObtuseReverb"; }
   const char *getDescription() const override {
     return "I comb reverb things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  uint32_t getVersion() const override { return d_version(1,0,0); }
+  uint32_t getVersion() const override { return d_version(0,1,0); }
   int64_t getUniqueId() const override { 
-    return d_cconst('B','R','V','B'); 
+    return d_cconst('O','R','V','B');
   }
 
   // params

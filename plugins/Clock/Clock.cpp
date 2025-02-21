@@ -24,7 +24,7 @@ enum ClockOutputs {
 // TODO: MIDI input to sync directly with it without relying to host?
 // NOTE: in autotomous follow transport it will only pause at the same time of transport (albeit at risk of loosing sync upon pause/play with current implementation) and reset when we are back to 0 (if supported by plugin type and host). Jumping forward or backward will otherwise let the clock run.
 // NOTE: in transport, will retrigger upon change in timeline
-// NOTE: in transport only note to beat ratio parameter is used, bypass botania DSP.
+// NOTE: in transport only note to beat ratio parameter is used, bypass obtuse DSP.
 // NOTE: host time pos not supported in LADSPA/DSSI versions
 // NOTE: when host handles poorly multiple outputs, user can override with desired information -- e.g. the first two ones
 class Clock : public ExtendedPlugin {
@@ -43,14 +43,14 @@ public:
 
 protected:
   // metadata
-  const char *getLabel() const override { return "BotaniaClock"; }
+  const char *getLabel() const override { return "ObtuseClock"; }
   const char *getDescription() const override {
     return "I clock things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  uint32_t getVersion() const override { return d_version(1,0,0); }
+  uint32_t getVersion() const override { return d_version(0,1,0); }
   int64_t getUniqueId() const override { 
-    return d_cconst('B','C','L','K'); 
+    return d_cconst('O','C','L','K');
   }
 
   // ports
@@ -477,7 +477,7 @@ protected:
 
     const TimePosition& timePos(getTimePosition());
 
-    // autonomous mode, rely on botania
+    // autonomous mode, rely on obtuse
     if (source == 0 or source == 1) {
       // detect reset
       // TODO: check that we go indeed back to 0 ticks at start of buffer for all host

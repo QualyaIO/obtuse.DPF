@@ -14,8 +14,8 @@ NAME = saturator
 
 # vultin.cpp here for win64 compilation during CI
 FILES_DSP = \
-	../../botania/src/vultin.cpp \
-	../../botania/src/effects.cpp \
+	../../obtuse/src/vultin.cpp \
+	../../obtuse/src/effects.cpp \
 	Saturator.cpp
 
 
@@ -25,8 +25,8 @@ FILES_DSP = \
 include ../../dpf/Makefile.plugins.mk
 
 # --------------------------------------------------------------
-# Adding botania (ignoring its warnings) and custom libs
-BUILD_CXX_FLAGS += -isystem../../botania/src -I../../src
+# Adding obtuse (ignoring its warnings) and custom libs
+BUILD_CXX_FLAGS += -isystem../../obtuse/src -I../../src
 
 # --------------------------------------------------------------
 # Select plugins

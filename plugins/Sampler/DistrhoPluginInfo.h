@@ -3,8 +3,8 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "Sampler"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/sampler"
-#define DISTRHO_PLUGIN_CLAP_ID "botania.sampler"
+#define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/sampler"
+#define DISTRHO_PLUGIN_CLAP_ID "obtuse.sampler"
 
 #define DISTRHO_PLUGIN_NUM_INPUTS   0
 #define DISTRHO_PLUGIN_NUM_OUTPUTS  1

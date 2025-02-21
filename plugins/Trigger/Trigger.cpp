@@ -3,7 +3,6 @@
 #include "utils.h"
 #include "DistrhoPluginUtils.hpp"
 
-
 START_NAMESPACE_DISTRHO
 
 // in seconds, how long for each trigger -- to sync with Clock
@@ -21,14 +20,14 @@ public:
 
 protected:
   // metadata
-  const char *getLabel() const override { return "BotaniaTrigger"; }
+  const char *getLabel() const override { return "ObtuseTrigger"; }
   const char *getDescription() const override {
     return "I trigger things.";
   }
   const char *getMaker() const override { return "jfrey"; }
-  uint32_t getVersion() const override { return d_version(1,0,0); }
+  uint32_t getVersion() const override { return d_version(0,1,0); }
   int64_t getUniqueId() const override { 
-    return d_cconst('B','T','R','G'); 
+    return d_cconst('O','T','R','G');
   }
 
   // ports

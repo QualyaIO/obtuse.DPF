@@ -3,8 +3,8 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "Clock"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/clock"
-#define DISTRHO_PLUGIN_CLAP_ID "botania.clock"
+#define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/clock"
+#define DISTRHO_PLUGIN_CLAP_ID "obtuse.clock"
 
 #define DISTRHO_PLUGIN_NUM_INPUTS   0
 // Note: all CV outputs

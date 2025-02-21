@@ -3,8 +3,8 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "SVF"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/svf"
-#define DISTRHO_PLUGIN_CLAP_ID "botania.SVF"
+#define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/svf"
+#define DISTRHO_PLUGIN_CLAP_ID "obtuse.svf"
 
 
 #define DISTRHO_PLUGIN_NUM_INPUTS   1

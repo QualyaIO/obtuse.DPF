@@ -3,8 +3,8 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "Allpass"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/allpass"
-#define DISTRHO_PLUGIN_CLAP_ID "botania.Allpass"
+#define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/allpass"
+#define DISTRHO_PLUGIN_CLAP_ID "obtuse.allpass"
 
 
 #define DISTRHO_PLUGIN_NUM_INPUTS   1

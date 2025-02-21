@@ -3,8 +3,8 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_NAME  "Arp"
-#define DISTRHO_PLUGIN_URI   "http://ullo.fr/botania/arp"
-#define DISTRHO_PLUGIN_CLAP_ID "botania.arp"
+#define DISTRHO_PLUGIN_URI   "https://qualya.io/obtuse/arp"
+#define DISTRHO_PLUGIN_CLAP_ID "obtuse.arp"
 
 // Note: CV input
 #define DISTRHO_PLUGIN_NUM_INPUTS   1

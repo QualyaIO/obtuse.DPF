@@ -13,12 +13,12 @@ NAME = drummer
 # Files to build
 
 FILES_DSP = \
-	../../botania/src/vultin.cpp \
-        ../../botania/src/synthDrummer.cpp \
-        ../../botania/src/synthDrummerBbox.cpp \
-        ../../botania/src/synthDrummerFoleyType.cpp \
-        ../../botania/src/synthDrummerNes.cpp \
-        ../../botania/src/synthDrummerTamaRockstar.cpp \
+	../../obtuse/src/vultin.cpp \
+        ../../obtuse/src/synthDrummer.cpp \
+        ../../obtuse/src/synthDrummerBbox.cpp \
+        ../../obtuse/src/synthDrummerFoleyType.cpp \
+        ../../obtuse/src/synthDrummerNes.cpp \
+        ../../obtuse/src/synthDrummerTamaRockstar.cpp \
 	MetaDrummer.cpp \
 	Drummer.cpp
 
@@ -28,8 +28,8 @@ FILES_DSP = \
 include ../../dpf/Makefile.plugins.mk
 
 # --------------------------------------------------------------
-# Adding botania (ignoring its warnings) and custom libs
-BUILD_CXX_FLAGS += -isystem../../botania/src -I../../src
+# Adding obtuse (ignoring its warnings) and custom libs
+BUILD_CXX_FLAGS += -isystem../../obtuse/src -I../../src
 
 # --------------------------------------------------------------
 # Select plugins

@@ -13,8 +13,8 @@ NAME = SVF
 # Files to build
 
 FILES_DSP = \
-	../../botania/src/vultin.cpp \
-	../../botania/src/effects.cpp \
+	../../obtuse/src/vultin.cpp \
+	../../obtuse/src/effects.cpp \
 	SVF.cpp
 
 # --------------------------------------------------------------
@@ -23,8 +23,8 @@ FILES_DSP = \
 include ../../dpf/Makefile.plugins.mk
 
 # --------------------------------------------------------------
-# Adding botania (ignoring its warnings) and custom libs
-BUILD_CXX_FLAGS += -isystem../../botania/src -I../../src
+# Adding obtuse (ignoring its warnings) and custom libs
+BUILD_CXX_FLAGS += -isystem../../obtuse/src -I../../src
 
 # --------------------------------------------------------------
 # Select plugins
