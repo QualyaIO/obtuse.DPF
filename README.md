@@ -1,5 +1,5 @@
 
-Audio plugins version of Botania DSP, thanks to DPF. 
+Audio plugins version of [Obtuse DSP](https://github.com/QualyaIO/obtuse.DSP) (VST2, VST3, LV2 and CLAP formats), thanks to [DPF](https://github.com/DISTRHO/DPF/). 
 
 # Known issues
 
@@ -8,4 +8,10 @@ Audio plugins version of Botania DSP, thanks to DPF.
 
 # Dev
 
-Using git submodule to get source from botania dsp (itself using git LFS), and also from DPF. Don't forget to clone recursive or init submodule afterwards -- e.g. `git submodule update --init --recursive`.
+Using git submodule to get source from obtuse (itself using git LFS), and also from DPF. Don't forget to clone recursive or init submodule afterwards -- e.g. `git submodule update --init --recursive`.
+
+# Changelog
+
+## v0.1.0 (current)
+
+- first proper release
