@@ -31,7 +31,7 @@ protected:
   fix16_t buffIn[BUFFER_SIZE];
   fix16_t buffOut[BUFFER_SIZE];
 
-  const char *getLicense() const override { return "http://ullo.fr/botania/custom_licence"; }
+  const char *getLicense() const override { return "AGPL3"; }
 
   // The following functions will be called upon encountering MIDI events, to be implemented by subclasses. channel: 0..15. frame: frame number within the buffer of the MIDI event
   virtual void noteOn(uint8_t /*note*/, uint8_t /*velocity*/, uint8_t /*channel*/, uint32_t /*frame*/) {};
