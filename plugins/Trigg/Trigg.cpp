@@ -9,13 +9,13 @@ START_NAMESPACE_DISTRHO
 // in seconds, how long for each trigger -- to sync with Clock
 #define TRIGGER_LENGTH 0.0002
 
-// Wrapper for Trigger.
+// Wrapper for Trigg.
 // Note: in this version there is a flag to reset on transport reset (effective upon next reset).
 // TODO: alternate MIDI input/output to be used with Arp or Chord? 
-class Trigger : public ExtendedPlugin {
+class Trigg : public ExtendedPlugin {
 public:
   // Note: do not care with default values since we will sent all parameters upon init
-  Trigger() : ExtendedPlugin(kParameterCount, 0, 0) {
+  Trigg() : ExtendedPlugin(kParameterCount, 0, 0) {
     utils_Trigg_process_init(context_processor);
     // seed with current second and cpu clock to get something more granular
     utils_Trigg_setSeed(context_processor, time(NULL) + (unsigned) clock());
@@ -23,7 +23,7 @@ public:
 
 protected:
   // metadata
-  const char *getLabel() const override { return "ObtuseTrigger"; }
+  const char *getLabel() const override { return "ObtuseTrigg"; }
   const char *getDescription() const override {
     return "I trigger things.";
   }
@@ -305,9 +305,9 @@ private:
   float magnitude;
   int doTransportReset;
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Trigger);
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Trigg);
 };
 
-Plugin *createPlugin() { return new Trigger(); }
+Plugin *createPlugin() { return new Trigg(); }
 
 END_NAMESPACE_DISTRHO

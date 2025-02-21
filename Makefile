@@ -30,7 +30,7 @@ plugins: dgl
 	$(MAKE) all -C plugins/Chord
 	$(MAKE) all -C plugins/Clock
 	$(MAKE) all -C plugins/Gate
-	$(MAKE) all -C plugins/Trigger
+	$(MAKE) all -C plugins/Trigg
 	$(MAKE) all -C plugins/SVF
 	$(MAKE) all -C plugins/CombFF
 	$(MAKE) all -C plugins/CombFB
@@ -62,7 +62,7 @@ clean:
 	$(MAKE) clean -C plugins/Chord
 	$(MAKE) clean -C plugins/Clock
 	$(MAKE) clean -C plugins/Gate
-	$(MAKE) clean -C plugins/Trigger
+	$(MAKE) clean -C plugins/Trigg
 	$(MAKE) clean -C plugins/SVF
 	$(MAKE) clean -C plugins/CombFF
 	$(MAKE) clean -C plugins/CombFB

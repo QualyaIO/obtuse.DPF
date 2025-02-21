@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = obtuse-trigger
+NAME = obtuse-trigg
 
 # --------------------------------------------------------------
 # Files to build
@@ -15,7 +15,7 @@ NAME = obtuse-trigger
 FILES_DSP = \
 	../../obtuse/src/vultin.cpp \
 	../../obtuse/src/utils.cpp \
-	Trigger.cpp
+	Trigg.cpp
 
 # --------------------------------------------------------------
 # Do some magic
