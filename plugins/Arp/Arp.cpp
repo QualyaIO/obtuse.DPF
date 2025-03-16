@@ -9,6 +9,8 @@ START_NAMESPACE_DISTRHO
 // to sync with vult code
 #define ARP_MAX_NOTES 16
 #define ARP_NB_MODES 6
+// we want to make sure we know how many midi noes there is
+#define NB_NOTES 128
 
 // Wrapper for Arp. Up, down, etc. will refer to note order. Duplicated note brings it to newest.
 // Note: In this version, the duration of the CV trigger input will be the duration of the output noteOn / noteOff MIDI events.
@@ -320,13 +322,15 @@ protected:
 
   // callbacks for processing MIDI
   // keep track of xx last active notes, duplicate no matter the channel will reset position. Using gate's list
-  void noteOn(uint8_t note, uint8_t, uint8_t channel, uint32_t frame) {
+  void noteOn(uint8_t note, uint8_t velocity, uint8_t channel, uint32_t frame) {
     // filter event depending on selected channel
     if (channelInput == 0 or channelInput - 1 == channel) {
       // turn off previous note, if any -- channel not important here, nothing sent
       noteOff(note, 0, frame);
       // add note to list
       utils_Gate_push(context_list, note);
+      // preserve velocity
+      velocities[note] = velocity;
       // update arp
       updateNotes();
     }
@@ -362,7 +366,8 @@ protected:
     lastChan = channelOutput - 1;
     // send MIDI
     if (lastNote >= 0) {
-      sendNoteOn(lastNote, 127, lastChan, frame);
+      uint8_t lastVelocity =  utils_Arp_getVel(context_processor, lastNote);
+      sendNoteOn(lastNote, lastVelocity, lastChan, frame);
     }
   }
 
@@ -391,7 +396,10 @@ protected:
 
 private:
   utils_Arp_process_type context_processor;
+  // we use a list here to keep track of incoming notes
   utils_Gate_list_type context_list;
+  // keeping track of incoming velocities, only updated upon new notes
+  uint8_t velocities[NB_NOTES] = {0};
   // currently receive a trigger
   bool trigerring = false;
   // saving last value sent for note on and used channel
@@ -419,17 +427,27 @@ private:
     }
     // now build array to be sent to arp from there
     int arpNotes[ARP_MAX_NOTES];
+    int arpVelocities[ARP_MAX_NOTES];
     int n = 0;
     while (n < nbNotes && n < ARP_MAX_NOTES) {
-      arpNotes[n] = utils_Gate_peek(context_list, listStartIdx + n);
+      int note = utils_Gate_peek(context_list, listStartIdx + n);
+      arpNotes[n] = note;
+      if (note >= 0 && note < NB_NOTES) {
+        arpVelocities[n] = velocities[note];
+      }
+      // failsafe if the note is somehow corrupted, fallback velocity
+      else {
+        arpVelocities[n] = 127;
+      }
       n++;
     }
     // finish with -1
     while (n < ARP_MAX_NOTES) {
       arpNotes[n] = -1;
+      arpVelocities[n] = 0;
       n++;
     }
-    utils_Arp_setNotes(context_processor, arpNotes);
+    utils_Arp_setNotesVel(context_processor, arpNotes, arpVelocities);
   }
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Arp);

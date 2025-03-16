@@ -218,7 +218,7 @@ protected:
       }
       note = utils_Gate_getNoteOn(context_processor);
       while (note >= 0) {
-        sendNoteOn(note, 127, channelOutput, frame+i);
+        sendNoteOn(note, utils_Gate_getVel(context_processor, note), channelOutput, frame+i);
         note = utils_Gate_getNoteOn(context_processor);
       }
     }

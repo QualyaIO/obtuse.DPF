@@ -17,6 +17,11 @@ Using git submodule to get source from obtuse (itself using git LFS), and also f
 
 # Changelog
 
+## v0.1.1 (2025-03-17)
+
+- bump DSP to v0.2.1
+- arp, gate: preserve velocity
+
 ## v0.1.0 (2025-02-21)
 
 - first proper release
