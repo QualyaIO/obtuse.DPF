@@ -1,5 +1,5 @@
 
-#include "ExtendedPlugin.hpp"
+#include "ExtendedPluginFP.hpp"
 #include "MetaDrummer.hpp"
 
 START_NAMESPACE_DISTRHO

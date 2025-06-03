@@ -1,5 +1,5 @@
 
-#include "ExtendedPlugin.hpp"
+#include "ExtendedPluginFP.hpp"
 #include "effectsXL.h"
 
 START_NAMESPACE_DISTRHO

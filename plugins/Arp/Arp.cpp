@@ -1,5 +1,5 @@
 
-#include "ExtendedPlugin.hpp"
+#include "ExtendedPluginFP.hpp"
 #include "utils.h"
 #include <cassert>
 #include <ctime>

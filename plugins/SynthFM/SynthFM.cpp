@@ -1,5 +1,5 @@
 
-#include "ExtendedPlugin.hpp"
+#include "ExtendedPluginFP.hpp"
 #include "synthFM.h"
 
 START_NAMESPACE_DISTRHO

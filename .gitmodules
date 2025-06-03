@@ -4,3 +4,6 @@
 [submodule "obtuse"]
 	path = obtuse
 	url = git@github.com:QualyaIO/obtuse.DSP.git
+[submodule "dpf-extra"]
+	path = dpf-extra
+	url = https://github.com/jfrey-xx/DPF-Extra.git

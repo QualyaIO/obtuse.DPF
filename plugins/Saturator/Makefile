@@ -26,7 +26,7 @@ include ../../dpf/Makefile.plugins.mk
 
 # --------------------------------------------------------------
 # Adding obtuse (ignoring its warnings) and custom libs
-BUILD_CXX_FLAGS += -isystem../../obtuse/src -I../../src
+BUILD_CXX_FLAGS += -isystem../../obtuse/src -I../../dpf-extra -I../../src 
 
 # --------------------------------------------------------------
 # Select plugins
