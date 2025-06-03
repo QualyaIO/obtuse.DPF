@@ -4,9 +4,14 @@
 # Created by falkTX
 #
 
+# select opengl version, go for max compatibility, make it visible for all spawned make (especially dgl)
+# USE_GLES2 and USE_OPENGL3 tested working on macos, linux and (cross-compiled) windows
+USE_GLES2=true
+export USE_GLES2
+
 include dpf/Makefile.base.mk
 
-all: dgl examples gen
+all: dgl examples gen plugins
 
 # --------------------------------------------------------------
 
@@ -18,7 +23,7 @@ endif
 
 dgl:
 ifeq ($(HAVE_DGL),true)
-	$(MAKE) -C dpf/dgl
+	$(MAKE) -C dpf/dgl opengl
 endif
 
 plugins: dgl
@@ -53,7 +58,7 @@ tests: dgl
 # --------------------------------------------------------------
 
 clean:
-	$(MAKE) clean -C dgl
+	$(MAKE) clean -C dpf/dgl
 	$(MAKE) clean -C plugins/Saturator
 	$(MAKE) clean -C plugins/SynthFM
 	$(MAKE) clean -C plugins/Sampler
@@ -69,6 +74,7 @@ clean:
 	$(MAKE) clean -C plugins/Allpass
 	$(MAKE) clean -C plugins/Reverb
 	$(MAKE) clean -C dpf/utils/lv2-ttl-generator
+	$(MAKE) clean -C dpf-extra
 	rm -rf bin build
 
 # --------------------------------------------------------------
