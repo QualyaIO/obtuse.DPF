@@ -60,11 +60,15 @@ protected:
     GuiSliderBar(layoutRecs[1], TextFormat("Decay: %.2f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
 
     curParam = kDelay;
-    GuiSliderBar(layoutRecs[2], TextFormat("Delay: %.2f ms", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
+    GuiSliderBar(layoutRecs[2], TextFormat("Delay: %.2f ms", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, dspParams[kMaxDelay]);
 
     // only send value if updated
     for (int i=0; i < kParameterCount; i++) {
-      if (uiParams[i] != dspParams[i]) {
+      // exception for delay since we restrain display
+      if (i == kDelay && uiParams[i] >= dspParams[kMaxDelay]) {
+	continue;
+      }
+      else if (uiParams[i] != dspParams[i]) {
 	setParameterValue(i, uiParams[i]);
 	// note: only output parameters, if any, will be fired back, hence sync also here
 	dspParams[i] = uiParams[i];

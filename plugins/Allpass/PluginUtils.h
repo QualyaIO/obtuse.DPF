@@ -13,6 +13,7 @@ const ParameterRanges params[kParameterCount] =
     ParameterRanges(0.5f, 0.0f, 1.0f), // decay
    // actually max delay will depend on buffer size, with XL 16384 buffer and 44100 fs it's only 371ms
     ParameterRanges(50.0f, 0.0f, 1000.0f), // delay
+    ParameterRanges(50.0f, 0.0f, 1000.0f), // max delay
   };
   
 #endif /* PLUGIN_UTILS_H */

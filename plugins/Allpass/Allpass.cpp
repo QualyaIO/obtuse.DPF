@@ -7,7 +7,6 @@ START_NAMESPACE_DISTRHO
 
 // Wrapper for allpass
 // NOTE: output not guaranteed to be kept in -1..1 range, use Saturator after
-// TODO: expose limits due to buffer size?
 // FIXME: audio glitches upon change in delay while playing
 class Allpass : public ExtendedPlugin {
 public:
@@ -62,6 +61,17 @@ protected:
       parameter.ranges.min = params[kDelay].min;
       parameter.ranges.max = params[kDelay].max;
       break;
+    case kMaxDelay:
+      parameter.hints = kParameterIsOutput;
+      parameter.name = "Maximum Delay";
+      parameter.shortName = "max del";
+      parameter.symbol = "delay";
+      parameter.unit = "ms";
+      // here we actually compute actual value
+      parameter.ranges.def = effectsXL_Buffer_bufferLargeSize() / getSampleRate() * 1000;
+      parameter.ranges.min = params[kMaxDelay].min;
+      parameter.ranges.max = params[kMaxDelay].max;
+      break;
     default:
       break;
     }
@@ -78,6 +88,8 @@ protected:
       return decay;
     case kDelay:
       return delay;
+    case kMaxDelay:
+      return maxDelay;
     default:
       return 0.0;
     }
@@ -96,6 +108,9 @@ protected:
     case kDelay:
       delay = value;
       updateDelay();
+      break;
+    case kMaxDelay:
+      maxDelay = value;
       break;
     default:
       break;
@@ -151,6 +166,8 @@ protected:
     effectsXL_Allpass_setSamplerate(context_processor, float_to_fix((float)newSampleRate / 1000.0f));
     // apply again delay because in the DSP ultimately a number of sample is used
     updateDelay();
+    // update info about maximum delay
+    setParameterValue(kMaxDelay, effectsXL_Buffer_bufferLargeSize() / newSampleRate * 1000);
   }
   
 private:
@@ -161,6 +178,7 @@ private:
   float decay;
   // init with some value since it will be used upon sample rate change
   float delay = 10.0;
+  float maxDelay = 10.0;
 
   void updateDelay() {
       // HOTFIX: make sure we do not overflow fixed float

@@ -21,6 +21,7 @@ enum Parameters {
     kDryWet,
     kDecay,
     kDelay,
+    kMaxDelay,
     kParameterCount
 };
 
