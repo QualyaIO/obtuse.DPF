@@ -1,0 +1,15 @@
+#
+# rgl layout text file (v4.0) - raygui layout file generated using rGuiLayout
+#
+# Number of controls:     4
+#
+# Ref. window:    r <x> <y> <width> <height>
+# Anchor info:    a <id> <name> <posx> <posy> <enabled>
+# Control info:   c <id> <type> <name> <rectangle> <anchor_id> <text>
+#
+r 0 40 -1 -1
+a 001 anchor 552 264 1
+c 000 16 SliderDryWet 144 0 216 32 1 Dry/Wet: 0.5
+c 001 17 SliderDecay 144 40 216 32 1 Decay: 0.5
+c 002 17 SliderDelay 144 80 216 32 1 Delay: 1000 ms
+c 003 3 PanelNice 0 120 360 192 1 

@@ -1,6 +1,7 @@
 
 #include "ExtendedPluginFP.hpp"
 #include "effectsXL.h"
+#include "PluginUtils.h"
 
 START_NAMESPACE_DISTRHO
 
@@ -37,9 +38,9 @@ protected:
       parameter.shortName = "dw";
       parameter.symbol = "drywet";
       parameter.unit = "ratio";
-      parameter.ranges.def = 0.5f;
-      parameter.ranges.min = 0.0f;
-      parameter.ranges.max = 1.0f;
+      parameter.ranges.def = params[kDryWet].def;
+      parameter.ranges.min = params[kDryWet].min;
+      parameter.ranges.max = params[kDryWet].max;
       break;
     case kDecay:
       parameter.hints = kParameterIsAutomatable;
@@ -47,9 +48,9 @@ protected:
       parameter.shortName = "Dec";
       parameter.symbol = "decay";
       parameter.unit = "ratio";
-      parameter.ranges.def = 0.5f;
-      parameter.ranges.min = 0.0f;
-      parameter.ranges.max = 1.0f;
+      parameter.ranges.def = params[kDecay].def;
+      parameter.ranges.min = params[kDecay].min;
+      parameter.ranges.max = params[kDecay].max;
       break;
     case kDelay:
       parameter.hints = kParameterIsAutomatable;
@@ -57,10 +58,9 @@ protected:
       parameter.shortName = "del";
       parameter.symbol = "delay";
       parameter.unit = "ms";
-   // actually max delay will depend on buffer size, with XL 16384 buffer and 44100 fs it's only 371ms
-      parameter.ranges.def = 50.0f;
-      parameter.ranges.min = 0.0f;
-      parameter.ranges.max = 1000.0f;
+      parameter.ranges.def = params[kDelay].def;
+      parameter.ranges.min = params[kDelay].min;
+      parameter.ranges.max = params[kDelay].max;
       break;
     default:
       break;

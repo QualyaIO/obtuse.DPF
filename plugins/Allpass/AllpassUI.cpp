@@ -3,6 +3,7 @@
 #define UI_REFRESH_RATE 30
 
 #include "RayUI.hpp"
+#include "PluginUtils.h"
 
 START_NAMESPACE_DISTRHO
 
@@ -29,9 +30,8 @@ protected:
       This is called by the host to inform the UI about parameter changes.
     */
     void parameterChanged(uint32_t index, float value) override {
-      switch (index) {
-      default:
-	break;
+      if (index < kParameterCount) {
+	dspParams[index] = value;
       }
     }
 
@@ -44,13 +44,53 @@ protected:
   
   void onCanvasDisplay() override
   {
-    ClearBackground(BLACK);
+    ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
+
+    // sync ui and dsp
+    for (int i=0; i < kParameterCount; i++) {
+      uiParams[i] = dspParams[i];
+    }
+    // we'll ease copy and paste
+    int curParam = 0;
+
+    curParam = kDryWet;
+    GuiSlider(layoutRecs[0], TextFormat("Dry/Wet: %f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
+
+    curParam = kDecay;
+    GuiSliderBar(layoutRecs[1], TextFormat("Decay: %f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
+
+    curParam = kDelay;
+    GuiSliderBar(layoutRecs[2], TextFormat("Delay: %f ms", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
+
+    // only send value if updated
+    for (int i=0; i < kParameterCount; i++) {
+      if (uiParams[i] != dspParams[i]) {
+	setParameterValue(i, uiParams[i]);
+	// note: only output parameters, if any, will be fired back, hence sync also here
+	dspParams[i] = uiParams[i];
+      }
+    }
+
     DrawFPS(10, 10);
   }
 
     // -------------------------------------------------------------------------------------------------- --------------
 
 private:
+  // parameters sync with DSP
+  float dspParams[kParameterCount];
+  // those used in UI
+  float uiParams[kParameterCount];
+
+  // upper left reference point for UI
+  static constexpr Vector2 anchor = { 10, 5 };
+  // layout of the GUI
+  Rectangle layoutRecs[4] = {
+    (Rectangle){ anchor.x + 144, anchor.y + 0, 216, 32 },
+    (Rectangle){ anchor.x + 144, anchor.y + 40, 216, 32 },
+    (Rectangle){ anchor.x + 144, anchor.y + 80, 216, 32 },
+    (Rectangle){ anchor.x + 0, anchor.y + 120, 360, 192 },
+  };
   
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AllpassUI)
 };
