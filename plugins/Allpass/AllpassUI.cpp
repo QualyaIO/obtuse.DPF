@@ -15,7 +15,7 @@ public:
       The UI should be initialized to a default state that matches the plugin side.
     */
 
-  AllpassUI() : RayUI(UI_REFRESH_RATE, TEXTURE_FILTER_POINT) {
+  AllpassUI() : RayUI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT, UI_REFRESH_RATE, TEXTURE_FILTER_POINT) {
   }
   
   ~AllpassUI() {
