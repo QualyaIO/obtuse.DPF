@@ -9,7 +9,7 @@
 #
 r 0 40 -1 -1
 a 001 anchor 552 264 1
-c 000 16 SliderDryWet 144 0 216 32 1 Dry/Wet: 0.5
-c 001 17 SliderDecay 144 40 216 32 1 Decay: 0.5
-c 002 17 SliderDelay 144 80 216 32 1 Delay: 1000 ms
-c 003 3 PanelNice 0 120 360 192 1 
+c 000 16 SliderDryWet 176 0 200 32 1 Dry/Wet: 0.50
+c 001 17 SliderDecay 176 40 200 32 1 Decay: 0.50
+c 002 17 SliderDelay 176 80 200 32 1 Delay: 1000.00 ms
+c 003 3 Panel003 0 120 376 208 1 

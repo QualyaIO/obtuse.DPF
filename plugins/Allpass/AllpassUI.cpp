@@ -54,13 +54,13 @@ protected:
     int curParam = 0;
 
     curParam = kDryWet;
-    GuiSlider(layoutRecs[0], TextFormat("Dry/Wet: %f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
+    GuiSlider(layoutRecs[0], TextFormat("Dry/Wet: %.2f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
 
     curParam = kDecay;
-    GuiSliderBar(layoutRecs[1], TextFormat("Decay: %f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
+    GuiSliderBar(layoutRecs[1], TextFormat("Decay: %.2f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
 
     curParam = kDelay;
-    GuiSliderBar(layoutRecs[2], TextFormat("Delay: %f ms", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
+    GuiSliderBar(layoutRecs[2], TextFormat("Delay: %.2f ms", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
 
     // only send value if updated
     for (int i=0; i < kParameterCount; i++) {
@@ -86,10 +86,10 @@ private:
   static constexpr Vector2 anchor = { 10, 5 };
   // layout of the GUI
   Rectangle layoutRecs[4] = {
-    (Rectangle){ anchor.x + 144, anchor.y + 0, 216, 32 },
-    (Rectangle){ anchor.x + 144, anchor.y + 40, 216, 32 },
-    (Rectangle){ anchor.x + 144, anchor.y + 80, 216, 32 },
-    (Rectangle){ anchor.x + 0, anchor.y + 120, 360, 192 },
+    (Rectangle){ anchor.x + 176, anchor.y + 0, 200, 32 },
+    (Rectangle){ anchor.x + 176, anchor.y + 40, 200, 32 },
+    (Rectangle){ anchor.x + 176, anchor.y + 80, 200, 32 },
+    (Rectangle){ anchor.x + 0, anchor.y + 120, 376, 208 },
   };
   
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AllpassUI)
