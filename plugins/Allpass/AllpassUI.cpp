@@ -30,7 +30,15 @@ protected:
       This is called by the host to inform the UI about parameter changes.
     */
     void parameterChanged(uint32_t index, float value) override {
-      if (index < kParameterCount) {
+      // backport change in maxDelay
+      if (index == kMaxDelay && dspParams[kDelay] > value) {
+	dspParams[kDelay] = value;
+      }
+      // special case with delay, clamp to effective max
+      if (index == kDelay && dspParams[kMaxDelay] > 0 && value > dspParams[kMaxDelay]) {
+	dspParams[index] = dspParams[kMaxDelay];
+      }
+      else if (index < kParameterCount) {
 	dspParams[index] = value;
       }
     }
@@ -60,15 +68,12 @@ protected:
     GuiSliderBar(layoutRecs[1], TextFormat("Decay: %.2f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
 
     curParam = kDelay;
-    GuiSliderBar(layoutRecs[2], TextFormat("Delay: %.2f ms", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, dspParams[kMaxDelay]);
+    // use max delay if set
+    GuiSliderBar(layoutRecs[2], TextFormat("Delay: %.2f ms", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, (dspParams[kMaxDelay] > 0.0 ? dspParams[kMaxDelay] : params[curParam].max));
 
     // only send value if updated
     for (int i=0; i < kParameterCount; i++) {
-      // exception for delay since we restrain display
-      if (i == kDelay && uiParams[i] >= dspParams[kMaxDelay]) {
-	continue;
-      }
-      else if (uiParams[i] != dspParams[i]) {
+      if (uiParams[i] != dspParams[i]) {
 	setParameterValue(i, uiParams[i]);
 	// note: only output parameters, if any, will be fired back, hence sync also here
 	dspParams[i] = uiParams[i];
@@ -82,9 +87,10 @@ protected:
 
 private:
   // parameters sync with DSP
-  float dspParams[kParameterCount];
+  // init to 0 so we can use effecively kMaxDelay
+  float dspParams[kParameterCount] = {0.0};
   // those used in UI
-  float uiParams[kParameterCount];
+  float uiParams[kParameterCount] = {0.0};
 
   // upper left reference point for UI
   static constexpr Vector2 anchor = { 10, 5 };
