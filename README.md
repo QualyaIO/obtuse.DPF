@@ -15,7 +15,13 @@ Audio plugins version of [Obtuse DSP](https://github.com/QualyaIO/obtuse.DSP) (V
 
 Using git submodule to get source from obtuse (itself using git LFS), and also from DPF. Don't forget to clone recursive or init submodule afterwards -- e.g. `git submodule update --init --recursive`.
 
+Freecad is used to model 3D assets. To make its (zipped) files git-friendly, configure the software to use "0" compression level and tune git: `git config diff.strings.textconv strings`.
+
 # Changelog
+
+## current
+
+- adding GUI
 
 ## v0.1.1 (2025-03-17)
 
