@@ -4,6 +4,12 @@
 
 #include "RayUI.hpp"
 #include "PluginUtils.h"
+#include <math.h>
+
+// scenario: a planet orbiting around the sun
+// dry/wet: stronger color on the sun for dry, wet on the planet, from semi-transparent to solid. Also dry increase sun rotation, while wet increase planet rotation
+// decay: size of the planet (hence gravity) -- bigger the decay, the longer we "bounce" on a small planet
+// delay: distance between planet and sun, also orbit speed
 
 START_NAMESPACE_DISTRHO
 
@@ -22,8 +28,8 @@ public:
     model = LoadModel(resourcesLocation + "patatoide.obj");
 
     // camera in the diagonal of origin, high enough to fit the whole scene with selected fov
-    camera.position = (Vector3){ 0.0, 5.0, 5.0 };
-    // toward origin
+    camera.position = (Vector3){ 0.0, 6.0, 6.0 };
+    // traget origin
     camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
     // camera pointing down
     camera.up = (Vector3){ 0.0, 0.0, -1.0};
@@ -72,37 +78,61 @@ protected:
     // Widget Callbacks
   void onMainDisplay() override
   {
-    ClearBackground(BLUE);
+    ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
     // 3D scene
     BeginTextureMode(canvasScene);
     // we have to clear background for anything to display
-    ClearBackground(Color({0,0,0,0}));
+    ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
-    // playing with camera for now
-    camera.position = (Vector3){0.0f, 1.0f + dspParams[kDecay] * 5, 1.0f + dspParams[kDecay] * 5};
-    camera.fovy = 100.0f  -  dspParams[kDecay] * 50;
+    Vector3 positionSun = { 0.0f, 0.0f, 0.0f };
+
+    // compute a ratio from delay, taking into account effective max delay
+    float maxDelay = dspParams[kMaxDelay] > 0 ? dspParams[kMaxDelay] : params[kDelay].max;
+    float delayRatio = 1.0;
+    if (maxDelay > params[kDelay].min) {
+      delayRatio = (dspParams[kDelay] - params[kDelay].min) / (maxDelay - params[kDelay].min);
+    }
+
+    // from 1.2 (min delay) to 3.0 (max delay) (Pythagora should be here)
+    float planetDistance = 1.2 + 1.9 * delayRatio;
+    Vector3 positionPlanet = { planetDistance, 0.0f, planetDistance};
+
+    // space occupy by scene depends on delay (distance planet-sun) and decay (planet's size). We will manipulate camera to compensate
+    float sceneRatio = delayRatio * 0.8 + 0.2 * (1 - dspParams[kDecay]);
+    // adapt camera fov to keep in frame
+    camera.fovy = 60.0 - 20 * (1.0 - sceneRatio);
+    // move camera target toward front as planet get further away and fov increase to better occupy space
+    camera.target = (Vector3){ 0.0f, 0.0f, sceneRatio * 1.75f};
 
     BeginMode3D(camera);
 
+    // base rotation speed 360 degrees per second
+    float rotationInc = GetFrameTime() * 360.0;
+    rotationDay = fmod(rotationDay + (rotationInc / 2.0), 360.0);
+    // sun takes ~ 25 days for one rotation in real life, speed-up to see that
+    rotationSun = fmod(rotationSun + (rotationInc / 5.0), 360.0);
+    // a year around sun sun, likewise speed-up the 365 days, speed up if delay decrease
+    // sepecial case, 0 delay : no more delay
+    float rotationYearCoeff = delayRatio > 0.0 ? 0.1 * (20.0 - 19.0 * delayRatio) : 0.0;
+    rotationYear = fmod(rotationYear + (rotationInc * rotationYearCoeff), 360.0);
+
     rlPushMatrix();
-    // se rotation speed to dry/wet for now
-    static float r = 0;
-    r = r + 1 + dspParams[kDryWet] * 5;
-    // rotate along <1,0,0> x-axis
-    rlRotatef(r, 0, 1, 0);
-
+    // rotation sun
+    rlRotatef(rotationSun, 0, 1, 0);
     // Draw sun
-    DrawSphereWires(positionSun, 1.0, 5, 10, YELLOW);
-
+    DrawSphereWires(positionSun, 1.0, 4, 8, YELLOW);
     rlPopMatrix();
 
     rlPushMatrix();
-    rlRotatef(r/2, 0, 1, 0);
-
+    // rotation around sun
+    rlRotatef(rotationYear, 0, 1, 0);
     // scale-down planet to match desired proportion
     // Note: wireframe does not work with GLES2 it seems, requires project with raylib compiled set to OPENGL 3
-    DrawModelWires(model, positionPlanet, 0.05f, RED);
+    // size related to decay -- model is scale 10 in original file compared to unit
+    float planetSize = 0.03 + 0.06 * (1 - dspParams[kDecay]);
+    // set day rotation
+    DrawModelWiresEx(model, positionPlanet, {0, 1, 0}, rotationDay, {planetSize, planetSize, planetSize}, RED);
     rlPopMatrix();
 
     EndMode3D();
@@ -160,12 +190,14 @@ private:
   float uiParams[kParameterCount] = {0.0};
   // main asset and its positoin
   Model model;
-  Vector3 positionSun = { 0.0f, 0.0f, 0.0f };
-  Vector3 positionPlanet = { 1.1f, 0.0f, 1.1f, };
-  // used for 3D rendering
+    // used for 3D rendering
   Camera camera;
   // drawing separately 3D scene
   RenderTexture2D canvasScene;
+  // keep trace of the different rotation between calls
+  float rotationDay = 0.0;
+  float rotationSun = 0.0;
+  float rotationYear = 0.0;
 
   // upper left reference point for UI
   static constexpr Vector2 anchor = { 10, 5 };
