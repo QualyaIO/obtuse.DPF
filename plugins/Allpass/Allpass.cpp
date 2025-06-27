@@ -72,6 +72,16 @@ protected:
       parameter.ranges.min = params[kMaxDelay].min;
       parameter.ranges.max = params[kMaxDelay].max;
       break;
+     case kActivity:
+      parameter.hints = kParameterIsOutput;
+      parameter.name = "Activity";
+      parameter.shortName = "activity";
+      parameter.symbol = "activity";
+      parameter.unit = "ratio";
+      parameter.ranges.def = params[kActivity].def;
+      parameter.ranges.min = params[kActivity].min;
+      parameter.ranges.max = params[kActivity].max;
+      break;
     default:
       break;
     }
@@ -90,6 +100,8 @@ protected:
       return delay;
     case kMaxDelay:
       return maxDelay;
+    case kActivity:
+      return activity;
     default:
       return 0.0;
     }
@@ -112,6 +124,9 @@ protected:
     case kMaxDelay:
       maxDelay = value;
       break;
+    case kActivity:
+      activity = value;
+      break;
     default:
       break;
     }
@@ -126,6 +141,9 @@ protected:
     if (in == NULL || out == NULL) {
       return;
     }
+
+    // update for each buffer, mean of absolute values
+    activity = 0.0;
 
     // nothing to do if completely dry
     if (dryWet <= 0.0) {
@@ -151,13 +169,20 @@ protected:
         // copy to output buffer, with dry/wet
         if (out != NULL) {
           for (uint32_t i = 0; i < chunkSize; i++) {
-            out[k+i] = (1 - dryWet) * in[k+i] + dryWet * fix_to_float(buffOut[i]);
+            float val = fix_to_float(buffOut[i]);
+            out[k+i] = (1 - dryWet) * in[k+i] + dryWet * val;
+            // average over the frames
+            activity += abs(val) / frames;
           }
         }
         // advance
         k += chunkSize;
       }
     }
+
+    // clamp 0..1
+    activity = activity > 1.0 ? 1.0 : activity;
+    activity = activity < 0.0 ? 0.0 : activity;
   }
 
   // Optional callback to inform synth about a sample rate change on the plugin side.
@@ -176,6 +201,7 @@ private:
   // parameters
   float dryWet;
   float decay;
+  float activity;
   // init with some value since it will be used upon sample rate change
   float delay = 10.0;
   float maxDelay = 10.0;

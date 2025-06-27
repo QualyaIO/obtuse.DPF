@@ -22,6 +22,7 @@ enum Parameters {
     kDecay,
     kDelay,
     kMaxDelay,
+    kActivity,
     kParameterCount
 };
 

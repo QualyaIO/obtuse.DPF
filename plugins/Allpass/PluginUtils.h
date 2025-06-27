@@ -14,6 +14,7 @@ const ParameterRanges params[kParameterCount] =
    // actually max delay will depend on buffer size, with XL 16384 buffer and 44100 fs it's only 371ms
     ParameterRanges(50.0f, 0.0f, 1000.0f), // delay
     ParameterRanges(50.0f, 0.0f, 1000.0f), // max delay
+    ParameterRanges(0.0f, 0.0f, 1.0f), // plugin activity
   };
   
 #endif /* PLUGIN_UTILS_H */

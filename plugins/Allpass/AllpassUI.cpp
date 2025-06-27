@@ -148,6 +148,8 @@ protected:
     rlPopMatrix();
 
     EndMode3D();
+
+    DrawText(TextFormat("activity %f", dspParams[kActivity]), 10, 100, 50, BLUE);
     EndTextureMode();
   }
   
