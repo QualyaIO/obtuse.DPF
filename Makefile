@@ -4,10 +4,10 @@
 # Created by falkTX
 #
 
-# select opengl version, go for max compatibility, make it visible for all spawned make (especially dgl)
+# select opengl version, go for max compatibility, make it visible for all spawned make (dgl and dpf-extra)
 # USE_GLES2 and USE_OPENGL3 tested working on macos, linux and (cross-compiled) windows
-USE_GLES2=true
-export USE_GLES2
+USE_OPENGL3=true
+export USE_OPENGL3
 
 include dpf/Makefile.base.mk
 
