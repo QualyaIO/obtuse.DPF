@@ -65,7 +65,7 @@ protected:
       parameter.hints = kParameterIsOutput;
       parameter.name = "Maximum Delay";
       parameter.shortName = "max del";
-      parameter.symbol = "delay";
+      parameter.symbol = "maxdelay";
       parameter.unit = "ms";
       // here we actually compute actual value
       parameter.ranges.def = effectsXL_Buffer_bufferLargeSize() / getSampleRate() * 1000;
