@@ -80,7 +80,7 @@ protected:
     ClearBackground(Color({0,0,0,0}));
 
     // playing with camera for now
-    camera.position = (Vector3){0.0, 1.0 + dspParams[kDecay] * 5, 1.0 + dspParams[kDecay] * 5};
+    camera.position = (Vector3){0.0f, 1.0f + dspParams[kDecay] * 5, 1.0f + dspParams[kDecay] * 5};
     camera.fovy = 100.0f  -  dspParams[kDecay] * 50;
 
     BeginMode3D(camera);
