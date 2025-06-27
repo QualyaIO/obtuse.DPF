@@ -29,7 +29,7 @@ public:
 
     // camera in the diagonal of origin, high enough to fit the whole scene with selected fov
     camera.position = (Vector3){ 0.0, 6.0, 6.0 };
-    // traget origin
+    // target origin
     camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
     // camera pointing down
     camera.up = (Vector3){ 0.0, 0.0, -1.0};
@@ -105,23 +105,35 @@ protected:
     // move camera target toward front as planet get further away and fov increase to better occupy space
     camera.target = (Vector3){ 0.0f, 0.0f, sceneRatio * 1.75f};
 
+    // with qualya palette should be near magenta for sun and cyan for planet
+    // will adapt color (alpha) depending on dry (sun) / wet (planet)
+    Color colorSun = GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_PRESSED));
+    Color colorPlanet = GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_FOCUSED));
+    // max ratio for dry below 0.5, then fade
+    float dryRatio = dspParams[kDryWet] < 0.5 ? 1.0 : 1 - (dspParams[kDryWet] - 0.5) * 2;
+    colorSun.a = 192 + 63 * dryRatio;
+    // reciprocate wet
+    float wetRatio = dspParams[kDryWet] > 0.5 ? 1.0 : dspParams[kDryWet] * 2;
+    colorPlanet.a = 192 + 63 * wetRatio;
+
     BeginMode3D(camera);
 
     // base rotation speed 360 degrees per second
     float rotationInc = GetFrameTime() * 360.0;
-    rotationDay = fmod(rotationDay + (rotationInc / 2.0), 360.0);
-    // sun takes ~ 25 days for one rotation in real life, speed-up to see that
-    rotationSun = fmod(rotationSun + (rotationInc / 5.0), 360.0);
+    // rotation for day mediated by wet ratio
+    rotationDay = fmod(rotationDay + rotationInc * (0.1 + 0.4 * wetRatio ), 360.0);
+    // for sun by dry ratio -- note that in real-life it takes around 25 days for one rotation
+    rotationSun = fmod(rotationSun + rotationInc * (0.05 + 0.15 * dryRatio), 360.0);
     // a year around sun sun, likewise speed-up the 365 days, speed up if delay decrease
     // sepecial case, 0 delay : no more delay
     float rotationYearCoeff = delayRatio > 0.0 ? 0.1 * (20.0 - 19.0 * delayRatio) : 0.0;
-    rotationYear = fmod(rotationYear + (rotationInc * rotationYearCoeff), 360.0);
+    rotationYear = fmod(rotationYear + rotationInc * rotationYearCoeff, 360.0);
 
     rlPushMatrix();
     // rotation sun
     rlRotatef(rotationSun, 0, 1, 0);
     // Draw sun
-    DrawSphereWires(positionSun, 1.0, 4, 8, YELLOW);
+    DrawSphereWires(positionSun, 1.0, 4, 8, colorSun);
     rlPopMatrix();
 
     rlPushMatrix();
@@ -132,7 +144,7 @@ protected:
     // size related to decay -- model is scale 10 in original file compared to unit
     float planetSize = 0.03 + 0.06 * (1 - dspParams[kDecay]);
     // set day rotation
-    DrawModelWiresEx(model, positionPlanet, {0, 1, 0}, rotationDay, {planetSize, planetSize, planetSize}, RED);
+    DrawModelWiresEx(model, positionPlanet, {0, 1, 0}, rotationDay, {planetSize, planetSize, planetSize}, colorPlanet);
     rlPopMatrix();
 
     EndMode3D();
