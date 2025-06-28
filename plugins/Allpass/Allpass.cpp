@@ -5,6 +5,13 @@
 
 START_NAMESPACE_DISTRHO
 
+
+// made-up function to boost lower values
+// a must be < 1 , b > 0 to avoid divide by 0. x expected be 0..1 so we got output 0..1
+float normie(float a, float b, float x) {
+  return (pow(a,x * b) - 1 ) / (pow(a,1 * b) - 1);
+}
+
 // Wrapper for allpass
 // NOTE: output not guaranteed to be kept in -1..1 range, use Saturator after
 // FIXME: audio glitches upon change in delay while playing
@@ -149,6 +156,7 @@ protected:
     if (dryWet <= 0.0) {
       for (uint32_t i = 0; i < frames; i++) {
         out[i] = in[i];
+        activity += abs(out[i]) / frames;
       }
     }
     // process and mix
@@ -169,10 +177,9 @@ protected:
         // copy to output buffer, with dry/wet
         if (out != NULL) {
           for (uint32_t i = 0; i < chunkSize; i++) {
-            float val = fix_to_float(buffOut[i]);
-            out[k+i] = (1 - dryWet) * in[k+i] + dryWet * val;
+            out[k+i] = (1 - dryWet) * in[k+i] + dryWet * fix_to_float(buffOut[i]);
             // average over the frames
-            activity += abs(val) / frames;
+            activity += abs(out[k+i]) / frames;
           }
         }
         // advance
@@ -181,6 +188,11 @@ protected:
     }
 
     // clamp 0..1
+    activity = activity > 1.0 ? 1.0 : activity;
+    activity = activity < 0.0 ? 0.0 : activity;
+    // norm
+    activity =  normie(0.2, 10, activity);
+    // clamp on last time to be on the safe side
     activity = activity > 1.0 ? 1.0 : activity;
     activity = activity < 0.0 ? 0.0 : activity;
   }
