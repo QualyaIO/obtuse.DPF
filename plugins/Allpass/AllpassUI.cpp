@@ -10,6 +10,7 @@
 // dry/wet: stronger color on the sun for dry, wet on the planet, from semi-transparent to solid. Also dry increase sun rotation, while wet increase planet rotation
 // decay: size of the planet (hence gravity) -- bigger the decay, the longer we "bounce" on a small planet
 // delay: distance between planet and sun, also orbit speed
+// activity: increase sun and planet size, related to wet/dry
 
 START_NAMESPACE_DISTRHO
 
@@ -133,7 +134,8 @@ protected:
     // rotation sun
     rlRotatef(rotationSun, 0, 1, 0);
     // Draw sun
-    DrawSphereWires(positionSun, 1.0, 4, 8, colorSun);
+    float sunSize = 1.0 + 0.5 * dspParams[kActivity] * dryRatio;
+    DrawSphereWires(positionSun, sunSize, 4, 8, colorSun);
     rlPopMatrix();
 
     rlPushMatrix();
@@ -142,7 +144,7 @@ protected:
     // scale-down planet to match desired proportion
     // Note: wireframe does not work with GLES2 it seems, requires project with raylib compiled set to OPENGL 3
     // size related to decay -- model is scale 10 in original file compared to unit
-    float planetSize = 0.03 + 0.06 * (1 - dspParams[kDecay]);
+    float planetSize = 0.03 + 0.06 * (1 - dspParams[kDecay]) + 0.05 * dspParams[kActivity] * wetRatio;
     // set day rotation
     DrawModelWiresEx(model, positionPlanet, {0, 1, 0}, rotationDay, {planetSize, planetSize, planetSize}, colorPlanet);
     rlPopMatrix();
