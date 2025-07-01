@@ -5,12 +5,9 @@
 
 START_NAMESPACE_DISTRHO
 
-
-// made-up function to boost lower values
-// a must be < 1 , b > 0 to avoid divide by 0. x expected be 0..1 so we got output 0..1
-float normie(float a, float b, float x) {
-  return (pow(a,x * b) - 1 ) / (pow(a,1 * b) - 1);
-}
+// over how long (in ms) activity is computed
+// Note: for efficiency, might be a greater time, will update at most once per buffer (parameters won't update faster anyhow)
+#define TIME_ACTIVITY 20
 
 // Wrapper for allpass
 // NOTE: output not guaranteed to be kept in -1..1 range, use Saturator after
@@ -20,6 +17,11 @@ public:
   Allpass() : ExtendedPlugin(kParameterCount, 0, 0) {
     effectsXL_Allpass_process_init(context_processor);
     effectsXL_Allpass_setSamplerate(context_processor, float_to_fix((float)getSampleRate() / 1000.0f));
+    nbActivityFrames = getSampleRate() * (TIME_ACTIVITY/1000.0);
+    // give it a default value, will be actually once per buffer
+    if (nbActivityFrames == 0) {
+      nbActivityFrames = 1;
+    }
   }
 
 protected:
@@ -149,14 +151,11 @@ protected:
       return;
     }
 
-    // update for each buffer, mean of absolute values
-    activity = 0.0;
-
     // nothing to do if completely dry
     if (dryWet <= 0.0) {
       for (uint32_t i = 0; i < frames; i++) {
         out[i] = in[i];
-        activity += out[i] * out[i];
+        cumulatedActivity += out[i] * out[i]; 
       }
     }
     // process and mix
@@ -179,7 +178,7 @@ protected:
           for (uint32_t i = 0; i < chunkSize; i++) {
             out[k+i] = (1 - dryWet) * in[k+i] + dryWet * fix_to_float(buffOut[i]);
             // average over the frames
-            activity += out[k+i] * out[k+i];
+            cumulatedActivity += out[k+i] * out[k+i];
           }
         }
         // advance
@@ -187,11 +186,18 @@ protected:
       }
     }
 
-    // average and one final squared root for RMS
-    activity = pow(activity / frames, 0.5) ;
-    // clamp 0..1
-    activity = activity > 1.0 ? 1.0 : activity;
-    activity = activity < 0.0 ? 0.0 : activity;
+    nbActivity = nbActivity + frames;
+    // time to update activity
+    if (nbActivity >= nbActivityFrames) {
+      // average and one final squared root for RMS
+      activity = pow(cumulatedActivity / nbActivity, 0.5) ;
+      // clamp 0..1
+      activity = activity > 1.0 ? 1.0 : activity;
+      activity = activity < 0.0 ? 0.0 : activity;
+      // reset
+      cumulatedActivity = 0;
+      nbActivity = 0;
+    }
   }
 
   // Optional callback to inform synth about a sample rate change on the plugin side.
@@ -202,6 +208,11 @@ protected:
     updateDelay();
     // update info about maximum delay
     setParameterValue(kMaxDelay, effectsXL_Buffer_bufferLargeSize() / newSampleRate * 1000);
+    nbActivityFrames = newSampleRate * (TIME_ACTIVITY/1000.0);
+    // failsafe
+    if (nbActivityFrames == 0) {
+      nbActivityFrames = 1;
+    }
   }
   
 private:
@@ -214,6 +225,11 @@ private:
   // init with some value since it will be used upon sample rate change
   float delay = 10.0;
   float maxDelay = 10.0;
+  // how many frames it takes to update activity
+  unsigned int nbActivityFrames = 1;
+  // how many frames we are in
+  unsigned int nbActivity = 0;
+  double cumulatedActivity = 0;
 
   void updateDelay() {
       // HOTFIX: make sure we do not overflow fixed float
