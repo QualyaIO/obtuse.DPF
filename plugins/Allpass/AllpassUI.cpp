@@ -14,6 +14,21 @@
 
 START_NAMESPACE_DISTRHO
 
+// made-up function to boost lower values
+// x expected be 0..1
+// a should be between 0 and 1
+// clamp output to 0..1
+float normie(float x, float a) {
+  float val = 0;
+  float denom = pow(x, a);
+  if (denom != 0) {
+    val = x / denom;
+  }
+  val = val > 1.0 ? 1.0 : val;
+  val = val < 0.0 ? 0.0 : val;
+  return val;
+}
+
 class AllpassUI : public RayUI
 {
 public:
@@ -134,7 +149,8 @@ protected:
     // rotation sun
     rlRotatef(rotationSun, 0, 1, 0);
     // Draw sun
-    float sunSize = 1.0 + 0.5 * dspParams[kActivity] * dryRatio;
+    float activity = normie(dspParams[kActivity], 0.7);
+    float sunSize = 1.0 + 0.5 * activity  * dryRatio;
     DrawSphereWires(positionSun, sunSize, 4, 8, colorSun);
     rlPopMatrix();
 
@@ -144,14 +160,14 @@ protected:
     // scale-down planet to match desired proportion
     // Note: wireframe does not work with GLES2 it seems, requires project with raylib compiled set to OPENGL 3
     // size related to decay -- model is scale 10 in original file compared to unit
-    float planetSize = 0.03 + 0.06 * (1 - dspParams[kDecay]) + 0.05 * dspParams[kActivity] * wetRatio;
+    float planetSize = 0.03 + 0.06 * (1 - dspParams[kDecay]) + 0.05 * activity * wetRatio;
     // set day rotation
     DrawModelWiresEx(model, positionPlanet, {0, 1, 0}, rotationDay, {planetSize, planetSize, planetSize}, colorPlanet);
     rlPopMatrix();
 
     EndMode3D();
 
-    DrawText(TextFormat("activity %f", dspParams[kActivity]), 10, 100, 50, BLUE);
+    DrawText(TextFormat("activity %.2f/%.2f", dspParams[kActivity], activity), 10, 100, 25, BLUE);
     EndTextureMode();
   }
   
