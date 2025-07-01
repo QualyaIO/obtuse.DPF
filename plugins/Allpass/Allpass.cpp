@@ -156,7 +156,7 @@ protected:
     if (dryWet <= 0.0) {
       for (uint32_t i = 0; i < frames; i++) {
         out[i] = in[i];
-        activity += abs(out[i]) / frames;
+        activity += out[i] * out[i];
       }
     }
     // process and mix
@@ -179,7 +179,7 @@ protected:
           for (uint32_t i = 0; i < chunkSize; i++) {
             out[k+i] = (1 - dryWet) * in[k+i] + dryWet * fix_to_float(buffOut[i]);
             // average over the frames
-            activity += abs(out[k+i]) / frames;
+            activity += out[k+i] * out[k+i];
           }
         }
         // advance
@@ -187,12 +187,9 @@ protected:
       }
     }
 
+    // average and one final squared root for RMS
+    activity = pow(activity / frames, 0.5) ;
     // clamp 0..1
-    activity = activity > 1.0 ? 1.0 : activity;
-    activity = activity < 0.0 ? 0.0 : activity;
-    // norm
-    activity =  normie(0.2, 10, activity);
-    // clamp on last time to be on the safe side
     activity = activity > 1.0 ? 1.0 : activity;
     activity = activity < 0.0 ? 0.0 : activity;
   }
