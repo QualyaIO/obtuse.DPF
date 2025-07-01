@@ -112,8 +112,8 @@ protected:
       delayRatio = (dspParams[kDelay] - params[kDelay].min) / (maxDelay - params[kDelay].min);
     }
 
-    // from 1.2 (min delay) to 3.0 (max delay) (Pythagora should be here)
-    float planetDistance = 1.2 + 1.9 * delayRatio;
+    // vary distance with delay (Pythagora should be here)
+    float planetDistance = 1.3 + 1.9 * delayRatio;
     Vector3 positionPlanet = { planetDistance, 0.0f, planetDistance};
 
     // space occupy by scene depends on delay (distance planet-sun) and decay (planet's size). We will manipulate camera to compensate
@@ -155,7 +155,7 @@ protected:
     // rotation sun
     rlRotatef(rotationSun, 0, 1, 0);
     // Draw sun
-    float sunSize = 1.0 + 0.5 * activity  * dryRatio;
+    float sunSize = 0.8 + 0.5 * activity  * dryRatio;
     DrawSphereWires(positionSun, sunSize, 4, 8, colorSun);
     rlPopMatrix();
 
@@ -165,7 +165,7 @@ protected:
     // scale-down planet to match desired proportion
     // Note: wireframe does not work with GLES2 it seems, requires project with raylib compiled set to OPENGL 3
     // size related to decay -- model is scale 10 in original file compared to unit
-    float planetSize = 0.03 + 0.06 * (1 - dspParams[kDecay]) + 0.05 * activity * wetRatio;
+    float planetSize = 0.03 + 0.04 * (1 - dspParams[kDecay]) + 0.04 * activity * wetRatio;
     // set day rotation
     DrawModelWiresEx(model, positionPlanet, {0, 1, 0}, rotationDay, {planetSize, planetSize, planetSize}, colorPlanet);
     rlPopMatrix();
