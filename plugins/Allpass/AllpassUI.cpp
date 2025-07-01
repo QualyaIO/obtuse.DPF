@@ -10,7 +10,7 @@
 // dry/wet: stronger color on the sun for dry, wet on the planet, from semi-transparent to solid. Also dry increase sun rotation, while wet increase planet rotation
 // decay: size of the planet (hence gravity) -- bigger the decay, the longer we "bounce" on a small planet
 // delay: distance between planet and sun, also orbit speed
-// activity: increase sun and planet size, related to wet/dry
+// activity: increase sun and planet size and brightness, related to wet/dry
 
 START_NAMESPACE_DISTRHO
 
@@ -94,6 +94,8 @@ protected:
     // Widget Callbacks
   void onMainDisplay() override
   {
+    float activity = normie(dspParams[kActivity], 0.7);
+
     ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
     // 3D scene
@@ -132,6 +134,10 @@ protected:
     float wetRatio = dspParams[kDryWet] > 0.5 ? 1.0 : dspParams[kDryWet] * 2;
     colorPlanet.a = 192 + 63 * wetRatio;
 
+    // tune brightness with activity (from same color to white)
+    colorSun = ColorBrightness(colorSun, 0.75 * activity * dryRatio);
+    colorPlanet = ColorBrightness(colorPlanet, 0.75 * activity * wetRatio);
+
     BeginMode3D(camera);
 
     // base rotation speed 360 degrees per second
@@ -149,7 +155,6 @@ protected:
     // rotation sun
     rlRotatef(rotationSun, 0, 1, 0);
     // Draw sun
-    float activity = normie(dspParams[kActivity], 0.7);
     float sunSize = 1.0 + 0.5 * activity  * dryRatio;
     DrawSphereWires(positionSun, sunSize, 4, 8, colorSun);
     rlPopMatrix();
