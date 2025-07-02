@@ -10,7 +10,7 @@
 // dry/wet: stronger color on the sun for dry, wet on the planet, from semi-transparent to solid. Also dry increase sun rotation, while wet increase planet rotation
 // decay: size of the planet (hence gravity) -- bigger the decay, the longer we "bounce" on a small planet
 // delay: distance between planet and sun, also orbit speed
-// activity: increase sun and planet size and brightness, related to wet/dry
+// activity: increase sun and planet size + brightness related to wet/dry, also overall bloom effect
 
 START_NAMESPACE_DISTRHO
 
@@ -60,12 +60,17 @@ public:
     //canvasScene = LoadRenderTexture(1024, 768);
     SetTextureFilter(canvasScene.texture, TEXTURE_FILTER_POINT);
     //SetTextureFilter(canvasScene.texture, TEXTURE_FILTER_BILINEAR);
+
+    // setup shader and pointer to its parameter
+    bloom = LoadShader(0, resourcesLocation + "bloom.fs");
+    bloomIntensityLoc = GetShaderLocation(bloom, "intensity");
   }
   
   ~AllpassUI() {
     // unload assets and canvas
     UnloadModel(model);
     UnloadRenderTexture(canvasScene);
+    UnloadShader(bloom);
   }
   
 protected:
@@ -94,6 +99,7 @@ protected:
     // Widget Callbacks
   void onMainDisplay() override
   {
+
     float activity = normie(dspParams[kActivity], 0.7);
 
     ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
@@ -101,7 +107,9 @@ protected:
     // 3D scene
     BeginTextureMode(canvasScene);
     // we have to clear background for anything to display
-    ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
+    // bloom shader will add source and effect, hence half the color to result in the same
+    Color backgroundColor = GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR));
+    ClearBackground(Color({(unsigned char)(backgroundColor.r/2), (unsigned char)(backgroundColor.g/2), (unsigned char)(backgroundColor.b/2), (unsigned char)(backgroundColor.a/2)}));
 
     Vector3 positionSun = { 0.0f, 0.0f, 0.0f };
 
@@ -129,14 +137,14 @@ protected:
     Color colorPlanet = GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_FOCUSED));
     // max ratio for dry below 0.5, then fade
     float dryRatio = dspParams[kDryWet] < 0.5 ? 1.0 : 1 - (dspParams[kDryWet] - 0.5) * 2;
-    colorSun.a = 192 + 63 * dryRatio;
+    colorSun.a =  63 + 192 * dryRatio;
     // reciprocate wet
     float wetRatio = dspParams[kDryWet] > 0.5 ? 1.0 : dspParams[kDryWet] * 2;
-    colorPlanet.a = 192 + 63 * wetRatio;
+    colorPlanet.a = 63 + 192 * wetRatio;
 
     // tune brightness with activity (from same color to white)
-    colorSun = ColorBrightness(colorSun, 0.75 * activity * dryRatio);
-    colorPlanet = ColorBrightness(colorPlanet, 0.75 * activity * wetRatio);
+    colorSun = ColorBrightness(colorSun, 0.50 * activity * dryRatio);
+    colorPlanet = ColorBrightness(colorPlanet, 0.50 * activity * wetRatio);
 
     BeginMode3D(camera);
 
@@ -171,9 +179,10 @@ protected:
     rlPopMatrix();
 
     EndMode3D();
-
-    DrawText(TextFormat("activity %.2f/%.2f", dspParams[kActivity], activity), 10, 100, 25, BLUE);
     EndTextureMode();
+
+    float intensity = activity;
+    SetShaderValue(bloom, bloomIntensityLoc, &intensity, SHADER_UNIFORM_FLOAT);
   }
   
   void onCanvasDisplay() override
@@ -206,14 +215,19 @@ protected:
       }
     }
 
-    // render the 3D scene
+    // render the 3D scene, apply shader is correctly loaded
+    if (IsShaderValid(bloom)) {
+      BeginShaderMode(bloom);
+    }
     DrawTexturePro(
 		   canvasScene.texture,
 		   // flip Y so we get the right texture
 		   (Rectangle){ 0.0f, 0.0f , (float)canvasScene.texture.width, -(float)canvasScene.texture.height },
 		   (Rectangle){layoutRecs[3].x, layoutRecs[3].y, layoutRecs[3].width, layoutRecs[3].height },
 		   (Vector2){ 0, 0 }, 0.0f, WHITE);
-
+    if (IsShaderValid(bloom)) {
+      EndShaderMode();
+    }
     DrawFPS(10, 10);
   }
 
@@ -235,6 +249,9 @@ private:
   float rotationDay = 0.0;
   float rotationSun = 0.0;
   float rotationYear = 0.0;
+  // we want a nice effect
+  Shader bloom = {0, 0};
+  int bloomIntensityLoc;
 
   // upper left reference point for UI
   static constexpr Vector2 anchor = { 10, 5 };
