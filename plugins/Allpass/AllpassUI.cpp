@@ -62,7 +62,31 @@ public:
     //SetTextureFilter(canvasScene.texture, TEXTURE_FILTER_BILINEAR);
 
     // setup shader and pointer to its parameter
-    bloom = LoadShader(0, resourcesLocation + "bloom.fs");
+    switch(rlGetVersion()) {
+    case RL_OPENGL_21:
+      bloom = LoadShader(0, resourcesLocation + "bloom120.fs");
+      d_stdout("loading bloom shader, glsl version 120");
+      break;
+    case  RL_OPENGL_ES_20:
+      bloom = LoadShader(0, resourcesLocation + "bloom100.fs");
+      d_stdout("loading bloom shader, glsl version 100");
+      break;
+    case  RL_OPENGL_ES_30:
+      bloom = LoadShader(0, resourcesLocation + "bloom300es.fs");
+      d_stdout("loading bloom shader, glsl version 300 es");
+      break;
+      // as per rlgl, 4.3 use 3.3 core functionality
+    case RL_OPENGL_43:
+    case RL_OPENGL_33:
+      bloom = LoadShader(0, resourcesLocation + "bloom330.fs");
+      d_stdout("loading bloom shader, glsl version 330");
+      break;
+      // might not be supported but we try nevertheless
+    default:
+      bloom = LoadShader(0, resourcesLocation + "bloom330.fs");
+      d_stdout("loading bloom shader, glsl version 330 as failsafe");
+      break;
+    }
     bloomIntensityLoc = GetShaderLocation(bloom, "intensity");
   }
   
