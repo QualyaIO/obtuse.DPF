@@ -42,5 +42,5 @@ void main()
 
     // Calculate final fragment color
     // Note: might average bloom and source here, but would produce a less "punchy" output
-    finalColor = ((sum/(samples*samples)) + source)*colDiffuse;
+    finalColor = ((sum/(samples*samples)) + source)*colDiffuse*fragColor;
 }

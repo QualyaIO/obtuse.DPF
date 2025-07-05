@@ -39,5 +39,5 @@ void main()
 
     // Calculate final fragment color
     // Note: might average bloom and source here, but would produce a less "punchy" output
-    gl_FragColor = ((sum/(samples*samples)) + source)*colDiffuse;
+    gl_FragColor = ((sum/(samples*samples)) + source)*colDiffuse*fragColor;
 }
