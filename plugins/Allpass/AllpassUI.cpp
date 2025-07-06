@@ -40,7 +40,11 @@ public:
   AllpassUI() : RayUI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT, UI_REFRESH_RATE, TEXTURE_FILTER_POINT) {
     String resourcesLocation = getResourcesLocation();
     d_stdout("resources location: %s", resourcesLocation.buffer());
-    // load model
+
+    // load assets
+    obtuseLogo = LoadTexture(resourcesLocation + "obtuse.png");
+    // smooth logo for this low resolution display
+    SetTextureFilter(obtuseLogo, TEXTURE_FILTER_BILINEAR);
     model = LoadModel(resourcesLocation + "patatoide.obj");
 
     // camera in the diagonal of origin, high enough to fit the whole scene with selected fov
@@ -213,6 +217,19 @@ protected:
   {
     ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
+    // background for banner title, take the darkest color and some more
+    Color backgroundHeader = ColorBrightness(GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_NORMAL)), -0.38);
+    DrawRectangle(0,0, DISTRHO_UI_DEFAULT_WIDTH,45, backgroundHeader);
+
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_RIGHT);
+    GuiLabel({10, 4, 140, 32}, "Obtuse");
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+    GuiLabel({220, 4, 150, 32}, "Allpass");
+
+    DrawTexturePro(obtuseLogo, {0, 0, (float)obtuseLogo.width, (float)obtuseLogo.height}, {160, -2, 40, 40}, {0, 0}, 0, WHITE);
+    
+
+
     // sync ui and dsp
     for (int i=0; i < kParameterCount; i++) {
       uiParams[i] = dspParams[i];
@@ -276,15 +293,17 @@ private:
   // we want a nice effect
   Shader bloom = {0, 0};
   int bloomIntensityLoc;
+  // one nice logo
+  Texture2D obtuseLogo;
 
   // upper left reference point for UI
-  static constexpr Vector2 anchor = { 10, 5 };
+  static constexpr Vector2 anchor = { 10, 45};
   // layout of the GUI
   Rectangle layoutRecs[4] = {
-    (Rectangle){ anchor.x + 176, anchor.y + 0, 200, 32 },
-    (Rectangle){ anchor.x + 176, anchor.y + 40, 200, 32 },
-    (Rectangle){ anchor.x + 176, anchor.y + 80, 200, 32 },
-    (Rectangle){ anchor.x + 0, anchor.y + 120, 376, 208 },
+    (Rectangle){ anchor.x + 176, anchor.y + 0 + 208, 200, 32 },
+    (Rectangle){ anchor.x + 176, anchor.y + 40 + 208, 200, 32 },
+    (Rectangle){ anchor.x + 176, anchor.y + 80 + 208, 200, 32 },
+    (Rectangle){ anchor.x + 0, anchor.y , 376, 208 },
   };
   
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AllpassUI)
