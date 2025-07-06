@@ -59,7 +59,7 @@ public:
     camera.projection = CAMERA_PERSPECTIVE;
 
     // init canvas for 3D scene with place holder size
-    canvasScene = LoadRenderTexture(layoutRecs[3].width, layoutRecs[3].height);
+    canvasScene = LoadRenderTexture(layoutRecs[5].width, layoutRecs[5].height);
     // alternate route, power of 2, assumption that the placeholder for the rendering is 16:9 format
     //canvasScene = LoadRenderTexture(1024, 768);
     SetTextureFilter(canvasScene.texture, TEXTURE_FILTER_POINT);
@@ -215,20 +215,34 @@ protected:
   
   void onCanvasDisplay() override
   {
-    ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
-    // background for banner title, take the darkest color and some more
-    Color backgroundHeader = ColorBrightness(GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_NORMAL)), -0.38);
-    DrawRectangle(0,0, DISTRHO_UI_DEFAULT_WIDTH,45, backgroundHeader);
+    // background for window, take the darkest color and some more
+    Color backgroundWindow = ColorBrightness(GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_NORMAL)), -0.38);
+    ClearBackground(backgroundWindow);
 
+    // header
     GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_RIGHT);
-    GuiLabel({10, 4, 140, 32}, "Obtuse");
+    GuiLabel(layoutRecs[1], "Obtuse");
     GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
-    GuiLabel({220, 4, 150, 32}, "Allpass");
+    DrawTexturePro(obtuseLogo, {0, 0, (float)obtuseLogo.width, (float)obtuseLogo.height}, layoutRecs[2], {0, 0}, 0, WHITE);
+    GuiLabel(layoutRecs[3], "Allpass");
 
-    DrawTexturePro(obtuseLogo, {0, 0, (float)obtuseLogo.width, (float)obtuseLogo.height}, {160, -2, 40, 40}, {0, 0}, 0, WHITE);
-    
+    // background for UI -- but nicer without?
+    //DrawRectangle(layoutRecs[4].x,layoutRecs[4].y, layoutRecs[4].width, layoutRecs[4].height, GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
+    // render the 3D scene, apply shader is correctly loaded
+    if (IsShaderValid(bloom)) {
+      BeginShaderMode(bloom);
+    }
+    DrawTexturePro(
+		   canvasScene.texture,
+		   // flip Y so we get the right texture
+		   (Rectangle){ 0.0f, 0.0f , (float)canvasScene.texture.width, -(float)canvasScene.texture.height },
+		   {layoutRecs[5].x, layoutRecs[5].y, layoutRecs[5].width, layoutRecs[5].height},
+		   (Vector2){ 0, 0 }, 0.0f, WHITE);
+    if (IsShaderValid(bloom)) {
+      EndShaderMode();
+    }
 
     // sync ui and dsp
     for (int i=0; i < kParameterCount; i++) {
@@ -238,14 +252,14 @@ protected:
     int curParam = 0;
 
     curParam = kDryWet;
-    GuiSlider(layoutRecs[0], TextFormat("Dry/Wet: %.2f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
+    GuiSlider(layoutRecs[6], TextFormat("Dry/Wet: %.2f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
 
     curParam = kDecay;
-    GuiSliderBar(layoutRecs[1], TextFormat("Decay: %.2f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
+    GuiSliderBar(layoutRecs[7], TextFormat("Decay: %.2f", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, params[curParam].max);
 
     curParam = kDelay;
     // use max delay if set
-    GuiSliderBar(layoutRecs[2], TextFormat("Delay: %.2f ms", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, (dspParams[kMaxDelay] > 0.0 ? dspParams[kMaxDelay] : params[curParam].max));
+    GuiSliderBar(layoutRecs[8], TextFormat("Delay: %.2f ms", uiParams[curParam]), NULL, &(uiParams[curParam]), params[curParam].min, (dspParams[kMaxDelay] > 0.0 ? dspParams[kMaxDelay] : params[curParam].max));
 
     // only send value if updated
     for (int i=0; i < kParameterCount; i++) {
@@ -256,19 +270,6 @@ protected:
       }
     }
 
-    // render the 3D scene, apply shader is correctly loaded
-    if (IsShaderValid(bloom)) {
-      BeginShaderMode(bloom);
-    }
-    DrawTexturePro(
-		   canvasScene.texture,
-		   // flip Y so we get the right texture
-		   (Rectangle){ 0.0f, 0.0f , (float)canvasScene.texture.width, -(float)canvasScene.texture.height },
-		   (Rectangle){layoutRecs[3].x, layoutRecs[3].y, layoutRecs[3].width, layoutRecs[3].height },
-		   (Vector2){ 0, 0 }, 0.0f, WHITE);
-    if (IsShaderValid(bloom)) {
-      EndShaderMode();
-    }
     DrawFPS(10, 10);
   }
 
@@ -297,13 +298,18 @@ private:
   Texture2D obtuseLogo;
 
   // upper left reference point for UI
-  static constexpr Vector2 anchor = { 10, 45};
+  static constexpr Vector2 anchor = {0, 0};
   // layout of the GUI
-  Rectangle layoutRecs[4] = {
-    (Rectangle){ anchor.x + 176, anchor.y + 0 + 208, 200, 32 },
-    (Rectangle){ anchor.x + 176, anchor.y + 40 + 208, 200, 32 },
-    (Rectangle){ anchor.x + 176, anchor.y + 80 + 208, 200, 32 },
-    (Rectangle){ anchor.x + 0, anchor.y , 376, 208 },
+  const Rectangle layoutRecs[9] = {
+    (Rectangle){ anchor.x + 0, anchor.y + 0, 392, 384 },
+    (Rectangle){ anchor.x + 8, anchor.y + 8, 160, 32 },
+    (Rectangle){ anchor.x + 176, anchor.y + 0, 40, 40 },
+    (Rectangle){ anchor.x + 224, anchor.y + 8, 160, 32 },
+    (Rectangle){ anchor.x + 8, anchor.y + 48, 376, 328 },
+    (Rectangle){ anchor.x + 8, anchor.y + 48, 376, 208 },
+    (Rectangle){ anchor.x + 184, anchor.y + 264, 200, 32 },
+    (Rectangle){ anchor.x + 184, anchor.y + 304, 200, 32 },
+    (Rectangle){ anchor.x + 184, anchor.y + 344, 200, 32 },
   };
   
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AllpassUI)
