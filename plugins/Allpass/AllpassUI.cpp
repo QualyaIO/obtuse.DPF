@@ -57,13 +57,10 @@ public:
     camera.fovy = 45.0f;
     // camera projection type
     camera.projection = CAMERA_PERSPECTIVE;
-
+    
     // init canvas for 3D scene with place holder size
     canvasScene = LoadRenderTexture(layoutRecs[5].width, layoutRecs[5].height);
-    // alternate route, power of 2, assumption that the placeholder for the rendering is 16:9 format
-    //canvasScene = LoadRenderTexture(1024, 768);
     SetTextureFilter(canvasScene.texture, TEXTURE_FILTER_POINT);
-    //SetTextureFilter(canvasScene.texture, TEXTURE_FILTER_BILINEAR);
 
     // setup shader and pointer to its parameter
     switch(rlGetVersion()) {
@@ -92,13 +89,19 @@ public:
       break;
     }
     bloomIntensityLoc = GetShaderLocation(bloom, "intensity");
+
+    // init canvas for background
+    canvasBackground = LoadRenderTexture(128, 128);
+    SetTextureFilter(canvasBackground.texture, TEXTURE_FILTER_POINT);
   }
   
   ~AllpassUI() {
     // unload assets and canvas
     UnloadModel(model);
     UnloadRenderTexture(canvasScene);
+    UnloadRenderTexture(canvasBackground);
     UnloadShader(bloom);
+    UnloadTexture(obtuseLogo);
   }
   
 protected:
@@ -131,6 +134,18 @@ protected:
     float activity = normie(dspParams[kActivity], 0.7);
 
     ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
+
+    // background, two "stars" flickering at different pace with time and activity
+    BeginTextureMode(canvasBackground);
+    double bright1 =  -0.5 + 0.25 * sin(GetTime()) + 0.25 * activity;
+    double bright2 =  -0.5 + 0.25 * sin(GetTime()/2 + 0.5) + 0.25 * activity;
+    DrawRectangle(10, 10, 5, 5, (ColorBrightness(WHITE, bright1)));
+    DrawRectangle(90, 100, 2, 2, (ColorBrightness(WHITE, bright2)));
+    EndTextureMode();
+    // repeat texture on background -- that as well requiring OpenGL > ES2
+    int ratiox =  GetScreenWidth() / canvasBackground.texture.width + 1;
+    int ratioy =  GetScreenHeight() / canvasBackground.texture.height + 1;
+    DrawTexturePro(canvasBackground.texture, {0, 0, (float) canvasBackground.texture.width*ratiox, (float) canvasBackground.texture.height*ratioy}, {0, 0, (float)canvasBackground.texture.width*ratiox, (float)canvasBackground.texture.height*ratioy}, {0, 0}, 0, WHITE);
 
     // 3D scene
     BeginTextureMode(canvasScene);
@@ -287,6 +302,8 @@ private:
   Camera camera;
   // drawing separately 3D scene
   RenderTexture2D canvasScene;
+  // background
+  RenderTexture2D canvasBackground;
   // keep trace of the different rotation between calls
   float rotationDay = 0.0;
   float rotationSun = 0.0;
