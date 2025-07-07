@@ -10,9 +10,9 @@
 r 0 40 -1 -1
 a 001 anchor 552 264 1
 c 000 3 Window 0 0 392 384 1 
-c 001 4 LabelObtuse 8 8 160 32 1 Obtuse
+c 001 4 LabeObtuse 8 8 160 32 1 Obtuse
 c 002 5 Logo 176 0 40 40 1 L
-c 003 4 LabelPlugin 224 8 160 32 1 Allpass
+c 003 4 LabePlugin 224 8 160 32 1 CombFB
 c 004 3 Black 8 48 376 328 1 
 c 005 3 Scene 8 48 376 208 1 
 c 006 16 SliderDryWet 184 264 200 32 1 Dry/Wet: 0.50

@@ -46,9 +46,9 @@ protected:
       parameter.shortName = "dw";
       parameter.symbol = "drywet";
       parameter.unit = "ratio";
-      parameter.ranges.def = params[kDryWet].def;
-      parameter.ranges.min = params[kDryWet].min;
-      parameter.ranges.max = params[kDryWet].max;
+      parameter.ranges.def = params[index].def;
+      parameter.ranges.min = params[index].min;
+      parameter.ranges.max = params[index].max;
       break;
     case kDecay:
       parameter.hints = kParameterIsAutomatable;
@@ -56,9 +56,9 @@ protected:
       parameter.shortName = "Dec";
       parameter.symbol = "decay";
       parameter.unit = "ratio";
-      parameter.ranges.def = params[kDecay].def;
-      parameter.ranges.min = params[kDecay].min;
-      parameter.ranges.max = params[kDecay].max;
+      parameter.ranges.def = params[index].def;
+      parameter.ranges.min = params[index].min;
+      parameter.ranges.max = params[index].max;
       break;
     case kDelay:
       parameter.hints = kParameterIsAutomatable;
@@ -66,9 +66,9 @@ protected:
       parameter.shortName = "del";
       parameter.symbol = "delay";
       parameter.unit = "ms";
-      parameter.ranges.def = params[kDelay].def;
-      parameter.ranges.min = params[kDelay].min;
-      parameter.ranges.max = params[kDelay].max;
+      parameter.ranges.def = params[index].def;
+      parameter.ranges.min = params[index].min;
+      parameter.ranges.max = params[index].max;
       break;
     case kMaxDelay:
       parameter.hints = kParameterIsOutput;
@@ -78,8 +78,8 @@ protected:
       parameter.unit = "ms";
       // here we actually compute actual value
       parameter.ranges.def = effectsXL_Buffer_bufferLargeSize() / getSampleRate() * 1000;
-      parameter.ranges.min = params[kMaxDelay].min;
-      parameter.ranges.max = params[kMaxDelay].max;
+      parameter.ranges.min = params[index].min;
+      parameter.ranges.max = params[index].max;
       break;
      case kActivity:
       parameter.hints = kParameterIsOutput;
@@ -87,9 +87,9 @@ protected:
       parameter.shortName = "activity";
       parameter.symbol = "activity";
       parameter.unit = "ratio";
-      parameter.ranges.def = params[kActivity].def;
-      parameter.ranges.min = params[kActivity].min;
-      parameter.ranges.max = params[kActivity].max;
+      parameter.ranges.def = params[index].def;
+      parameter.ranges.min = params[index].min;
+      parameter.ranges.max = params[index].max;
       break;
     default:
       break;
@@ -177,7 +177,7 @@ protected:
         if (out != NULL) {
           for (uint32_t i = 0; i < chunkSize; i++) {
             out[k+i] = (1 - dryWet) * in[k+i] + dryWet * fix_to_float(buffOut[i]);
-            // average over the frames
+            // gather output for activity
             cumulatedActivity += out[k+i] * out[k+i];
           }
         }
@@ -208,6 +208,7 @@ protected:
     updateDelay();
     // update info about maximum delay
     setParameterValue(kMaxDelay, effectsXL_Buffer_bufferLargeSize() / newSampleRate * 1000);
+    // now activity window computation will change as well
     nbActivityFrames = newSampleRate * (TIME_ACTIVITY/1000.0);
     // failsafe
     if (nbActivityFrames == 0) {
