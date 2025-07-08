@@ -48,13 +48,13 @@ public:
     model = LoadModel(resourcesLocation + "ramp.obj");
 
     // camera in the diagonal of origin, high enough to fit the whole scene with selected fov
-    camera.position = (Vector3){ 0.0, 6.0, 6.0 };
+    camera.position = (Vector3){ 0.0, 6.0, 4.0 };
     // target origin
     camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
-    // camera pointing down
-    camera.up = (Vector3){ 0.0, 0.0, -1.0};
+    // camera pointing down (...really, this time)
+    camera.up = (Vector3){ 0.0, 0.0, 1.0};
     // field-of-view Y
-    camera.fovy = 45.0f;
+    camera.fovy = 60.0f;
     // camera projection type
     camera.projection = CAMERA_PERSPECTIVE;
     
@@ -152,9 +152,8 @@ protected:
     // we have to clear background for anything to display
     // bloom shader will add source and effect, hence half the color to result in the same
     Color backgroundColor = GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR));
-    ClearBackground(Color({(unsigned char)(backgroundColor.r/2), (unsigned char)(backgroundColor.g/2), (unsigned char)(backgroundColor.b/2), (unsigned char)(backgroundColor.a/2)}));
-
-    Vector3 positionSun = { 0.0f, 0.0f, 0.0f };
+    backgroundColor = Color({(unsigned char)(backgroundColor.r/2), (unsigned char)(backgroundColor.g/2), (unsigned char)(backgroundColor.b/2), backgroundColor.a});
+    ClearBackground(backgroundColor);
 
     // compute a ratio from delay, taking into account effective max delay
     float maxDelay = dspParams[kMaxDelay] > 0 ? dspParams[kMaxDelay] : params[kDelay].max;
@@ -164,68 +163,55 @@ protected:
     }
 
     // vary distance with delay (Pythagora should be here)
+
+
     float planetDistance = 1.3 + 1.9 * delayRatio;
     Vector3 positionPlanet = { planetDistance, 0.0f, planetDistance};
 
-    // space occupy by scene depends on delay (distance planet-sun) and decay (planet's size). We will manipulate camera to compensate
-    float sceneRatio = delayRatio * 0.8 + 0.2 * (1 - dspParams[kDecay]);
-    // adapt camera fov to keep in frame
-    camera.fovy = 60.0 - 20 * (1.0 - sceneRatio);
-    // move camera target toward front as planet get further away and fov increase to better occupy space
-    camera.target = (Vector3){ 0.0f, 0.0f, sceneRatio * 1.75f};
-
     // with qualya palette should be near magenta for sun and cyan for planet
     // will adapt color (alpha) depending on dry (sun) / wet (planet)
-    Color colorSun = GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_PRESSED));
-    Color colorPlanet = GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_FOCUSED));
+    Color colorDry = GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_PRESSED));
+    Color colorWet = GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_FOCUSED));
     // max ratio for dry below 0.5, then fade
     float dryRatio = dspParams[kDryWet] < 0.5 ? 1.0 : 1 - (dspParams[kDryWet] - 0.5) * 2;
-    colorSun.a =  63 + 192 * dryRatio;
+    colorDry.a =  63 + 192 * dryRatio;
     // reciprocate wet
     float wetRatio = dspParams[kDryWet] > 0.5 ? 1.0 : dspParams[kDryWet] * 2;
-    colorPlanet.a = 63 + 192 * wetRatio;
+    colorWet.a = 63 + 192 * wetRatio;
 
     // tune brightness with activity (from same color to white)
-    colorSun = ColorBrightness(colorSun, 0.50 * activity * dryRatio);
-    colorPlanet = ColorBrightness(colorPlanet, 0.50 * activity * wetRatio);
+    colorDry = ColorBrightness(colorDry, 0.50 * activity * dryRatio);
+    colorWet = ColorBrightness(colorWet, 0.50 * activity * wetRatio);
 
     BeginMode3D(camera);
 
-    // base rotation speed 360 degrees per second
-    float rotationInc = GetFrameTime() * 360.0;
-    // rotation for day mediated by wet ratio
-    rotationDay = fmod(rotationDay + rotationInc * (0.1 + 0.4 * wetRatio ), 360.0);
-    // for sun by dry ratio -- note that in real-life it takes around 25 days for one rotation
-    rotationSun = fmod(rotationSun + rotationInc * (0.05 + 0.15 * dryRatio), 360.0);
-    // a year around sun sun, likewise speed-up the 365 days, speed up if delay decrease
-    // sepecial case, 0 delay : no more delay
-    float rotationYearCoeff = delayRatio > 0.0 ? 0.1 * (20.0 - 19.0 * delayRatio) : 0.0;
-    rotationYear = fmod(rotationYear + rotationInc * rotationYearCoeff, 360.0);
+    // ramp, 5mm long in freecad
+    float rampLength = 5.0;
+    // will serve as a clip plane
+    Vector3 positionClip = {0, -3*rampLength, 0};
+    DrawCube(positionClip, 10, 0.5, 10, backgroundColor);
 
-    rlPushMatrix();
-    // rotation sun
-    rlRotatef(rotationSun, 0, 1, 0);
-    // Draw sun
-    float sunSize = 0.8 + 0.5 * activity  * dryRatio;
-    DrawSphereWires(positionSun, sunSize, 4, 8, colorSun);
-    rlPopMatrix();
+    // advance ramp, speed related to decay, from 1 unit second (max decay) to 5 (one tile, at min decay)
+    d_stdout("fractime: %f, pos: %f)", GetFrameTime(), positionRamp.y);
+    positionRamp.y -=  GetFrameTime() * (5 - 4 * dspParams[kDecay]);
+    if (positionRamp.y <= -rampLength) {
+      positionRamp.y = 0;
+    }
 
-    rlPushMatrix();
-    // rotation around sun
-    rlRotatef(rotationYear, 0, 1, 0);
-    // scale-down planet to match desired proportion
-    // Note: wireframe does not work with GLES2 it seems, requires project with raylib compiled set to OPENGL 3
-    // size related to decay -- model is scale 10 in original file compared to unit
-    float planetSize = 0.03 + 0.04 * (1 - dspParams[kDecay]) + 0.04 * activity * wetRatio;
-    // set day rotation
-    DrawModelWiresEx(model, positionPlanet, {0, 1, 0}, rotationDay, {planetSize, planetSize, planetSize}, colorPlanet);
-    rlPopMatrix();
+    // duplicate ramp tile
+    for (int i=0; i<7; i++) {
+      Vector3 positionRampTile = {positionRamp.x, positionClip.y + rampLength * i +  positionRamp.y, positionRamp.z};
+      // tune color as depth goes
+      Color colorTile = ColorContrast(colorDry, -0.20 + 0.05*i);
+
+      DrawModelWiresEx(model, positionRampTile, {0, 0, 0},  0.0, {1, 1, 1}, colorTile);
+    }
 
     EndMode3D();
     EndTextureMode();
 
     float intensity = activity;
-    SetShaderValue(bloom, bloomIntensityLoc, &intensity, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(bloom, bloomIntensityLoc, &activity, SHADER_UNIFORM_FLOAT);
   }
   
   void onCanvasDisplay() override
@@ -308,6 +294,9 @@ private:
   float rotationDay = 0.0;
   float rotationSun = 0.0;
   float rotationYear = 0.0;
+  // base position of ramp, will advance with time
+  Vector3 positionRamp = { 0.0f, 0.0f, 0.0f };
+
   // we want a nice effect
   Shader bloom = {0, 0};
   int bloomIntensityLoc;

@@ -224,8 +224,7 @@ protected:
     EndMode3D();
     EndTextureMode();
 
-    float intensity = activity;
-    SetShaderValue(bloom, bloomIntensityLoc, &intensity, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(bloom, bloomIntensityLoc, &activity, SHADER_UNIFORM_FLOAT);
   }
   
   void onCanvasDisplay() override
