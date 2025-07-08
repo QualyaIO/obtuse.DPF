@@ -47,12 +47,12 @@ public:
     SetTextureFilter(obtuseLogo, TEXTURE_FILTER_BILINEAR);
     model = LoadModel(resourcesLocation + "ramp.obj");
 
-    // camera in the diagonal of origin, high enough to fit the whole scene with selected fov
-    camera.position = (Vector3){ 0.0, 6.0, 4.0 };
+    // camera in the diagonal of origin, high enough to fit the whole scene with selected fov, trial and error to get something nice
+    camera.position = (Vector3){ 0.0, 4.1, 5.0 };
     // target origin
     camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
     // camera pointing down (...really, this time)
-    camera.up = (Vector3){ 0.0, 0.0, 1.0};
+    camera.up = (Vector3){ 0.0, 1.0, 0.0};
     // field-of-view Y
     camera.fovy = 60.0f;
     // camera projection type
@@ -183,29 +183,68 @@ protected:
     colorDry = ColorBrightness(colorDry, 0.50 * activity * dryRatio);
     colorWet = ColorBrightness(colorWet, 0.50 * activity * wetRatio);
 
+    // debug 
+    //camera.position = (Vector3){ 5* dspParams[kDryWet], 10.0 * dspParams[kDecay], 10.0 * delayRatio };
+    //d_stdout("camera %f %f %f", camera.position.x, camera.position.y, camera.position.z);
+
     BeginMode3D(camera);
+
+    // for debug
+    //DrawGrid(10, 2.0f);
 
     // ramp, 5mm long in freecad
     float rampLength = 5.0;
     // will serve as a clip plane
-    Vector3 positionClip = {0, -3*rampLength, 0};
-    DrawCube(positionClip, 10, 0.5, 10, backgroundColor);
+    Vector3 positionClip = {0, 0, -5*rampLength};
+    DrawCube(positionClip, 10, 10, 0.5, backgroundColor);
 
     // advance ramp, speed related to decay, from 1 unit second (max decay) to 5 (one tile, at min decay)
-    d_stdout("fractime: %f, pos: %f)", GetFrameTime(), positionRamp.y);
-    positionRamp.y -=  GetFrameTime() * (5 - 4 * dspParams[kDecay]);
-    if (positionRamp.y <= -rampLength) {
-      positionRamp.y = 0;
+    positionRamp.z -=  GetFrameTime() * (5 - 4 * dspParams[kDecay]);
+    if (positionRamp.z <= -rampLength) {
+      positionRamp.z = 0;
     }
 
     // duplicate ramp tile
-    for (int i=0; i<7; i++) {
-      Vector3 positionRampTile = {positionRamp.x, positionClip.y + rampLength * i +  positionRamp.y, positionRamp.z};
+    for (int i=0; i<8; i++) {
+      Vector3 positionRampTile = {positionRamp.x, positionRamp.y, positionClip.z + rampLength * i +  positionRamp.z};
+      //Vector3 positionRampTile = {0, 0, 0};
       // tune color as depth goes
       Color colorTile = ColorContrast(colorDry, -0.20 + 0.05*i);
-
-      DrawModelWiresEx(model, positionRampTile, {0, 0, 0},  0.0, {1, 1, 1}, colorTile);
+      // rotate to compensate obj orientation
+      DrawModelWiresEx(model, positionRampTile, {1, 0, 0}, 270.0, {1, 1, 1}, colorTile);
     }
+
+    // amplitude from left to right with delay
+    ballX += GetFrameTime() * vectorBall * 4;
+    if (ballX > ballXmax) {
+      vectorBall *= -1;
+      ballX = ballXmax;
+    }
+    else if (ballX < ballXmin) {
+      vectorBall *= -1;
+      ballX = ballXmin;
+    }
+    // ball is shifted compared to ramp, "valley" at origin instead of 3PI*2
+    float px = ballX;
+    // compute tangent 
+    float py = sin(px);
+
+    // move ball so that it fits the curve of the ramp
+    // (x,sin(x)). A unit-length tangent is (1,cos(x))/sqrt(1+(cos(x))^2)
+    float ballRadius = 0.33 + 0.33 * dspParams[kDryWet];
+    float k =  sqrt(1+cos(px) * cos(px));
+    float tx =  1 / k;
+    float ty = cos(px) / k;
+    // norm is (ty, -tx) ; multiply by magnitude to displace ball, minus for the "correct" orientation
+    // note: if magnitude inverted only on one axis we get interesting movements
+    Vector3 positionBall = {px + ty * (-ballRadius), py - tx * (-ballRadius), 0};
+    // ball is shifted compared to ramp, "valley" at origin instead of 3PI*2
+    positionBall.x -= 3.0*PI/2.0;
+
+    // Debug
+    //Vector3 positionBallPrime = {px - 3.0*PI/2.0, py, 0};
+    // DrawSphereWires(positionBallPrime, ballRadius, 4, 8, GREEN);
+    DrawSphereWires(positionBall, ballRadius, 5, 10, colorWet);
 
     EndMode3D();
     EndTextureMode();
@@ -227,9 +266,6 @@ protected:
     GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
     DrawTexturePro(obtuseLogo, {0, 0, (float)obtuseLogo.width, (float)obtuseLogo.height}, layoutRecs[2], {0, 0}, 0, WHITE);
     GuiLabel(layoutRecs[3], "CombFB");
-
-    // background for UI -- but nicer without?
-    //DrawRectangle(layoutRecs[4].x,layoutRecs[4].y, layoutRecs[4].width, layoutRecs[4].height, GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
     // render the 3D scene, apply shader is correctly loaded
     if (IsShaderValid(bloom)) {
@@ -274,7 +310,7 @@ protected:
     DrawFPS(10, 10);
   }
 
-    // -------------------------------------------------------------------------------------------------- --------------
+  // -------------------------------------------------------------------------------------------------- --------------
 
 private:
   // parameters sync with DSP
@@ -295,7 +331,15 @@ private:
   float rotationSun = 0.0;
   float rotationYear = 0.0;
   // base position of ramp, will advance with time
-  Vector3 positionRamp = { 0.0f, 0.0f, 0.0f };
+  Vector3 positionRamp = {0.0, 0.0, 0.0};
+  // limits and starting point for X, the "valley" part of sine
+  static constexpr float ballXmin = PI/2.0;
+  static constexpr float ballXmax = 5.0*PI/2.0;
+  static constexpr float ballXdef = 3.0*PI/2.0;
+  // reference point for the rolling ball horizontally, start center valley
+  float ballX = ballXdef;
+  // in which direction the ball is going
+  float vectorBall = -1;
 
   // we want a nice effect
   Shader bloom = {0, 0};
