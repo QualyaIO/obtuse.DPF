@@ -10,7 +10,7 @@
 // dry/wet: stronger color for the corresponding ball, scale ball
 // decay: speed of the ball going down 
 // delay: amplitude and frequency of the oscillation
-// activity: brightness related to wet/dry, also overall bloom effect
+// activity: brightness related to wet/dry, also overall bloom effect and tune camera fov
 
 START_NAMESPACE_DISTRHO
 
@@ -177,14 +177,10 @@ protected:
     colorDry = ColorBrightness(colorDry, 0.50 * activity * dryRatio);
     colorWet = ColorBrightness(colorWet, 0.50 * activity * wetRatio);
 
-    // debug 
-    //camera.position = (Vector3){ 5* dspParams[kDryWet], 10.0 * dspParams[kDecay], 10.0 * delayRatio };
-    //d_stdout("camera %f %f %f", camera.position.x, camera.position.y, camera.position.z);
+    // tune camera with activity
+    camera.fovy = 60 - 5.0 * activity;
 
     BeginMode3D(camera);
-
-    // for debug
-    //DrawGrid(10, 2.0f);
 
     // ramp, 5mm long in freecad
     float rampLength = 5.0;
@@ -210,11 +206,15 @@ protected:
     }
 
     // ball speed tuned with delay
-    // TODO: match actual delay?
-    ballX += GetFrameTime() * vectorBall * (6 - 2 * delayRatio);
+    // note: does not match delay, it would be too fast and we'd have to come-up with more clever way to adjust speed below
+    float ballInc = GetFrameTime() * vectorBall * 3*PI;
+    // due to the way shifted ball is computed, it will "slow down" at the center of the ramp, which defies laws of physics. hack to speed-up at center, slow-don on heights
+    // there is probably a mathematical way to do that
+    float ballCoeff = (sin(ballX+PI)+1); // 0 when ball center, 2 on extremes
+    ballX +=  ballInc * (0.5 + 0.5 * ballCoeff);
     // amplitude from left to right with delay
-    float ballXminTuned = ballXmin + (ballXmid - ballXmin) * (1 - delayRatio) * 0.9;
-    float ballXmaxTuned = ballXmax - (ballXmax - ballXmid) * (1 - delayRatio) * 0.9;
+    float ballXminTuned = ballXmin + (ballXmid - ballXmin) * (1 - delayRatio);
+    float ballXmaxTuned = ballXmax - (ballXmax - ballXmid) * (1 - delayRatio);
     if (ballX > ballXmaxTuned) {
       vectorBall *= -1;
       ballX = ballXmaxTuned;
@@ -240,14 +240,9 @@ protected:
     // ball is shifted compared to ramp, "valley" at origin instead of 3PI*2
     positionBall.x -= 3.0*PI/2.0;
 
-
     // we will only simulate ball rolling along the ramp, not in the other direction (that would require more math, for a cheap viz)
     // approximate number of revolution corresponding to the movement of the ramp in Z
     ballTravelAngle += positionRampInc / (2*PI*ballRadius) * 360;
-
-    // Debug
-    //Vector3 positionBallPrime = {px - 3.0*PI/2.0, py, 0};
-    // DrawSphereWires(positionBallPrime, ballRadius, 4, 8, GREEN);
 
     rlPushMatrix();
     // position ball with low-level call to also have rotation origin on ball center
