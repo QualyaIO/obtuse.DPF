@@ -7,9 +7,9 @@
 #include <math.h>
 
 // scenario: tow balls going down a ramp, one straight (dry signal), one oscillating behind (wet signal)
-// dry/wet: stronger color for the corresponding ball
+// dry/wet: stronger color for the corresponding ball, scale ball
 // decay: speed of the ball going down 
-// delay: amplitude of the oscillation
+// delay: amplitude and frequency of the oscillation
 // activity: brightness related to wet/dry, also overall bloom effect
 
 START_NAMESPACE_DISTRHO
@@ -162,12 +162,6 @@ protected:
       delayRatio = (dspParams[kDelay] - params[kDelay].min) / (maxDelay - params[kDelay].min);
     }
 
-    // vary distance with delay (Pythagora should be here)
-
-
-    float planetDistance = 1.3 + 1.9 * delayRatio;
-    Vector3 positionPlanet = { planetDistance, 0.0f, planetDistance};
-
     // with qualya palette should be near magenta for sun and cyan for planet
     // will adapt color (alpha) depending on dry (sun) / wet (planet)
     Color colorDry = GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_PRESSED));
@@ -199,7 +193,8 @@ protected:
     DrawCube(positionClip, 10, 10, 0.5, backgroundColor);
 
     // advance ramp, speed related to decay, from 1 unit second (max decay) to 5 (one tile, at min decay)
-    positionRamp.z -=  GetFrameTime() * (5 - 4 * dspParams[kDecay]);
+    float positionRampInc = GetFrameTime() * (8 - 4 * dspParams[kDecay]);
+    positionRamp.z -= positionRampInc;
     if (positionRamp.z <= -rampLength) {
       positionRamp.z = 0;
     }
@@ -214,24 +209,28 @@ protected:
       DrawModelWiresEx(model, positionRampTile, {1, 0, 0}, 270.0, {1, 1, 1}, colorTile);
     }
 
+    // ball speed tuned with delay
+    // TODO: match actual delay?
+    ballX += GetFrameTime() * vectorBall * (6 - 2 * delayRatio);
     // amplitude from left to right with delay
-    ballX += GetFrameTime() * vectorBall * 4;
-    if (ballX > ballXmax) {
+    float ballXminTuned = ballXmin + (ballXmid - ballXmin) * (1 - delayRatio) * 0.9;
+    float ballXmaxTuned = ballXmax - (ballXmax - ballXmid) * (1 - delayRatio) * 0.9;
+    if (ballX > ballXmaxTuned) {
       vectorBall *= -1;
-      ballX = ballXmax;
+      ballX = ballXmaxTuned;
     }
-    else if (ballX < ballXmin) {
+    else if (ballX < ballXminTuned) {
       vectorBall *= -1;
-      ballX = ballXmin;
+      ballX = ballXminTuned;
     }
     // ball is shifted compared to ramp, "valley" at origin instead of 3PI*2
     float px = ballX;
     // compute tangent 
     float py = sin(px);
 
-    // move ball so that it fits the curve of the ramp
-    // (x,sin(x)). A unit-length tangent is (1,cos(x))/sqrt(1+(cos(x))^2)
+    // move ball so that it fits the curve of the ramp, size related to dry/wet
     float ballRadius = 0.33 + 0.33 * dspParams[kDryWet];
+    // (x,sin(x)). A unit-length tangent is (1,cos(x))/sqrt(1+(cos(x))^2)
     float k =  sqrt(1+cos(px) * cos(px));
     float tx =  1 / k;
     float ty = cos(px) / k;
@@ -241,15 +240,26 @@ protected:
     // ball is shifted compared to ramp, "valley" at origin instead of 3PI*2
     positionBall.x -= 3.0*PI/2.0;
 
+
+    // we will only simulate ball rolling along the ramp, not in the other direction (that would require more math, for a cheap viz)
+    // approximate number of revolution corresponding to the movement of the ramp in Z
+    ballTravelAngle += positionRampInc / (2*PI*ballRadius) * 360;
+
     // Debug
     //Vector3 positionBallPrime = {px - 3.0*PI/2.0, py, 0};
     // DrawSphereWires(positionBallPrime, ballRadius, 4, 8, GREEN);
-    DrawSphereWires(positionBall, ballRadius, 5, 10, colorWet);
+
+    rlPushMatrix();
+    // position ball with low-level call to also have rotation origin on ball center
+    rlTranslatef(positionBall.x, positionBall.y, positionBall.z);
+    // rotate ball to match travel, angle in degrees
+    rlRotatef(ballTravelAngle, 1, 0, 0);
+    DrawSphereWires({0, 0, 0}, ballRadius, 4, 8, colorWet);
+    rlPopMatrix();
 
     EndMode3D();
     EndTextureMode();
 
-    float intensity = activity;
     SetShaderValue(bloom, bloomIntensityLoc, &activity, SHADER_UNIFORM_FLOAT);
   }
   
@@ -332,14 +342,18 @@ private:
   float rotationYear = 0.0;
   // base position of ramp, will advance with time
   Vector3 positionRamp = {0.0, 0.0, 0.0};
+  // base position of ball, used to approximate movement
+  Vector3 positionBall = {0.0, 0.0, 0.0};
   // limits and starting point for X, the "valley" part of sine
   static constexpr float ballXmin = PI/2.0;
   static constexpr float ballXmax = 5.0*PI/2.0;
-  static constexpr float ballXdef = 3.0*PI/2.0;
+  static constexpr float ballXmid = ballXmin + (ballXmax - ballXmin)/2.0;
   // reference point for the rolling ball horizontally, start center valley
-  float ballX = ballXdef;
+  float ballX = ballXmid;
   // in which direction the ball is going
   float vectorBall = -1;
+  // roll a ball
+  float ballTravelAngle = 0;
 
   // we want a nice effect
   Shader bloom = {0, 0};
