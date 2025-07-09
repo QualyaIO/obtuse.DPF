@@ -1,0 +1,20 @@
+#
+# rgl layout text file (v4.0) - raygui layout file generated using rGuiLayout
+#
+# Number of controls:     9
+#
+# Ref. window:    r <x> <y> <width> <height>
+# Anchor info:    a <id> <name> <posx> <posy> <enabled>
+# Control info:   c <id> <type> <name> <rectangle> <anchor_id> <text>
+#
+r 0 40 -1 -1
+a 001 anchor 552 264 1
+c 000 3 Window 0 0 392 384 1 
+c 001 4 LabeObtuse 8 8 160 32 1 Obtuse
+c 002 5 Logo 176 0 40 40 1 L
+c 003 4 LabePlugin 224 8 160 32 1 Reverb
+c 004 3 Black 8 48 376 328 1 
+c 005 3 Scene 8 48 376 208 1 
+c 006 16 SliderDryWet 184 264 200 32 1 Dry/Wet: 0.50
+c 007 17 SliderDecay 184 304 200 32 1 Decay: 0.50
+c 008 17 SliderDelay 184 344 200 32 1 Delay: 1000.00 ms

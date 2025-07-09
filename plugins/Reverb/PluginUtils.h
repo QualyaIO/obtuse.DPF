@@ -10,10 +10,10 @@ const ParameterRanges params[kParameterCount] =
   {
     // default, min, max.
     ParameterRanges(0.5f, 0.0f, 1.0f), // dry/wet
-    ParameterRanges(10.0f, 0.001f, 60.0f), // reverberation time
-    // actually max delay will depend on buffer size, with medium 2048 buffer and 44100 fs it's only 46ms. Also min delay is capped to avoid glitches.
-    ParameterRanges(50.0f, 1.0f, 100.0f), // delay
-    ParameterRanges(50.0f, 1.0f, 100.0f), // max delay
+    ParameterRanges(0.5f, 0.0f, 1.0f), // decay
+   // actually max delay will depend on buffer size, with XL 16384 buffer and 44100 fs it's only 371ms
+    ParameterRanges(50.0f, 0.0f, 1000.0f), // delay
+    ParameterRanges(50.0f, 0.0f, 1000.0f), // max delay
     ParameterRanges(0.0f, 0.0f, 1.0f), // plugin activity
   };
   
