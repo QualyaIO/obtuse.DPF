@@ -6,11 +6,11 @@
 #include "PluginUtils.h"
 #include <math.h>
 
-// scenario: tow balls going down a ramp, one straight (dry signal), one oscillating behind (wet signal)
+// scenario: ball bouncing off a table tennis
 // dry/wet: stronger color for the corresponding ball, scale ball
-// decay: speed of the ball going down 
-// delay: amplitude and frequency of the oscillation
-// activity: brightness related to wet/dry, also overall bloom effect and tune camera fov
+// decay: amplitude of the movement
+// delay: speed of the ball
+// activity: brightness related to wet/dry, also overall bloom effect and tune camera position
 
 START_NAMESPACE_DISTRHO
 
@@ -45,10 +45,10 @@ public:
     obtuseLogo = LoadTexture(resourcesLocation + "obtuse.png");
     // smooth logo for this low resolution display
     SetTextureFilter(obtuseLogo, TEXTURE_FILTER_BILINEAR);
-    model = LoadModel(resourcesLocation + "ramp.obj");
+    model = LoadModel(resourcesLocation + "table.obj");
 
     // camera in the diagonal of origin, high enough to fit the whole scene with selected fov, trial and error to get something nice
-    camera.position = (Vector3){ 0.0, 4.1, 5.0 };
+    camera.position = (Vector3){ -1.0f, 4.0f, 5.0f };
     // target origin
     camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
     // camera pointing down (...really, this time)
@@ -177,78 +177,53 @@ protected:
     colorDry = ColorBrightness(colorDry, 0.50 * activity * dryRatio);
     colorWet = ColorBrightness(colorWet, 0.50 * activity * wetRatio);
 
-    // tune camera with activity
-    camera.fovy = 60 - 5.0 * activity;
-
+    // activity move camera
+    camera.position.x = -1 + 0.2 * activity;
     BeginMode3D(camera);
 
-    // ramp, 5mm long in freecad
-    float rampLength = 5.0;
-    // will serve as a clip plane
-    Vector3 positionClip = {0, 0, -5*rampLength};
-    DrawCube(positionClip, 10, 10, 0.5, backgroundColor);
+    DrawModelWiresEx(model, {0, 0, 0}, {1, 0, 0}, 270.0, {0.1, 0.1, 0.1}, colorDry);
 
-    // advance ramp, speed related to decay, from 1 unit second (max decay) to 5 (one tile, at min decay)
-    float positionRampInc = GetFrameTime() * (8 - 4 * dspParams[kDecay]);
-    positionRamp.z -= positionRampInc;
-    if (positionRamp.z <= -rampLength) {
-      positionRamp.z = 0;
-    }
-
-    // duplicate ramp tile
-    for (int i=0; i<8; i++) {
-      Vector3 positionRampTile = {positionRamp.x, positionRamp.y, positionClip.z + rampLength * i +  positionRamp.z};
-      //Vector3 positionRampTile = {0, 0, 0};
-      // tune color as depth goes
-      Color colorTile = ColorContrast(colorDry, -0.20 + 0.05*i);
-      // rotate to compensate obj orientation
-      DrawModelWiresEx(model, positionRampTile, {1, 0, 0}, 270.0, {1, 1, 1}, colorTile);
-    }
+    // table is 8 unit long, position at origin
+    // launch position from ball on x, will be highest point, on left hand-sight
+    float ballVmin = -0.0;
+    // we want the ball at the end of the right side
+    float ballXhit = 3.5;
 
     // ball speed tuned with delay
-    // note: does not match delay, it would be too fast and we'd have to come-up with more clever way to adjust speed below
-    float ballInc = GetFrameTime() * vectorBall * 3*PI;
-    // due to the way shifted ball is computed, it will "slow down" at the center of the ramp, which defies laws of physics. hack to speed-up at center, slow-don on heights
-    // there is probably a mathematical way to do that
-    float ballCoeff = (sin(ballX+PI)+1); // 0 when ball center, 2 on extremes
-    ballX +=  ballInc * (0.5 + 0.5 * ballCoeff);
-    // amplitude from left to right with delay
-    float ballXminTuned = ballXmin + (ballXmid - ballXmin) * (1 - delayRatio);
-    float ballXmaxTuned = ballXmax - (ballXmax - ballXmid) * (1 - delayRatio);
-    if (ballX > ballXmaxTuned) {
-      vectorBall *= -1;
-      ballX = ballXmaxTuned;
+    float ballInc = GetFrameTime() * (25 - 15 * delayRatio);
+    if (delayRatio <= 0) {
+      ballInc = 0;
     }
-    else if (ballX < ballXminTuned) {
-      vectorBall *= -1;
-      ballX = ballXminTuned;
+    ballX +=  ballInc;
+    if (ballX > ballXmax) {
+      ballX = ballXmin;
     }
-    // ball is shifted compared to ramp, "valley" at origin instead of 3PI*2
-    float px = ballX;
-    // compute tangent 
-    float py = sin(px);
+
+    // distance for half period between min and hit, convert to half-period of sine
+    // also take Vmin as origin
+    float px = (ballX - ballVmin) * PI / (ballXhit - ballVmin);
+    // will use cos, 1 at 0
+    float py = cos(px);
 
     // move ball so that it fits the curve of the ramp, size related to dry/wet
     float ballRadius = 0.33 + 0.33 * dspParams[kDryWet];
-    // (x,sin(x)). A unit-length tangent is (1,cos(x))/sqrt(1+(cos(x))^2)
-    float k =  sqrt(1+cos(px) * cos(px));
-    float tx =  1 / k;
-    float ty = cos(px) / k;
-    // norm is (ty, -tx) ; multiply by magnitude to displace ball, minus for the "correct" orientation
-    // note: if magnitude inverted only on one axis we get interesting movements
-    Vector3 positionBall = {px + ty * (-ballRadius), py - tx * (-ballRadius), 0};
-    // ball is shifted compared to ramp, "valley" at origin instead of 3PI*2
-    positionBall.x -= 3.0*PI/2.0;
 
-    // we will only simulate ball rolling along the ramp, not in the other direction (that would require more math, for a cheap viz)
+    // move ball above table, scale height
+    float ballY = (py + 1) * ( 0.66 + 0.66 * dspParams[kDecay] ) + ballRadius;
+
+    Vector3 positionBall = {ballX, ballY, 0};
+    // ball is shifted compared to ramp, "valley" at origin instead of 3PI*2
+    //positionBall.x -= 3.0*PI/2.0;
+
+    // ball rotation increase with speed
     // approximate number of revolution corresponding to the movement of the ramp in Z
-    ballTravelAngle += positionRampInc / (2*PI*ballRadius) * 360;
+    ballTravelAngle += ballInc / (2*PI*ballRadius) * 360;
 
     rlPushMatrix();
     // position ball with low-level call to also have rotation origin on ball center
     rlTranslatef(positionBall.x, positionBall.y, positionBall.z);
     // rotate ball to match travel, angle in degrees
-    rlRotatef(ballTravelAngle, 1, 0, 0);
+    rlRotatef(ballTravelAngle, 0, 0, -1);
     DrawSphereWires({0, 0, 0}, ballRadius, 4, 8, colorWet);
     rlPopMatrix();
 
@@ -339,14 +314,11 @@ private:
   Vector3 positionRamp = {0.0, 0.0, 0.0};
   // base position of ball, used to approximate movement
   Vector3 positionBall = {0.0, 0.0, 0.0};
-  // limits and starting point for X, the "valley" part of sine
-  static constexpr float ballXmin = PI/2.0;
-  static constexpr float ballXmax = 5.0*PI/2.0;
-  static constexpr float ballXmid = ballXmin + (ballXmax - ballXmin)/2.0;
+  // limits for ball throws
+  static constexpr float ballXmin = -7.0;
+  static constexpr float ballXmax = 10;
   // reference point for the rolling ball horizontally, start center valley
-  float ballX = ballXmid;
-  // in which direction the ball is going
-  float vectorBall = -1;
+  float ballX = ballXmin;
   // roll a ball
   float ballTravelAngle = 0;
 

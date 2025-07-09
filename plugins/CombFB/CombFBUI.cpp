@@ -205,7 +205,7 @@ protected:
       DrawModelWiresEx(model, positionRampTile, {1, 0, 0}, 270.0, {1, 1, 1}, colorTile);
     }
 
-    // ball speed tuned with delay
+    // ball speed
     // note: does not match delay, it would be too fast and we'd have to come-up with more clever way to adjust speed below
     float ballInc = GetFrameTime() * vectorBall * 3*PI;
     // due to the way shifted ball is computed, it will "slow down" at the center of the ramp, which defies laws of physics. hack to speed-up at center, slow-don on heights
